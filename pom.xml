@@ -8,6 +8,18 @@
     </parent>
     <artifactId>type-utils</artifactId>
     <version>1.5-SNAPSHOT</version>
+    <url>https://code.nsa.gov/datawave-type-utils</url>
+    <licenses>
+        <license>
+            <name>The Apache License, Version 2.0</name>
+            <url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
+        </license>
+    </licenses>
+    <scm>
+        <connection>scm:git:https://github.com/NationalSecurityAgency/datawave-type-utils.git</connection>
+        <developerConnection>scm:git:git@github.com:NationalSecurityAgency/datawave-type-utils.git</developerConnection>
+        <url>https://github.com/NationalSecurityAgency/datawave-type-utils</url>
+    </scm>
     <properties>
         <version.common-utils>1.0</version.common-utils>
         <version.commons-lang3>3.8.1</version.commons-lang3>
