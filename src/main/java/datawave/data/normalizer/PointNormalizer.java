@@ -17,7 +17,7 @@ public class PointNormalizer extends AbstractGeometryNormalizer<Point,com.vivids
     private static final long serialVersionUID = 171360806347433135L;
     
     // @formatter:off
-    public static NumericIndexStrategy indexStrategy = TieredSFCIndexFactory.createSingleTierStrategy(
+    public static final NumericIndexStrategy indexStrategy = TieredSFCIndexFactory.createSingleTierStrategy(
             new NumericDimensionDefinition[]{
                     new LongitudeDefinition(),
                     new LatitudeDefinition(

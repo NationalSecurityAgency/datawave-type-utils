@@ -12,6 +12,8 @@ import javax.xml.bind.annotation.XmlValue;
 
 import org.apache.commons.codec.binary.Base64;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
+
 /**
  * A JAXB holder class for strings that could possibly contain invalid XML characters. If any invalid XML characters are found, the string will be base64
  * encoded.
@@ -110,7 +112,7 @@ public class OptionallyEncodedString {
         if (XMLUtil.isValidXML(value)) {
             this.value = value;
         } else {
-            this.value = new String(Base64.encodeBase64(value.getBytes(Charset.forName("UTF-8"))));
+            this.value = new String(Base64.encodeBase64(value.getBytes(UTF_8)), UTF_8);
             this.base64Encoded = true;
         }
     }

@@ -54,37 +54,37 @@ public interface ObjectSizeOf {
         /**
          * static component: object ref (8) + ref to object (4) + int (4) + char[] (12 + 4) dynamic component: 2*length
          */
-        public static long STRING_STATIC_REF = 32;
+        public static final long STRING_STATIC_REF = 32;
         
         /**
          * All dates will be similarly sized, compute the size of one and reuse it
          */
-        public static long DATE_STATIC_REF = Sizer.getObjectSize(new Date()) + Sizer.OBJECT_OVERHEAD + Sizer.REFERENCE;
+        public static final long DATE_STATIC_REF = Sizer.getObjectSize(new Date()) + Sizer.OBJECT_OVERHEAD + Sizer.REFERENCE;
         
         /**
          * All IPV4 will be similarly sized object ref(8) + ref to object (4) + int (4) + int (4) + byte[4] (12 + 4 + 4*1)
          */
-        public static long IPV4ADDRESS_STATIC_REF = 40;
+        public static final long IPV4ADDRESS_STATIC_REF = 40;
         
         /**
          * All IPV6 will be similarly sized object ref(8) + ref to object (4) + short[8] (12 + 4 + 8*2)
          */
-        public static long IPV6ADDRESS_STATIC_REF = 44;
+        public static final long IPV6ADDRESS_STATIC_REF = 44;
         
         /**
          * All BigDecimal will be similarly sized object ref (8) + ref to object (4) + int (4) + int (4) + String (len=) + long (8) + BigInt( obj ref (8) + ref
          * to object (4) + int (4) + int[] (len=) (12 + 4) + int (4) + int (4) + int (4) + int (4)) note: two dynamic string lengths should be negligible
          */
-        public static long BIGDECIMAL_STATIC_REF = 76;
+        public static final long BIGDECIMAL_STATIC_REF = 76;
     }
     
     class Sizer {
         private static final Logger log = LoggerFactory.getLogger(Sizer.class);
-        public static short OBJECT_OVERHEAD = 8;
-        public static short ARRAY_OVERHEAD = 12;
-        public static short REFERENCE = 4;
+        public static final short OBJECT_OVERHEAD = 8;
+        public static final short ARRAY_OVERHEAD = 12;
+        public static final short REFERENCE = 4;
         // The size of the basic Number constructs (and Boolean and Character) is 16: roundUp(8 + primitiveSize)
-        public static short NUMBER_SIZE = 16;
+        public static final short NUMBER_SIZE = 16;
         
         /**
          * Get the size of an object. Note that we want something relatively fast that gives us an order of magnitude here. The java Instrumentation agent
