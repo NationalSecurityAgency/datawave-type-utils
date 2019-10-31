@@ -1,6 +1,7 @@
 package datawave.data.type.util;
 
 import java.io.Serializable;
+import java.util.Objects;
 
 /**
  * Class to hold a MAC Address
@@ -255,5 +256,10 @@ public class MACAddress implements Serializable, Comparable<MACAddress> {
         } else {
             return false;
         }
+    }
+    
+    @Override
+    public int hashCode() {
+        return this.toNormalizedString("").hashCode();
     }
 }

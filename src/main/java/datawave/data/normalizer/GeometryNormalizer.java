@@ -21,7 +21,7 @@ public class GeometryNormalizer extends AbstractGeometryNormalizer<Geometry,com.
     private static final long serialVersionUID = 171360806347433135L;
     
     // @formatter:off
-    public static NumericIndexStrategy indexStrategy = TieredSFCIndexFactory.createFullIncrementalTieredStrategy(
+    public static final NumericIndexStrategy indexStrategy = TieredSFCIndexFactory.createFullIncrementalTieredStrategy(
             new NumericDimensionDefinition[]{
                     new LongitudeDefinition(),
                     new LatitudeDefinition(

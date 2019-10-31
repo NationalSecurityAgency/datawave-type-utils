@@ -2,9 +2,9 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <artifactId>datawave-microservice-parent</artifactId>
         <groupId>gov.nsa.datawave.microservice</groupId>
-        <version>1.5</version>
+        <artifactId>datawave-microservice-parent</artifactId>
+        <version>1.7</version>
         <relativePath />
     </parent>
     <artifactId>type-utils</artifactId>
@@ -22,6 +22,7 @@
         <url>https://github.com/NationalSecurityAgency/datawave-type-utils</url>
     </scm>
     <properties>
+        <spotbugs.excludes.file>${project.basedir}/src/main/spotbugs/excludes.xml</spotbugs.excludes.file>
         <version.common-utils>1.0</version.common-utils>
         <version.commons-lang3>3.8.1</version.commons-lang3>
         <version.commons-net>3.5</version.commons-net>

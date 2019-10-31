@@ -15,6 +15,7 @@ import java.nio.CharBuffer;
 import java.text.NumberFormat;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.ExecutionException;
 import java.util.regex.Pattern;
 
@@ -477,6 +478,10 @@ public class GeoNormalizer extends AbstractNormalizer<String> {
             }
         }
         
+        @Override
+        public int hashCode() {
+            return Objects.hash(getLatitude(), getLongitude());
+        }
     }
     
     public static class OutOfRangeException extends Exception {

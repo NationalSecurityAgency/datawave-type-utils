@@ -103,7 +103,7 @@ public class NumericalEncoder {
                 } else if (exp.contains("!")) {
                     // Negative Number
                     exp = negativeNumEncodeToIntExponentsMap.get(exp);
-                    output = new BigDecimal(mantissa).subtract(BigDecimal.TEN).movePointRight(Integer.valueOf(exp));
+                    output = new BigDecimal(mantissa).subtract(BigDecimal.TEN).movePointRight(Integer.parseInt(exp));
                 } else {
                     throw new NumberFormatException("Unknown encoded exponent");
                 }
