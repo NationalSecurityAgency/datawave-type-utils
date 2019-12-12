@@ -1,7 +1,9 @@
 package datawave.data.normalizer;
 
-import static org.junit.Assert.assertEquals;
-import org.junit.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+import org.junit.jupiter.api.Test;
 
 public class HexStringNormalizerTest {
     
@@ -9,50 +11,50 @@ public class HexStringNormalizerTest {
     
     @Test
     public void testAllHexCharacters() {
-        assertEquals("Test all hex characters", "1234567890abcdefabcdef", normalizer.normalize("1234567890abcdefABCDEF"));
-        assertEquals("Test all hex characters w/0x", "1234567890abcdefabcdef", normalizer.normalize("0x1234567890abcdefABCDEF"));
+        assertEquals("1234567890abcdefabcdef", normalizer.normalize("1234567890abcdefABCDEF"), "Test all hex characters");
+        assertEquals("1234567890abcdefabcdef", normalizer.normalize("0x1234567890abcdefABCDEF"), "Test all hex characters w/0x");
     }
     
     @Test
     public void testOddLenghtValidHexString() {
-        assertEquals("Test odd length", "0123", normalizer.normalize("123"));
-        assertEquals("Test odd length w/0x", "0123", normalizer.normalize("0x123"));
-        assertEquals("Test odd length", "0abcde", normalizer.normalize("abCde"));
-        assertEquals("Test odd length w/0x", "0abcde", normalizer.normalize("0xabCde"));
+        assertEquals("0123", normalizer.normalize("123"), "Test odd length");
+        assertEquals("0123", normalizer.normalize("0x123"), "Test odd length w/0x");
+        assertEquals("0abcde", normalizer.normalize("abCde"), "Test odd length");
+        assertEquals("0abcde", normalizer.normalize("0xabCde"), "Test odd length w/0x");
     }
     
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testInvalidHexStringEmpty() {
-        normalizer.normalize("");
+        assertThrows(IllegalArgumentException.class, () -> normalizer.normalize(""));
     }
     
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testInvalidHexStringPrefixOnly() {
-        assertEquals("Test invalid hex string w/0x", "0x", normalizer.normalize("0x"));
+        assertThrows(IllegalArgumentException.class, () -> normalizer.normalize("0x"), "Test invalid hex string w/0x");
     }
     
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testInvalidHexStringNotHex() {
-        assertEquals("Test invalid hex string", "Not Hex", normalizer.normalize("Not Hex"));
+        assertThrows(IllegalArgumentException.class, () -> normalizer.normalize("Not Hex"), "Test invalid hex string");
     }
     
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testInvalidHexStringWithG() {
-        assertEquals("Test invalid hex string", "aBcDeFg12345", normalizer.normalize("aBcDeFg12345"));
+        assertThrows(IllegalArgumentException.class, () -> normalizer.normalize("aBcDeFg12345"), "Test invalid hex string");
     }
     
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testConvertFieldRegexEmpty() {
-        normalizer.normalizeRegex("");
+        assertThrows(IllegalArgumentException.class, () -> normalizer.normalizeRegex(""));
     }
     
     @Test
     public void testConvertFieldRegexToLower() {
-        assertEquals("Test convertFieldRegex", "1234567890abcdefabcdef", normalizer.normalizeRegex("1234567890abcdefABCDEF"));
+        assertEquals("1234567890abcdefabcdef", normalizer.normalizeRegex("1234567890abcdefABCDEF"), "Test convertFieldRegex");
     }
     
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testConvertFieldRegexNull() {
-        normalizer.normalizeRegex(null);
+        assertThrows(IllegalArgumentException.class, () -> normalizer.normalizeRegex(null));
     }
 }

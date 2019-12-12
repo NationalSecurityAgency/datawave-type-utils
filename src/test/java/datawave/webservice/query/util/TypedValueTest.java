@@ -4,9 +4,9 @@ import datawave.data.type.BaseType;
 import datawave.data.type.LcNoDiacriticsType;
 import datawave.data.type.NoOpType;
 import org.apache.commons.codec.binary.Base64;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import javax.xml.bind.JAXBContext;
 import java.io.BufferedReader;
@@ -19,9 +19,9 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class TypedValueTest {
     
@@ -29,7 +29,7 @@ public class TypedValueTest {
     private static String EXPECTED_BASE64_FORMAT;
     private JAXBContext ctx;
     
-    @BeforeClass
+    @BeforeAll
     public static void setUpClass() throws Exception {
         System.setProperty("user.timezone", "GMT");
         BufferedReader rdr;
@@ -41,7 +41,7 @@ public class TypedValueTest {
         rdr.close();
     }
     
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
         ctx = JAXBContext.newInstance(TypedValue.class);
     }

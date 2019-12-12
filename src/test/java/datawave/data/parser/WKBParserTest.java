@@ -4,8 +4,9 @@ import com.google.common.io.BaseEncoding;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.io.WKBWriter;
 import com.vividsolutions.jts.io.WKTReader;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class WKBParserTest {
     
@@ -19,7 +20,7 @@ public class WKBParserTest {
         
         Geometry parsedGeom = wkbParser.parseGeometry(base64EncodedWkb);
         
-        Assert.assertTrue(geom.equals(parsedGeom));
+        assertTrue(geom.equals(parsedGeom));
     }
     
     @Test
@@ -32,7 +33,7 @@ public class WKBParserTest {
         
         Geometry parsedGeom = wkbParser.parseGeometry(base64EncodedWkb);
         
-        Assert.assertTrue(geom.equals(parsedGeom));
+        assertTrue(geom.equals(parsedGeom));
     }
     
     @Test
@@ -45,6 +46,6 @@ public class WKBParserTest {
         
         Geometry parsedGeom = wkbParser.parseGeometry(base64EncodedWkb);
         
-        Assert.assertTrue(geom.equals(parsedGeom));
+        assertTrue(geom.equals(parsedGeom));
     }
 }

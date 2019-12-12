@@ -6,8 +6,9 @@
 package datawave.data.type.util;
 
 import org.apache.log4j.Logger;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * 
@@ -49,7 +50,7 @@ public class IpV6AddressTypeTest {
             log.debug(address + " parsed to: " + addr);
             IpV6Address reparsed = IpV6Address.parse(addr.toString());
             log.debug(address + " parsed to: " + addr + " and re-parsed to " + reparsed);
-            Assert.assertEquals("Had a problem re-parsing " + address, reparsed.toString(), addr.toString());
+            assertEquals(reparsed.toString(), addr.toString(), "Had a problem re-parsing " + address);
         }
     }
 }

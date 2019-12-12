@@ -1,23 +1,21 @@
 package datawave.data.type;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-/**
- *
- * 
- */
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 public class TypeFactoryTest {
     
     @Test
     public void testWithCorrectType() throws Exception {
         Type<?> type = Type.Factory.createType("datawave.data.type.LcType");
-        Assert.assertTrue(type instanceof LcType);
+        assertTrue(type instanceof LcType);
     }
     
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testWithIncorrectType() throws Exception {
-        Type<?> type = Type.Factory.createType("datawave.ingest.data.normalizer.LcNoDiacriticsNormalizer");
+        assertThrows(IllegalArgumentException.class, () -> Type.Factory.createType("datawave.ingest.data.normalizer.LcNoDiacriticsNormalizer"));
     }
     
 }

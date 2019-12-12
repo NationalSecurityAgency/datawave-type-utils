@@ -10,22 +10,21 @@ import mil.nga.giat.geowave.core.index.ByteArrayRange;
 import mil.nga.giat.geowave.core.index.sfc.data.MultiDimensionalNumericData;
 import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.io.IOUtils;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class PointNormalizerTest {
     
     private PointNormalizer pointNormalizer = null;
     private GeometryNormalizer geometryNormalizer = null;
     
-    @Before
+    @BeforeEach
     public void setup() {
         pointNormalizer = new PointNormalizer();
         geometryNormalizer = new GeometryNormalizer();
@@ -34,27 +33,27 @@ public class PointNormalizerTest {
     @Test
     public void testPoint() {
         Geometry point = new GeometryFactory().createPoint(new Coordinate(10, 10));
-        List<String> insertionIds = new ArrayList<String>(pointNormalizer.expand(new WKTWriter().write(point)));
+        List<String> insertionIds = new ArrayList<>(pointNormalizer.expand(new WKTWriter().write(point)));
         assertEquals(1, insertionIds.size());
         assertEquals("1f200a80a80a80a80a", insertionIds.get(0));
         
         // make sure the insertion id matches the geo normalizer
-        List<String> geoInsertionIds = new ArrayList<String>(geometryNormalizer.expand(new WKTWriter().write(point)));
+        List<String> geoInsertionIds = new ArrayList<>(geometryNormalizer.expand(new WKTWriter().write(point)));
         assertEquals(1, geoInsertionIds.size());
         assertEquals(insertionIds.get(0), geoInsertionIds.get(0));
     }
     
-    @Test(expected = ClassCastException.class)
+    @Test
     public void testLine() {
         Geometry line = new GeometryFactory().createLineString(new Coordinate[] {new Coordinate(-10, -10), new Coordinate(0, 0), new Coordinate(10, 20)});
-        pointNormalizer.expand(new WKTWriter().write(line));
+        assertThrows(ClassCastException.class, () -> pointNormalizer.expand(new WKTWriter().write(line)));
     }
     
-    @Test(expected = ClassCastException.class)
+    @Test
     public void testPolygon() {
         Geometry polygon = new GeometryFactory().createPolygon(new Coordinate[] {new Coordinate(-10, -10), new Coordinate(10, -10), new Coordinate(10, 10),
                 new Coordinate(-10, 10), new Coordinate(-10, -10)});
-        pointNormalizer.expand(new WKTWriter().write(polygon));
+        assertThrows(ClassCastException.class, () -> pointNormalizer.expand(new WKTWriter().write(polygon)));
     }
     
     @Test
@@ -63,12 +62,12 @@ public class PointNormalizerTest {
         assertEquals(10.0, geom.getGeometryN(0).getCoordinate().x, 0.0);
         assertEquals(20.0, geom.getGeometryN(0).getCoordinate().y, 0.0);
         
-        List<String> insertionIds = new ArrayList<String>(pointNormalizer.expand(new WKTWriter().write(geom)));
+        List<String> insertionIds = new ArrayList<>(pointNormalizer.expand(new WKTWriter().write(geom)));
         assertEquals(1, insertionIds.size());
         assertEquals("1f20306ba4306ba430", insertionIds.get(0));
         
         // make sure the insertion id matches the geo normalizer
-        List<String> geoInsertionIds = new ArrayList<String>(geometryNormalizer.expand(new WKTWriter().write(geom.getCentroid())));
+        List<String> geoInsertionIds = new ArrayList<>(geometryNormalizer.expand(new WKTWriter().write(geom.getCentroid())));
         assertEquals(1, geoInsertionIds.size());
         assertEquals(insertionIds.get(0), geoInsertionIds.get(0));
     }
@@ -80,12 +79,12 @@ public class PointNormalizerTest {
         assertEquals(20.0, geom.getGeometryN(0).getCoordinate().y, 0.0);
         assertEquals(30.0, geom.getGeometryN(0).getCoordinate().z, 0.0);
         
-        List<String> insertionIds = new ArrayList<String>(pointNormalizer.expand(new WKTWriter().write(geom)));
+        List<String> insertionIds = new ArrayList<>(pointNormalizer.expand(new WKTWriter().write(geom)));
         assertEquals(1, insertionIds.size());
         assertEquals("1f20306ba4306ba430", insertionIds.get(0));
         
         // make sure the insertion id matches the geo normalizer
-        List<String> geoInsertionIds = new ArrayList<String>(geometryNormalizer.expand(new WKTWriter().write(geom.getCentroid())));
+        List<String> geoInsertionIds = new ArrayList<>(geometryNormalizer.expand(new WKTWriter().write(geom.getCentroid())));
         assertEquals(1, geoInsertionIds.size());
         assertEquals(insertionIds.get(0), geoInsertionIds.get(0));
     }
@@ -95,7 +94,7 @@ public class PointNormalizerTest {
         Geometry polygon = new GeometryFactory().createPolygon(new Coordinate[] {new Coordinate(-10, -10), new Coordinate(10, -10), new Coordinate(10, 10),
                 new Coordinate(-10, 10), new Coordinate(-10, -10)});
         
-        List<ByteArrayRange> allRanges = new ArrayList<ByteArrayRange>();
+        List<ByteArrayRange> allRanges = new ArrayList<>();
         for (MultiDimensionalNumericData range : GeometryUtils.basicConstraintsFromEnvelope(polygon.getEnvelopeInternal())
                         .getIndexConstraints(PointNormalizer.indexStrategy)) {
             allRanges.addAll(Lists.reverse(PointNormalizer.indexStrategy.getQueryRanges(range)));
@@ -103,7 +102,7 @@ public class PointNormalizerTest {
         
         assertEquals(171, allRanges.size());
         
-        StringBuffer result = new StringBuffer();
+        StringBuilder result = new StringBuilder();
         for (ByteArrayRange range : allRanges) {
             result.append(Hex.encodeHexString(range.getStart().getBytes()));
             result.append(Hex.encodeHexString(range.getEnd().getBytes()));
@@ -115,11 +114,11 @@ public class PointNormalizerTest {
     }
     
     @Test
-    public void testPointQueryRangesMatchGeoQueryRanges() throws Exception {
+    public void testPointQueryRangesMatchGeoQueryRanges() {
         Geometry polygon = new GeometryFactory().createPolygon(new Coordinate[] {new Coordinate(-10, -10), new Coordinate(10, -10), new Coordinate(10, 10),
                 new Coordinate(-10, 10), new Coordinate(-10, -10)});
         
-        List<ByteArrayRange> allPointRanges = new ArrayList<ByteArrayRange>();
+        List<ByteArrayRange> allPointRanges = new ArrayList<>();
         for (MultiDimensionalNumericData range : GeometryUtils.basicConstraintsFromEnvelope(polygon.getEnvelopeInternal())
                         .getIndexConstraints(PointNormalizer.indexStrategy)) {
             allPointRanges.addAll(Lists.reverse(PointNormalizer.indexStrategy.getQueryRanges(range)));
@@ -127,13 +126,13 @@ public class PointNormalizerTest {
         
         assertEquals(171, allPointRanges.size());
         
-        StringBuffer pointResult = new StringBuffer();
+        StringBuilder pointResult = new StringBuilder();
         for (ByteArrayRange range : allPointRanges) {
             pointResult.append(Hex.encodeHexString(range.getStart().getBytes()));
             pointResult.append(Hex.encodeHexString(range.getEnd().getBytes()));
         }
         
-        List<ByteArrayRange> allGeoRanges = new ArrayList<ByteArrayRange>();
+        List<ByteArrayRange> allGeoRanges = new ArrayList<>();
         for (MultiDimensionalNumericData range : GeometryUtils.basicConstraintsFromEnvelope(polygon.getEnvelopeInternal())
                         .getIndexConstraints(GeometryNormalizer.indexStrategy)) {
             allGeoRanges.addAll(Lists.reverse(GeometryNormalizer.indexStrategy.getQueryRanges(range)));
@@ -142,7 +141,7 @@ public class PointNormalizerTest {
         assertEquals(3746, allGeoRanges.size());
         
         int numPointRanges = 0;
-        StringBuffer geoResult = new StringBuffer();
+        StringBuilder geoResult = new StringBuilder();
         for (ByteArrayRange range : allGeoRanges) {
             String start = Hex.encodeHexString(range.getStart().getBytes());
             String end = Hex.encodeHexString(range.getEnd().getBytes());

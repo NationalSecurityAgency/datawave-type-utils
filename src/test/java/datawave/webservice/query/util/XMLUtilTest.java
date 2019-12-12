@@ -1,9 +1,9 @@
 package datawave.webservice.query.util;
 
 import com.sun.org.apache.xml.internal.utils.XMLChar;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class XMLUtilTest {
     @Test
@@ -11,7 +11,7 @@ public class XMLUtilTest {
         for (int i = 0; i < 0x300000; ++i) {
             // Uses an internal class, but only for testing.
             boolean expectedResult = XMLChar.isValid(i);
-            assertEquals("Mismatch for 0x" + Integer.toHexString(i), expectedResult, XMLUtil.isValidXMLChar(i));
+            assertEquals(expectedResult, XMLUtil.isValidXMLChar(i), "Mismatch for 0x" + Integer.toHexString(i));
         }
     }
     

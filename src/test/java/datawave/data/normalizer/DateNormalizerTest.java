@@ -12,11 +12,12 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 import org.apache.log4j.Logger;
-import org.junit.Assert;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
 import com.google.common.collect.Sets;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  *
@@ -31,93 +32,93 @@ public class DateNormalizerTest {
             "2014-10-20", "2014-10-20T00|00", "Mon Oct 20 00:00:00 GMT 2014", "2014-10-20T00:00:00Z", "2014-10-20t00:00:00z", "2014-10-20T00:00:00+00:00",
             "Mon Oct 20 00:00:00 +00:00 2014"};
     
-    @BeforeClass
+    @BeforeAll
     public static void setupClass() {
         System.setProperty("user.timezone", "GMT");
     }
     
     @Test
-    public void testAllFormats() throws Exception {
-        Assert.assertEquals("The DateNormalizer may have an new untested format", inputDateStrings.length, DateNormalizer.FORMAT_STRINGS.length);
+    public void testAllFormats() {
+        assertEquals(inputDateStrings.length, DateNormalizer.FORMAT_STRINGS.length, "The DateNormalizer may have an new untested format");
         Set<Date> dateSet = Sets.newLinkedHashSet();
         Set<String> normalizedDates = Sets.newLinkedHashSet();
         Set<Long> dateTimes = Sets.newLinkedHashSet();
-        for (int i = 0; i < inputDateStrings.length; i++) {
-            Date date = normalizer.denormalize(inputDateStrings[i]);
+        for (String inputDateString : inputDateStrings) {
+            Date date = normalizer.denormalize(inputDateString);
             dateSet.add(date);
             String normalized = normalizer.normalizeDelegateType(date);
             normalizedDates.add(normalized);
             dateTimes.add(date.getTime());
         }
-        Assert.assertEquals("There can be only one", 1, dateSet.size());
-        Assert.assertEquals("There can be only one", 1, normalizedDates.size());
-        Assert.assertEquals("There can be only one", 1, dateTimes.size());
+        assertEquals(1, dateSet.size(), "There can be only one");
+        assertEquals(1, normalizedDates.size(), "There can be only one");
+        assertEquals(1, dateTimes.size(), "There can be only one");
     }
     
     @Test
-    public void testExpectedResults() throws Exception {
+    public void testExpectedResults() {
         String input = "2014-10-20T17:20:20.001Z";
         String normalized = normalizer.normalize(input);
-        Assert.assertEquals("2014-10-20T17:20:20.001Z", normalized);
+        assertEquals("2014-10-20T17:20:20.001Z", normalized);
         
         input = "20141020172020";
         normalized = normalizer.normalize(input);
-        Assert.assertEquals("2014-10-20T17:20:20.000Z", normalized);
+        assertEquals("2014-10-20T17:20:20.000Z", normalized);
         
         input = "2014-10-20 17:20:20GMT";
         normalized = normalizer.normalize(input);
-        Assert.assertEquals("2014-10-20T17:20:20.000Z", normalized);
+        assertEquals("2014-10-20T17:20:20.000Z", normalized);
         
         input = "2014-10-20 17:20:20Z";
         normalized = normalizer.normalize(input);
-        Assert.assertEquals("2014-10-20T17:20:20.000Z", normalized);
+        assertEquals("2014-10-20T17:20:20.000Z", normalized);
         
         input = "2014-10-20";
         normalized = normalizer.normalize(input);
-        Assert.assertEquals("2014-10-20T00:00:00.000Z", normalized);
+        assertEquals("2014-10-20T00:00:00.000Z", normalized);
         
         input = "2014-10-20 17:20:20";
         normalized = normalizer.normalize(input);
-        Assert.assertEquals("2014-10-20T17:20:20.000Z", normalized);
+        assertEquals("2014-10-20T17:20:20.000Z", normalized);
         
         input = "2014-10-20T17|20";
         normalized = normalizer.normalize(input);
-        Assert.assertEquals("2014-10-20T17:20:00.000Z", normalized);
+        assertEquals("2014-10-20T17:20:00.000Z", normalized);
         
         input = "Mon Oct 20 17:20:20 GMT 2014";
         normalized = normalizer.normalize(input);
-        Assert.assertEquals("2014-10-20T17:20:20.000Z", normalized);
+        assertEquals("2014-10-20T17:20:20.000Z", normalized);
         
         input = "2014-10-20T17:20:20Z";
         normalized = normalizer.normalize(input);
-        Assert.assertEquals("2014-10-20T17:20:20.000Z", normalized);
+        assertEquals("2014-10-20T17:20:20.000Z", normalized);
         
         input = "2014-10-20t17:20:20z";
         normalized = normalizer.normalize(input);
-        Assert.assertEquals("2014-10-20T17:20:20.000Z", normalized);
+        assertEquals("2014-10-20T17:20:20.000Z", normalized);
         
         input = "Thu Jan 1 00:00:00 GMT 1970";
         normalized = normalizer.normalize(input);
-        Assert.assertEquals("1970-01-01T00:00:00.000Z", normalized);
+        assertEquals("1970-01-01T00:00:00.000Z", normalized);
         
         input = "2014-10-20T17:20:20.345007Z";
         normalized = normalizer.normalize(input);
-        Assert.assertEquals("2014-10-20T17:20:20.345Z", normalized);
+        assertEquals("2014-10-20T17:20:20.345Z", normalized);
     }
     
     @Test
-    public void testFromLong() throws Exception {
+    public void testFromLong() {
         Date now = new Date();
         long rightNow = now.getTime();
         String normalizedFromLong = normalizer.normalize("" + rightNow);
         String normalizedFromDate = normalizer.normalizeDelegateType(now);
-        Assert.assertEquals(normalizedFromLong, normalizedFromDate);
+        assertEquals(normalizedFromLong, normalizedFromDate);
     }
     
-    @Test
     /**
      * Show that an un-protected SimpleDateFormat will cause this test to have more than 4 Dates, or cause it to throw an Exception:
      */
+    @Test
     public void showThreadUnsafeDateFormat() {
         
         try {
@@ -126,14 +127,10 @@ public class DateNormalizerTest {
             
             };
             final DateFormat unsafeDateFormat = new SimpleDateFormat("yyyyMMdd");
-            Callable<String> task = new Callable<String>() {
-                public String call() throws Exception {
-                    return unsafeDateFormat.format(thedates[(int) (Math.random() * 4)]);
-                }
-            };
+            Callable<String> task = () -> unsafeDateFormat.format(thedates[(int) (Math.random() * 4)]);
             
             ExecutorService exec = Executors.newFixedThreadPool(2);
-            List<Future<String>> results = new ArrayList<Future<String>>();
+            List<Future<String>> results = new ArrayList<>();
             for (int i = 0; i < 200; i++) {
                 results.add(exec.submit(task));
             }
@@ -148,23 +145,19 @@ public class DateNormalizerTest {
         }
     }
     
-    @Test
     /**
      * this test uses the ThreadLocal in DateNormalizer to give correct results with multi-threading
      */
+    @Test
     public void testThreadSafeConversions() throws Exception {
         DateFormat sdf = new SimpleDateFormat("yyyyMMdd");
         final Date[] thedates = new Date[] {sdf.parse("20170101"), sdf.parse("20170201"), sdf.parse("20170102"), sdf.parse("20160101"),
         
         };
-        Callable<String> task = new Callable<String>() {
-            public String call() throws Exception {
-                return normalizer.parseToString(thedates[(int) (Math.random() * 4)]);
-            }
-        };
+        Callable<String> task = () -> normalizer.parseToString(thedates[(int) (Math.random() * 4)]);
         
         ExecutorService exec = Executors.newFixedThreadPool(2);
-        List<Future<String>> results = new ArrayList<Future<String>>();
+        List<Future<String>> results = new ArrayList<>();
         for (int i = 0; i < 200; i++) {
             results.add(exec.submit(task));
         }
@@ -173,6 +166,6 @@ public class DateNormalizerTest {
         for (Future<String> result : results) {
             dates.add(result.get());
         }
-        Assert.assertEquals(4, dates.size());
+        assertEquals(4, dates.size());
     }
 }

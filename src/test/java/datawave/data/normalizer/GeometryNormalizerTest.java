@@ -10,20 +10,20 @@ import mil.nga.giat.geowave.core.index.ByteArrayRange;
 import mil.nga.giat.geowave.core.index.sfc.data.MultiDimensionalNumericData;
 import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.io.IOUtils;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.BeforeEach;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class GeometryNormalizerTest {
     
     private GeometryNormalizer normalizer = null;
     
-    @Before
+    @BeforeEach
     public void setup() {
         normalizer = new GeometryNormalizer();
     }
@@ -31,7 +31,7 @@ public class GeometryNormalizerTest {
     @Test
     public void testPoint() {
         Geometry point = new GeometryFactory().createPoint(new Coordinate(10, 10));
-        List<String> insertionIds = new ArrayList<String>(normalizer.expand(new WKTWriter().write(point)));
+        List<String> insertionIds = new ArrayList<>(normalizer.expand(new WKTWriter().write(point)));
         assertEquals(1, insertionIds.size());
         assertEquals("1f200a80a80a80a80a", insertionIds.get(0));
     }
@@ -39,7 +39,7 @@ public class GeometryNormalizerTest {
     @Test
     public void testLine() {
         Geometry line = new GeometryFactory().createLineString(new Coordinate[] {new Coordinate(-10, -10), new Coordinate(0, 0), new Coordinate(10, 20)});
-        List<String> insertionIds = new ArrayList<String>(normalizer.expand(new WKTWriter().write(line)));
+        List<String> insertionIds = new ArrayList<>(normalizer.expand(new WKTWriter().write(line)));
         Collections.sort(insertionIds);
         assertEquals(4, insertionIds.size());
         assertEquals("042a", insertionIds.get(0));
@@ -52,7 +52,7 @@ public class GeometryNormalizerTest {
     public void testPolygon() {
         Geometry polygon = new GeometryFactory().createPolygon(new Coordinate[] {new Coordinate(-10, -10), new Coordinate(10, -10), new Coordinate(10, 10),
                 new Coordinate(-10, 10), new Coordinate(-10, -10)});
-        List<String> insertionIds = new ArrayList<String>(normalizer.expand(new WKTWriter().write(polygon)));
+        List<String> insertionIds = new ArrayList<>(normalizer.expand(new WKTWriter().write(polygon)));
         assertEquals(4, insertionIds.size());
         assertEquals("0500aa", insertionIds.get(0));
         assertEquals("0501ff", insertionIds.get(1));
@@ -66,7 +66,7 @@ public class GeometryNormalizerTest {
         assertEquals(10.0, geom.getGeometryN(0).getCoordinate().x, 0.0);
         assertEquals(20.0, geom.getGeometryN(0).getCoordinate().y, 0.0);
         
-        List<String> insertionIds = new ArrayList<String>(normalizer.expand(new WKTWriter().write(geom)));
+        List<String> insertionIds = new ArrayList<>(normalizer.expand(new WKTWriter().write(geom)));
         assertEquals(1, insertionIds.size());
         assertEquals("1f20306ba4306ba430", insertionIds.get(0));
     }
@@ -78,7 +78,7 @@ public class GeometryNormalizerTest {
         assertEquals(20.0, geom.getGeometryN(0).getCoordinate().y, 0.0);
         assertEquals(30.0, geom.getGeometryN(0).getCoordinate().z, 0.0);
         
-        List<String> insertionIds = new ArrayList<String>(normalizer.expand(new WKTWriter().write(geom)));
+        List<String> insertionIds = new ArrayList<>(normalizer.expand(new WKTWriter().write(geom)));
         assertEquals(1, insertionIds.size());
         assertEquals("1f20306ba4306ba430", insertionIds.get(0));
     }
@@ -88,7 +88,7 @@ public class GeometryNormalizerTest {
         Geometry polygon = new GeometryFactory().createPolygon(new Coordinate[] {new Coordinate(-10, -10), new Coordinate(10, -10), new Coordinate(10, 10),
                 new Coordinate(-10, 10), new Coordinate(-10, -10)});
         
-        List<ByteArrayRange> allRanges = new ArrayList<ByteArrayRange>();
+        List<ByteArrayRange> allRanges = new ArrayList<>();
         for (MultiDimensionalNumericData range : GeometryUtils.basicConstraintsFromEnvelope(polygon.getEnvelopeInternal())
                         .getIndexConstraints(GeometryNormalizer.indexStrategy)) {
             allRanges.addAll(Lists.reverse(GeometryNormalizer.indexStrategy.getQueryRanges(range)));

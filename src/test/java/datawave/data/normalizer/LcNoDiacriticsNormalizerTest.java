@@ -1,21 +1,17 @@
 package datawave.data.normalizer;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-/**
- *
- * 
- */
+import static org.junit.jupiter.api.Assertions.assertNull;
+
 public class LcNoDiacriticsNormalizerTest {
     @Test
-    public void test1() throws Exception {
+    public void test1() {
         LcNoDiacriticsNormalizer norm = new LcNoDiacriticsNormalizer();
-        String a = "field";
         String b = null;
         String n1 = norm.normalize(b);
         
-        Assert.assertNull(n1);
+        assertNull(n1);
         
     }
 }
