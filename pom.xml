@@ -23,7 +23,7 @@
     </scm>
     <properties>
         <spotbugs.excludes.file>${project.basedir}/src/main/spotbugs/excludes.xml</spotbugs.excludes.file>
-        <version.common-utils>1.1-SNAPSHOT</version.common-utils>
+        <version.common-utils>1.1</version.common-utils>
         <version.commons-lang3>3.9</version.commons-lang3>
         <version.commons-net>3.6</version.commons-net>
         <version.geowave>0.9.5</version.geowave>
