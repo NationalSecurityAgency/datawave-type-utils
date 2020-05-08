@@ -1,17 +1,17 @@
 package datawave.data.normalizer;
 
 import com.google.common.collect.Lists;
-import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.GeometryFactory;
-import com.vividsolutions.jts.io.WKTWriter;
-import mil.nga.giat.geowave.core.geotime.GeometryUtils;
-import mil.nga.giat.geowave.core.index.ByteArrayRange;
-import mil.nga.giat.geowave.core.index.sfc.data.MultiDimensionalNumericData;
 import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.io.IOUtils;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.locationtech.geowave.core.geotime.util.GeometryUtils;
+import org.locationtech.geowave.core.index.ByteArrayRange;
+import org.locationtech.geowave.core.index.sfc.data.MultiDimensionalNumericData;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.GeometryFactory;
+import org.locationtech.jts.io.WKTWriter;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -90,16 +90,16 @@ public class GeometryNormalizerTest {
         
         List<ByteArrayRange> allRanges = new ArrayList<>();
         for (MultiDimensionalNumericData range : GeometryUtils.basicConstraintsFromEnvelope(polygon.getEnvelopeInternal())
-                        .getIndexConstraints(GeometryNormalizer.indexStrategy)) {
-            allRanges.addAll(Lists.reverse(GeometryNormalizer.indexStrategy.getQueryRanges(range)));
+                        .getIndexConstraints(GeometryNormalizer.index)) {
+            allRanges.addAll(Lists.reverse(GeometryNormalizer.indexStrategy.getQueryRanges(range).getCompositeQueryRanges()));
         }
         
         assertEquals(3746, allRanges.size());
         
         StringBuffer result = new StringBuffer();
         for (ByteArrayRange range : allRanges) {
-            result.append(Hex.encodeHexString(range.getStart().getBytes()));
-            result.append(Hex.encodeHexString(range.getEnd().getBytes()));
+            result.append(Hex.encodeHexString(range.getStart()));
+            result.append(Hex.encodeHexString(range.getEnd()));
         }
         
         String expected = IOUtils.toString(this.getClass().getClassLoader().getResourceAsStream("datawave/data/normalizer/geoRanges.txt"), "UTF8");

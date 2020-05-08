@@ -1,12 +1,12 @@
 package datawave.data.normalizer;
 
-import com.vividsolutions.jts.geom.Geometry;
 import datawave.data.parser.GeometryParser;
-import mil.nga.giat.geowave.core.geotime.GeometryUtils;
-import mil.nga.giat.geowave.core.index.ByteArrayId;
-import mil.nga.giat.geowave.core.index.NumericIndexStrategy;
-import mil.nga.giat.geowave.core.index.sfc.data.MultiDimensionalNumericData;
 import org.apache.commons.codec.binary.Hex;
+import org.locationtech.geowave.core.geotime.util.GeometryUtils;
+import org.locationtech.geowave.core.index.NumericIndexStrategy;
+import org.locationtech.geowave.core.index.sfc.data.MultiDimensionalNumericData;
+import org.locationtech.geowave.core.store.api.Index;
+import org.locationtech.jts.geom.Geometry;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -36,6 +36,8 @@ public abstract class AbstractGeometryNormalizer<T extends datawave.data.type.ut
     }
     
     abstract protected NumericIndexStrategy getIndexStrategy();
+    
+    abstract protected Index getIndex();
     
     abstract protected T createDatawaveGeometry(G geometry);
     
@@ -69,8 +71,8 @@ public abstract class AbstractGeometryNormalizer<T extends datawave.data.type.ut
         return getEncodedStringFromIndexBytes(getSingleIndexFromGeometry(geometry));
     }
     
-    public static String getEncodedStringFromIndexBytes(ByteArrayId index) {
-        return Hex.encodeHexString(index.getBytes());
+    public static String getEncodedStringFromIndexBytes(byte[] index) {
+        return Hex.encodeHexString(index);
     }
     
     public static Geometry parseGeometry(String geoString) throws IllegalArgumentException {
@@ -82,11 +84,11 @@ public abstract class AbstractGeometryNormalizer<T extends datawave.data.type.ut
         throw new IllegalArgumentException("Cannot parse geometry from string [" + geoString + "]");
     }
     
-    private ByteArrayId getSingleIndexFromGeometry(T geometry) {
-        final List<ByteArrayId> insertionIds = new ArrayList<>();
-        for (MultiDimensionalNumericData range : GeometryUtils.basicConstraintsFromGeometry(geometry.getJTSGeometry())
-                        .getIndexConstraints(getIndexStrategy())) {
-            insertionIds.addAll(getIndexStrategy().getInsertionIds(range, 1));
+    private byte[] getSingleIndexFromGeometry(T geometry) {
+        NumericIndexStrategy indexStrategy = getIndexStrategy();
+        final List<byte[]> insertionIds = new ArrayList<>();
+        for (MultiDimensionalNumericData range : GeometryUtils.basicConstraintsFromGeometry(geometry.getJTSGeometry()).getIndexConstraints(getIndex())) {
+            insertionIds.addAll(getIndexStrategy().getInsertionIds(range, 1).getCompositeInsertionIds());
         }
         if (insertionIds.size() == 1) {
             return insertionIds.get(0);
@@ -95,20 +97,20 @@ public abstract class AbstractGeometryNormalizer<T extends datawave.data.type.ut
         throw new IllegalArgumentException("Cannot normalize input geometry, no resulting indices");
     }
     
-    protected List<ByteArrayId> getIndicesFromGeometry(T geometry) {
-        final List<ByteArrayId> insertionIds = new ArrayList<>();
-        for (MultiDimensionalNumericData range : GeometryUtils.basicConstraintsFromGeometry(geometry.getJTSGeometry())
-                        .getIndexConstraints(getIndexStrategy())) {
-            insertionIds.addAll(getIndexStrategy().getInsertionIds(range));
+    protected List<byte[]> getIndicesFromGeometry(T geometry) {
+        NumericIndexStrategy indexStrategy = getIndexStrategy();
+        final List<byte[]> insertionIds = new ArrayList<>();
+        for (MultiDimensionalNumericData range : GeometryUtils.basicConstraintsFromGeometry(geometry.getJTSGeometry()).getIndexConstraints(getIndex())) {
+            insertionIds.addAll(getIndexStrategy().getInsertionIds(range).getCompositeInsertionIds());
         }
         return insertionIds;
     }
     
     @Override
     public Collection<String> expand(String geoString) {
-        List<ByteArrayId> indices = getIndicesFromGeometry(createDatawaveGeometry((G) parseGeometry(geoString)));
+        List<byte[]> indices = getIndicesFromGeometry(createDatawaveGeometry((G) parseGeometry(geoString)));
         List<String> retVal = new ArrayList<>(indices.size());
-        for (ByteArrayId index : indices) {
+        for (byte[] index : indices) {
             retVal.add(getEncodedStringFromIndexBytes(index));
         }
         return retVal;

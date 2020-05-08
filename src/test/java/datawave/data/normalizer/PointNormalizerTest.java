@@ -1,17 +1,17 @@
 package datawave.data.normalizer;
 
 import com.google.common.collect.Lists;
-import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.GeometryFactory;
-import com.vividsolutions.jts.io.WKTWriter;
-import mil.nga.giat.geowave.core.geotime.GeometryUtils;
-import mil.nga.giat.geowave.core.index.ByteArrayRange;
-import mil.nga.giat.geowave.core.index.sfc.data.MultiDimensionalNumericData;
 import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.io.IOUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.locationtech.geowave.core.geotime.util.GeometryUtils;
+import org.locationtech.geowave.core.index.ByteArrayRange;
+import org.locationtech.geowave.core.index.sfc.data.MultiDimensionalNumericData;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.GeometryFactory;
+import org.locationtech.jts.io.WKTWriter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -96,16 +96,16 @@ public class PointNormalizerTest {
         
         List<ByteArrayRange> allRanges = new ArrayList<>();
         for (MultiDimensionalNumericData range : GeometryUtils.basicConstraintsFromEnvelope(polygon.getEnvelopeInternal())
-                        .getIndexConstraints(PointNormalizer.indexStrategy)) {
-            allRanges.addAll(Lists.reverse(PointNormalizer.indexStrategy.getQueryRanges(range)));
+                        .getIndexConstraints(PointNormalizer.index)) {
+            allRanges.addAll(Lists.reverse(PointNormalizer.indexStrategy.getQueryRanges(range).getCompositeQueryRanges()));
         }
         
         assertEquals(171, allRanges.size());
         
         StringBuilder result = new StringBuilder();
         for (ByteArrayRange range : allRanges) {
-            result.append(Hex.encodeHexString(range.getStart().getBytes()));
-            result.append(Hex.encodeHexString(range.getEnd().getBytes()));
+            result.append(Hex.encodeHexString(range.getStart()));
+            result.append(Hex.encodeHexString(range.getEnd()));
         }
         
         String expected = IOUtils.toString(this.getClass().getClassLoader().getResourceAsStream("datawave/data/normalizer/pointRanges.txt"), "UTF8");
@@ -120,22 +120,22 @@ public class PointNormalizerTest {
         
         List<ByteArrayRange> allPointRanges = new ArrayList<>();
         for (MultiDimensionalNumericData range : GeometryUtils.basicConstraintsFromEnvelope(polygon.getEnvelopeInternal())
-                        .getIndexConstraints(PointNormalizer.indexStrategy)) {
-            allPointRanges.addAll(Lists.reverse(PointNormalizer.indexStrategy.getQueryRanges(range)));
+                        .getIndexConstraints(PointNormalizer.index)) {
+            allPointRanges.addAll(Lists.reverse(PointNormalizer.indexStrategy.getQueryRanges(range).getCompositeQueryRanges()));
         }
         
         assertEquals(171, allPointRanges.size());
         
         StringBuilder pointResult = new StringBuilder();
         for (ByteArrayRange range : allPointRanges) {
-            pointResult.append(Hex.encodeHexString(range.getStart().getBytes()));
-            pointResult.append(Hex.encodeHexString(range.getEnd().getBytes()));
+            pointResult.append(Hex.encodeHexString(range.getStart()));
+            pointResult.append(Hex.encodeHexString(range.getEnd()));
         }
         
         List<ByteArrayRange> allGeoRanges = new ArrayList<>();
         for (MultiDimensionalNumericData range : GeometryUtils.basicConstraintsFromEnvelope(polygon.getEnvelopeInternal())
-                        .getIndexConstraints(GeometryNormalizer.indexStrategy)) {
-            allGeoRanges.addAll(Lists.reverse(GeometryNormalizer.indexStrategy.getQueryRanges(range)));
+                        .getIndexConstraints(GeometryNormalizer.index)) {
+            allGeoRanges.addAll(Lists.reverse(GeometryNormalizer.indexStrategy.getQueryRanges(range).getCompositeQueryRanges()));
         }
         
         assertEquals(3746, allGeoRanges.size());
@@ -143,8 +143,8 @@ public class PointNormalizerTest {
         int numPointRanges = 0;
         StringBuilder geoResult = new StringBuilder();
         for (ByteArrayRange range : allGeoRanges) {
-            String start = Hex.encodeHexString(range.getStart().getBytes());
-            String end = Hex.encodeHexString(range.getEnd().getBytes());
+            String start = Hex.encodeHexString(range.getStart());
+            String end = Hex.encodeHexString(range.getEnd());
             if (start.startsWith("1f") && end.startsWith("1f")) {
                 geoResult.append(start);
                 geoResult.append(end);

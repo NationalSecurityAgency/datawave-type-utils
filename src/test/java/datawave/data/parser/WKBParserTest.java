@@ -1,10 +1,10 @@
 package datawave.data.parser;
 
 import com.google.common.io.BaseEncoding;
-import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.io.WKBWriter;
-import com.vividsolutions.jts.io.WKTReader;
 import org.junit.jupiter.api.Test;
+import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.io.WKBWriter;
+import org.locationtech.jts.io.WKTReader;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
