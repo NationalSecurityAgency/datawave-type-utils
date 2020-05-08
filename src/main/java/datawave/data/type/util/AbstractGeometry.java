@@ -8,7 +8,7 @@ import java.io.Serializable;
  * @param <T>
  *            The underlying JTS Geometry
  */
-public abstract class AbstractGeometry<T extends com.vividsolutions.jts.geom.Geometry> implements Serializable {
+public abstract class AbstractGeometry<T extends org.locationtech.jts.geom.Geometry> implements Serializable {
     protected final T jtsGeom;
     
     public AbstractGeometry(T jtsGeom) {

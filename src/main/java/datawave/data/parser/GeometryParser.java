@@ -1,6 +1,6 @@
 package datawave.data.parser;
 
-import com.vividsolutions.jts.geom.Geometry;
+import org.locationtech.jts.geom.Geometry;
 
 public abstract class GeometryParser implements Comparable<GeometryParser> {
     

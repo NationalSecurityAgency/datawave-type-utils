@@ -1,8 +1,8 @@
 package datawave.data.parser;
 
 import com.google.common.io.BaseEncoding;
-import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.io.WKBReader;
+import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.io.WKBReader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
