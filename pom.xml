@@ -28,7 +28,7 @@
         <version.commons-lang3>3.9</version.commons-lang3>
         <version.commons-net>3.6</version.commons-net>
         <version.geowave>1.1.0</version.geowave>
-        <version.hadoop>3.1.1</version.hadoop>
+        <version.hadoop>2.6.0-cdh5.9.1</version.hadoop>
         <version.jts>1.16.1</version.jts>
         <version.protostuff>1.6.2</version.protostuff>
         <version.slf4j>1.7.29</version.slf4j>
@@ -210,6 +210,13 @@
             <id>osgeo-release</id>
             <name>Open Source Geospatial Foundation Repository</name>
             <url>https://repo.osgeo.org/repository/release/</url>
+        </repository>
+        <repository>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+            <id>cloudera</id>
+            <url>https://repository.cloudera.com/artifactory/cloudera-repos/</url>
         </repository>
     </repositories>
 </project>
