@@ -127,6 +127,14 @@
                         <artifactId>commons-lang3</artifactId>
                         <groupId>org.apache.commons</groupId>
                     </exclusion>
+                    <exclusion>
+                        <artifactId>bcprov-jdk15on</artifactId>
+                        <groupId>org.bouncycastle</groupId>
+                    </exclusion>
+                    <exclusion>
+                        <artifactId>json-lib</artifactId>
+                        <groupId>net.sf.json-lib</groupId>
+                    </exclusion>
                 </exclusions>
             </dependency>
             <dependency>
