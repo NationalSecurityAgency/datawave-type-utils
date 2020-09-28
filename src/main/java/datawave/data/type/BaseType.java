@@ -2,6 +2,7 @@ package datawave.data.type;
 
 import java.io.Serializable;
 import java.util.Collection;
+import java.util.List;
 
 import datawave.data.normalizer.Normalizer;
 import datawave.webservice.query.data.ObjectSizeOf;
@@ -158,6 +159,12 @@ public class BaseType<T extends Comparable<T> & Serializable> implements Seriali
      */
     @Override
     public long sizeInBytes() {
-        return STATIC_SIZE + (2 * normalizedValue.length()) + ObjectSizeOf.Sizer.getObjectSize(delegate);
+        long size = 0;
+        if (this instanceof OneToManyNormalizerType) {
+            List<String> values = ((OneToManyNormalizerType<?>) this).getNormalizedValues();
+            size += values.stream().map(String::length).map(length -> 2 * length + ObjectSizeOf.Sizer.REFERENCE).reduce(Integer::sum).orElse(0);
+        }
+        size += STATIC_SIZE + (2 * normalizedValue.length()) + ObjectSizeOf.Sizer.getObjectSize(delegate);
+        return size;
     }
 }
