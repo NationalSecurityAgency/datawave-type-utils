@@ -24,7 +24,7 @@
     </scm>
     <properties>
         <spotbugs.excludes.file>${project.basedir}/src/main/spotbugs/excludes.xml</spotbugs.excludes.file>
-        <version.common-utils>1.1</version.common-utils>
+        <version.common-utils>1.2-SNAPSHOT</version.common-utils>
         <version.commons-lang3>3.9</version.commons-lang3>
         <version.commons-net>3.6</version.commons-net>
         <version.geowave>1.1.0</version.geowave>
@@ -107,6 +107,10 @@
                     <exclusion>
                         <artifactId>*</artifactId>
                         <groupId>org.slf4j</groupId>
+                    </exclusion>
+                    <exclusion>
+                        <artifactId>servlet-api</artifactId>
+                        <groupId>javax.servlet</groupId>
                     </exclusion>
                 </exclusions>
             </dependency>
@@ -191,8 +195,18 @@
             <artifactId>slf4j-api</artifactId>
         </dependency>
         <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
             <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter-api</artifactId>
+            <artifactId>junit-jupiter-engine</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.vintage</groupId>
+            <artifactId>junit-vintage-engine</artifactId>
             <scope>test</scope>
         </dependency>
     </dependencies>
