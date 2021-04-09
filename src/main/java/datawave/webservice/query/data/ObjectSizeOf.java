@@ -11,6 +11,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.Stack;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * A simple interface that objects can implement to return the object size.
@@ -86,6 +87,9 @@ public interface ObjectSizeOf {
         // The size of the basic Number constructs (and Boolean and Character) is 16: roundUp(8 + primitiveSize)
         public static final short NUMBER_SIZE = 16;
         
+        // Class name cache to avoid flood of NoSuchMethodException on reflective "sizeInBytes" invocation
+        private static Set<String> noSuchMethodCache = ConcurrentHashMap.newKeySet();
+        
         /**
          * Get the size of an object. Note that we want something relatively fast that gives us an order of magnitude here. The java Instrumentation agent
          * mechanism is a little too costly for general use here. This will look for the ObjectSizeOf interface and if implemented on the object will use that.
@@ -113,11 +117,15 @@ public interface ObjectSizeOf {
                                 if (o instanceof ObjectSizeOf) {
                                     size = ((ObjectSizeOf) o).sizeInBytes();
                                 } else {
-                                    Method sizeInBytes = o.getClass().getMethod("sizeInBytes", (Class<?>[]) null);
-                                    size = (Long) sizeInBytes.invoke(o);
+                                    if (!noSuchMethodCache.contains(o.getClass().getName())) {
+                                        Method sizeInBytes = o.getClass().getMethod("sizeInBytes", (Class<?>[]) null);
+                                        size = (Long) sizeInBytes.invoke(o);
+                                    }
                                 }
+                            } catch (NoSuchMethodException e) {
+                                noSuchMethodCache.add(o.getClass().getName());
                             } catch (Throwable t) {
-                                // ok, lets do this the hard way...
+                                log.warn("Unexpected error invoking sizeInBytes on " + o.getClass().getName(), t);
                             }
                         }
                         if (size == 0) {
