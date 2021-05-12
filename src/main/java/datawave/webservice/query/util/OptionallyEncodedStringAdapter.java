@@ -1,6 +1,16 @@
 package datawave.webservice.query.util;
 
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationContext;
+import com.fasterxml.jackson.databind.JsonDeserializer;
+import com.fasterxml.jackson.databind.JsonSerializer;
+import com.fasterxml.jackson.databind.SerializerProvider;
+
+import javax.swing.text.html.Option;
 import javax.xml.bind.annotation.adapters.XmlAdapter;
+import java.io.IOException;
 
 /**
  * An {@link XmlAdapter} that allows a {@link String} property to be bound to XML that is encoded as an {@link OptionallyEncodedStringAdapter}.
@@ -17,6 +27,22 @@ public class OptionallyEncodedStringAdapter extends XmlAdapter<OptionallyEncoded
     @Override
     public OptionallyEncodedString marshal(String v) throws Exception {
         return (v == null) ? null : new OptionallyEncodedString(v);
+    }
+
+    public static class Serializer extends JsonSerializer<OptionallyEncodedString> {
+        @Override
+        public void serialize(OptionallyEncodedString s, JsonGenerator jsonGenerator, SerializerProvider serializerProvider) throws IOException {
+            jsonGenerator.writeObject(s);
+        }
+    }
+
+    public static class Deserializer extends JsonDeserializer<String> {
+
+        @Override
+        public String deserialize(JsonParser jsonParser, DeserializationContext deserializationContext) throws IOException {
+            OptionallyEncodedString str = jsonParser.readValueAs(OptionallyEncodedString.class);
+            return str.getValue();
+        }
     }
     
 }
