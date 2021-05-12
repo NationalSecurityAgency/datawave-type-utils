@@ -29,10 +29,10 @@
         <version.commons-net>3.6</version.commons-net>
         <version.geowave>1.1.0</version.geowave>
         <version.hadoop>2.6.0-cdh5.9.1</version.hadoop>
+        <version.jackson>2.12.1</version.jackson>
         <version.jts>1.16.1</version.jts>
         <version.protostuff>1.6.2</version.protostuff>
         <version.slf4j>1.7.29</version.slf4j>
-        <version.jackson>2.12.1</version.jackson>
     </properties>
     <dependencyManagement>
         <dependencies>

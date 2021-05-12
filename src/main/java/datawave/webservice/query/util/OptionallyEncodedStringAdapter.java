@@ -28,20 +28,19 @@ public class OptionallyEncodedStringAdapter extends XmlAdapter<OptionallyEncoded
     public OptionallyEncodedString marshal(String v) throws Exception {
         return (v == null) ? null : new OptionallyEncodedString(v);
     }
-
-    public static class Serializer extends JsonSerializer<OptionallyEncodedString> {
+    
+    public static class Serializer extends JsonSerializer<String> {
         @Override
-        public void serialize(OptionallyEncodedString s, JsonGenerator jsonGenerator, SerializerProvider serializerProvider) throws IOException {
-            jsonGenerator.writeObject(s);
+        public void serialize(String s, JsonGenerator jsonGenerator, SerializerProvider serializerProvider) throws IOException {
+            jsonGenerator.writeObject(new OptionallyEncodedString(s));
         }
     }
-
+    
     public static class Deserializer extends JsonDeserializer<String> {
-
+        
         @Override
         public String deserialize(JsonParser jsonParser, DeserializationContext deserializationContext) throws IOException {
-            OptionallyEncodedString str = jsonParser.readValueAs(OptionallyEncodedString.class);
-            return str.getValue();
+            return jsonParser.readValueAs(OptionallyEncodedString.class).getValue();
         }
     }
     
