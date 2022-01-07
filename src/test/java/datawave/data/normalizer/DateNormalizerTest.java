@@ -28,9 +28,9 @@ public class DateNormalizerTest {
     private static final Logger log = Logger.getLogger(DateNormalizerTest.class);
     DateNormalizer normalizer = new DateNormalizer();
     
-    String[] inputDateStrings = {"2014-10-20T00:00:00.000Z", "20141020000000", "2014-10-20 00:00:00GMT", "2014-10-20 00:00:00Z", "2014-10-20 00:00:00",
-            "2014-10-20", "2014-10-20T00|00", "Mon Oct 20 00:00:00 GMT 2014", "2014-10-20T00:00:00Z", "2014-10-20t00:00:00z", "2014-10-20T00:00:00+00:00",
-            "Mon Oct 20 00:00:00 +00:00 2014"};
+    String[] inputDateStrings = {"2014-10-20T00:00:00.0000000", "2014-10-20T00:00:00.000Z", "20141020000000", "2014-10-20 00:00:00GMT", "2014-10-20 00:00:00Z",
+            "2014-10-20 00:00:00", "2014-10-20", "2014-10-20T00|00", "Mon Oct 20 00:00:00 GMT 2014", "2014-10-20T00:00:00Z", "2014-10-20t00:00:00z",
+            "2014-10-20T00:00:00+00:00", "Mon Oct 20 00:00:00 +00:00 2014"};
     
     @BeforeAll
     public static void setupClass() {
@@ -50,9 +50,9 @@ public class DateNormalizerTest {
             normalizedDates.add(normalized);
             dateTimes.add(date.getTime());
         }
-        assertEquals(1, dateSet.size(), "There can be only one");
-        assertEquals(1, normalizedDates.size(), "There can be only one");
-        assertEquals(1, dateTimes.size(), "There can be only one");
+        assertEquals(1, dateSet.size(), "There can be only one dateSet utilized for this unit test.");
+        assertEquals(1, normalizedDates.size(), "There should be only one normalizedDate produced from this test.");
+        assertEquals(1, dateTimes.size(), "There should be only one dateTimes produced from this test.");
     }
     
     @Test
