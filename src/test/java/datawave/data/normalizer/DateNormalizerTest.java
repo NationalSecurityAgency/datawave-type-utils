@@ -104,6 +104,18 @@ public class DateNormalizerTest {
         input = "2014-10-20T17:20:20.345007Z";
         normalized = normalizer.normalize(input);
         assertEquals("2014-10-20T17:20:20.345Z", normalized);
+        
+        input = "2014-10-20T00:00:00.0000000";
+        normalized = normalizer.normalize(input);
+        assertEquals("2014-10-20T00:00:00.000Z", normalized);
+        
+        input = "2014-10-20T00:00:00.1111";
+        normalized = normalizer.normalize(input);
+        assertEquals("2014-10-20T00:00:00.111Z", normalized);
+        
+        input = "2014-10-20T00:00:00.222";
+        normalized = normalizer.normalize(input);
+        assertEquals("2014-10-20T00:00:00.222Z", normalized);
     }
     
     @Test
