@@ -6,8 +6,8 @@ import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
-import jakarta.xml.bind.annotation.adapters.XmlAdapter;
 
+import javax.xml.bind.annotation.adapters.XmlAdapter;
 import java.io.IOException;
 
 /**
