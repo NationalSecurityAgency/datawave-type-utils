@@ -25,13 +25,8 @@
     <properties>
         <spotbugs.excludes.file>${project.basedir}/src/main/spotbugs/excludes.xml</spotbugs.excludes.file>
         <version.common-utils>1.2-SNAPSHOT</version.common-utils>
-        <version.commons-lang3>3.9</version.commons-lang3>
-        <version.commons-net>3.6</version.commons-net>
-        <version.geowave>1.1.0</version.geowave>
-        <version.hadoop>3.0.3</version.hadoop>
-        <version.jts>1.16.1</version.jts>
-        <version.protostuff>1.6.2</version.protostuff>
-        <version.slf4j>1.7.29</version.slf4j>
+        <version.commons-net>3.8.0</version.commons-net>
+
     </properties>
     <dependencyManagement>
         <dependencies>
@@ -54,16 +49,6 @@
                 <groupId>io.protostuff</groupId>
                 <artifactId>protostuff-core</artifactId>
                 <version>${version.protostuff}</version>
-            </dependency>
-            <dependency>
-                <groupId>jakarta.xml.bind</groupId>
-                <artifactId>jakarta.xml.bind-api</artifactId>
-                <version>${version.jakarta.xml.bind}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.commons</groupId>
-                <artifactId>commons-lang3</artifactId>
-                <version>${version.commons-lang3}</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.hadoop</groupId>
@@ -154,17 +139,6 @@
                 <groupId>org.locationtech.jts</groupId>
                 <artifactId>jts-core</artifactId>
                 <version>${version.jts}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.slf4j</groupId>
-                <artifactId>slf4j-api</artifactId>
-                <version>${version.slf4j}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.sun.xml.bind</groupId>
-                <artifactId>jaxb-impl</artifactId>
-                <version>${version.sun.xml.bind}</version>
-                <scope>runtime</scope>
             </dependency>
         </dependencies>
     </dependencyManagement>
