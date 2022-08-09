@@ -22,10 +22,10 @@ public class NumberNormalizer extends AbstractNormalizer<BigDecimal> {
      */
     public String normalizeRegex(String fieldRegex) {
         try {
-            String fixedNumber = normalize(fieldRegex);
-            return Pattern.quote(fixedNumber);
-        } catch (IllegalArgumentException e1) {
-            throw new IllegalArgumentException("Cannot normalize a regex against a numeric field pattern");
+            NumericRegexNormalizer regexNormalizer = NumericRegexNormalizer.of(fieldRegex);
+            return regexNormalizer.normalize();
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException("Failed to normalize numeric field pattern", e);
         }
     }
     
