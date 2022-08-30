@@ -39,7 +39,8 @@ public class NumericRegexNormalizer {
     /**
      * The set of all digits and the dot. This reflects all possible permutations for any . wildcards found in the regex.
      */
-    private static final List<Character> ALL_DIGITS_AND_DOT = Collections.unmodifiableList(Lists.newArrayList('0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '.'));
+    private static final List<Character> ALL_DIGITS_AND_DOT = Collections
+                    .unmodifiableList(Lists.newArrayList('0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '.'));
     
     private static final char LOWERCASE_D = 'd';
     
@@ -99,8 +100,9 @@ public class NumericRegexNormalizer {
     }
     
     private void checkForRestrictedLetters() {
-        if(RESTRICTED_LETTERS.matcher(regex).matches() || containsUnescapedLowercaseD()) {
-            throw new IllegalArgumentException("Regex pattern may not contain any letters other than \\d to indicate a member of the digit character class 0-9.");
+        if (RESTRICTED_LETTERS.matcher(regex).matches() || containsUnescapedLowercaseD()) {
+            throw new IllegalArgumentException(
+                            "Regex pattern may not contain any letters other than \\d to indicate a member of the digit character class 0-9.");
         }
     }
     
@@ -157,16 +159,13 @@ public class NumericRegexNormalizer {
             if (sb.length() != 0) {
                 sb.append("|");
             }
-            if(multipleSequences && multipleGroups){
+            if (multipleSequences && multipleGroups) {
                 sb.append("(");
             }
             if (hasTrailingModifiers) {
                 sb.append("(");
             }
-            String str = group.sequences.stream()
-                            .map(NumericalEncoder::encode)
-                            .map(this::escapeSpecialCharacters)
-                            .collect(Collectors.joining("|"));
+            String str = group.sequences.stream().map(NumericalEncoder::encode).map(this::escapeSpecialCharacters).collect(Collectors.joining("|"));
             sb.append(str);
             if (hasTrailingModifiers) {
                 sb.append(")");
@@ -200,16 +199,16 @@ public class NumericRegexNormalizer {
          * The index into the pattern string that keeps track of how much has been parsed.
          */
         private int cursor = 0;
-    
+        
         RegexParser(String pattern) {
             this.patternLength = pattern.length();
             this.patternArray = pattern.toCharArray();
         }
-    
+        
         public List<PermutationGroup> parse() {
             return parseExpression(false);
         }
-    
+        
         private List<PermutationGroup> parseExpression(boolean currentlyParsingGroup) {
             List<PermutationGroup> permutationGroups = new ArrayList<>();
             PermutationGroup currPermutations = new PermutationGroup();
@@ -280,28 +279,28 @@ public class NumericRegexNormalizer {
                         }
                     default:
                         throw new UnsupportedOperationException("Encountered unsupported regex operation " + currChar + " at position " + cursor);
-                
+                    
                 }
             }
             // Ensure the last permutation group we parsed is added.
             permutationGroups.add(currPermutations);
             return permutationGroups;
         }
-    
+        
         /**
          * Retrieve the next character, and advance the cursor by one.
          */
         private char next() {
             return patternArray[++cursor];
         }
-    
+        
         /**
          * Return whether {@link #next()} without an exception.
          */
         private boolean hasNext() {
             return cursor < patternLength - 1;
         }
-    
+        
         /**
          * Return the character after the next one, and advance the cursor by two.
          */
@@ -316,21 +315,21 @@ public class NumericRegexNormalizer {
         private char peek() {
             return patternArray[cursor + 1];
         }
-    
+        
         /**
          * Return the character at the position of the cursor.
          */
         private char current() {
             return patternArray[cursor];
         }
-    
+        
         /**
          * Parse and return the next numerical sequence.
          */
         public CharacterGroup parseSequence() {
             CharacterGroup group = CharacterGroup.newSequence();
             char curr = current();
-            for (;;){
+            for (;;) {
                 switch (curr) {
                     case '-':
                     case '0':
@@ -371,7 +370,7 @@ public class NumericRegexNormalizer {
             }
             return group;
         }
-    
+        
         /**
          * Return a character list that are valid numeric permutations for a . wildcard. This consists of the numbers 0-9, and a period for a decimal point.
          * However, if the wildcard is followed by * or +, and it is not definitively for the absolute end of a numerical sequence, an exception will be thrown.
@@ -387,11 +386,11 @@ public class NumericRegexNormalizer {
             }
         }
         
-        //todo finish implementing handling qualifiers
+        // todo finish implementing handling qualifiers
         private String parseQualifiers() {
             return "";
         }
-    
+        
         /**
          * Parse the group of characters relevant for the next escaped character.
          */
@@ -409,7 +408,7 @@ public class NumericRegexNormalizer {
                     throw new UnsupportedOperationException("Encountered unsupported escaped character " + next + " at position " + (cursor));
             }
         }
-    
+        
         /**
          * Parse the contents of a regex character list, e.g. [123-8].
          */
@@ -478,11 +477,11 @@ public class NumericRegexNormalizer {
     private static class PermutationGroup {
         private String qualifiers;
         private List<String> sequences = new ArrayList<>();
-    
+        
         public List<String> getSequences() {
             return sequences;
         }
-    
+        
         private void mergeWith(CharacterGroup group) {
             List<String> permutations = group.getPermutations();
             if (sequences.isEmpty()) {
@@ -526,14 +525,14 @@ public class NumericRegexNormalizer {
              */
             LIST {
                 public List<String> getPermutations(List<Character> characters) {
-                    // @formatter:off
+            // @formatter:off
                     return characters.stream()
                                     .map(String::valueOf)
                                     .collect(Collectors.toList());
                     // @formatter:on
                 }
             },
-    
+            
             /**
              * Represents a list of characters that make up a single numerical sequence.
              */
@@ -542,11 +541,11 @@ public class NumericRegexNormalizer {
                     StringBuilder sb = new StringBuilder();
                     characters.forEach(sb::append);
                     String sequence = sb.toString();
-    
+                    
                     return Lists.newArrayList(sequence);
                 }
             };
-    
+            
             abstract List<String> getPermutations(List<Character> characters);
             
         }
@@ -557,7 +556,7 @@ public class NumericRegexNormalizer {
         private static CharacterGroup newList() {
             return new CharacterGroup(Type.LIST);
         }
-    
+        
         private static CharacterGroup newList(Collection<Character> characters) {
             return new CharacterGroup(Type.LIST, characters);
         }
@@ -570,16 +569,16 @@ public class NumericRegexNormalizer {
             this.type = type;
             this.characters = new ArrayList<>();
         }
-    
+        
         private CharacterGroup(Type type, Collection<Character> characters) {
             this(type);
             this.characters.addAll(characters);
         }
-    
+        
         private void add(char character) {
             this.characters.add(character);
         }
-    
+        
         private List<String> getPermutations() {
             return type.getPermutations(characters);
         }

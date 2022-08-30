@@ -1,6 +1,5 @@
 package datawave.data.type.util;
 
-
 import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
@@ -16,23 +15,23 @@ import java.util.stream.Collectors;
  * <p/>
  * The bins are broken into four groups:
  * <ol>
- *     <li>!A through !Z represent negative numbers with magnitude greater than one (exponents 25 through 0, respectively)</li>
- *     <li>!a through !z represent negative numbers with magnitude less than 1 (exponents -1 through -26, respectively)</li>
- *     <li>+A through +Z represent positive numbers with magnitude less than 1 (exponents -26 through -1, respectively)</li>
- *     <li>+a through +z represent positive numbers with magnitude greater than one (exponents 0 through 25, respectively)</li>
+ * <li>!A through !Z represent negative numbers with magnitude greater than one (exponents 25 through 0, respectively)</li>
+ * <li>!a through !z represent negative numbers with magnitude less than 1 (exponents -1 through -26, respectively)</li>
+ * <li>+A through +Z represent positive numbers with magnitude less than 1 (exponents -26 through -1, respectively)</li>
+ * <li>+a through +z represent positive numbers with magnitude greater than one (exponents 0 through 25, respectively)</li>
  * </ol>
  * For positive numbers, the mantissa exactly matches the mantissa of scientific notation. For negative numbers, the mantissa equals ten minus the mantissa of
  * scientific notation.
  * <p/>
  * Some example inputs and encodings:
  * <ul>
- *     <li>-12344984165 becomes !PE8.7655015835</li>
- *     <li>-500 becomes !XE5</li>
- *     <li>-0.501 becomes !aE4.99</li>
- *     <li>0 becomes +AE0</li>
- *     <li>9E-9 becomes +RE9</li>
- *     <li>0.501 becomes +ZE5.01</li>
- *     <li>10000 becomes +eE1</li>
+ * <li>-12344984165 becomes !PE8.7655015835</li>
+ * <li>-500 becomes !XE5</li>
+ * <li>-0.501 becomes !aE4.99</li>
+ * <li>0 becomes +AE0</li>
+ * <li>9E-9 becomes +RE9</li>
+ * <li>0.501 becomes +ZE5.01</li>
+ * <li>10000 becomes +eE1</li>
  * </ul>
  */
 public class NumericalEncoder {
@@ -91,7 +90,8 @@ public class NumericalEncoder {
      * This provides a quick test that will determine whether this value is possibly encoded. Provides a mechanism that is significantly faster than waiting for
      * the decode method to throw an exception.
      * 
-     * @param input the value to test for encoding
+     * @param input
+     *            the value to test for encoding
      * @return true if possibly encoded, false if definitely not encoded
      */
     public static boolean isPossiblyEncoded(String input) {
@@ -143,9 +143,9 @@ public class NumericalEncoder {
     
     private static void initPositiveExponents() {
         // The order of the encoded characters here maps directly to how their corresponding exponent value is calculated, and must not be changed.
-        String[] exponents = new String[]{"+A", "+B", "+C", "+D", "+E", "+F", "+G", "+H", "+I", "+J", "+K", "+L", "+M", "+N", "+O", "+P", "+Q", "+R", "+S",
-                        "+T", "+U", "+V", "+W", "+X", "+Y", "+Z", "+a", "+b", "+c", "+d", "+e", "+f", "+g", "+h", "+i", "+j", "+k", "+l", "+m", "+n", "+o",
-                        "+p", "+q", "+r", "+s", "+t", "+u", "+v", "+w", "+x", "+y", "+z"};
+        String[] exponents = new String[] {"+A", "+B", "+C", "+D", "+E", "+F", "+G", "+H", "+I", "+J", "+K", "+L", "+M", "+N", "+O", "+P", "+Q", "+R", "+S",
+                "+T", "+U", "+V", "+W", "+X", "+Y", "+Z", "+a", "+b", "+c", "+d", "+e", "+f", "+g", "+h", "+i", "+j", "+k", "+l", "+m", "+n", "+o", "+p", "+q",
+                "+r", "+s", "+t", "+u", "+v", "+w", "+x", "+y", "+z"};
         Map<String,String> map = createExponentMap(exponents);
         positiveNumsEncodeToIntExponentsMap = Collections.unmodifiableMap(map);
         positiveNumsIntToEncodeExponentsMap = Collections.unmodifiableMap(invertMap(map));
@@ -153,9 +153,9 @@ public class NumericalEncoder {
     
     private static void initNegativeExponents() {
         // The order of the encoded characters here maps directly to how their corresponding exponent value is calculated, and must not be changed.
-        String[] exponents = new String[]{"!z", "!y", "!x", "!w", "!v", "!u", "!t", "!s", "!r", "!q", "!p", "!o", "!n", "!m", "!l", "!k", "!j", "!i", "!h",
-                        "!g", "!f", "!e", "!d", "!c", "!b", "!a", "!Z", "!Y", "!X", "!W", "!V", "!U", "!T", "!S", "!R", "!Q", "!P", "!O", "!N", "!M", "!L",
-                        "!K", "!J", "!I", "!H", "!G", "!F", "!E", "!D", "!C", "!B", "!A"};
+        String[] exponents = new String[] {"!z", "!y", "!x", "!w", "!v", "!u", "!t", "!s", "!r", "!q", "!p", "!o", "!n", "!m", "!l", "!k", "!j", "!i", "!h",
+                "!g", "!f", "!e", "!d", "!c", "!b", "!a", "!Z", "!Y", "!X", "!W", "!V", "!U", "!T", "!S", "!R", "!Q", "!P", "!O", "!N", "!M", "!L", "!K", "!J",
+                "!I", "!H", "!G", "!F", "!E", "!D", "!C", "!B", "!A"};
         Map<String,String> map = createExponentMap(exponents);
         negativeNumEncodeToIntExponentsMap = Collections.unmodifiableMap(map);
         negativeNumIntToEncodeExponentsMap = Collections.unmodifiableMap(invertMap(map));

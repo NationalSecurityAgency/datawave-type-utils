@@ -60,7 +60,7 @@ public class NumberNormalizerTest {
         
         String expected2 = "+jE2.147483646";
         assertNormalizeResult(Integer.toString(Integer.MAX_VALUE - 1), "+jE2.147483646");
-    
+        
         assertComparativelyConsecutive(expected2, expected1);
     }
     
@@ -90,7 +90,7 @@ public class NumberNormalizerTest {
     
     private void assertComparativelyConsecutive(String... values) {
         for (int i = 0; i < values.length - 1; i++) {
-            int compare = values[i].compareTo(values[i+1]);
+            int compare = values[i].compareTo(values[i + 1]);
             if (compare > 0) {
                 Assertions.fail("Expected values to be consecutive, but encountered " + values[i] + " which is greater than " + values[i + 1]);
             }
