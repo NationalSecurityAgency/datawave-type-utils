@@ -1,6 +1,5 @@
 package datawave.data.normalizer;
 
-import datawave.data.type.util.NumericalEncoder;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -207,12 +206,28 @@ public class NumericRegexNormalizerTest {
         Assertions.assertEquals("Nested regex groups are not supported.", throwable.getMessage());
     }
     
+    /**
+     * Verify that the regex character \d is correctly expanded into the numbers 0-9.
+     */
     @Test
-    void testToDos() {
-        // todo - test cases where multiple decimal points are generated within a number
-        // todo - test regex patterns that create no numbers
-        // todo - test regex patterns that contain qualifiers * and +
+    void testRegexDigitCharacter() {
+        // The character by itself.
+        givenRegex("\\d");
+        assertNormalizedRegex("\\+AE0|\\+aE1|\\+aE2|\\+aE3|\\+aE4|\\+aE5|\\+aE6|\\+aE7|\\+aE8|\\+aE9");
+    
+        // Should expand to 305, 315, 325, 335, 345, 355, 365, 375, 385, and 395.
+        givenRegex("3\\d5");
+        assertNormalizedRegex("\\+cE3\\.05|\\+cE3\\.15|\\+cE3\\.25|\\+cE3\\.35|\\+cE3\\.45|\\+cE3\\.55|\\+cE3\\.65|\\+cE3\\.75|\\+cE3\\.85|\\+cE3\\.95");
+        
+        // Same as above, but with groups.
+        givenRegex("(3\\d5)|(11|23)");
+        assertNormalizedRegex("(\\+cE3\\.05|\\+cE3\\.15|\\+cE3\\.25|\\+cE3\\.35|\\+cE3\\.45|\\+cE3\\.55|\\+cE3\\.65|\\+cE3\\.75|\\+cE3\\.85|\\+cE3\\.95)|(\\+bE1\\.1|\\+bE2\\.3)");
     }
+    
+    // todo - test cases where multiple decimal points are generated within a number
+    // todo - test regex patterns that create no numbers
+    // todo - test regex patterns that contain qualifiers * and +
+    // todo - test . wildcards
     
     private void givenRegex(String regex) {
         this.regex = regex;
