@@ -7,9 +7,11 @@ import datawave.data.type.util.NumericalEncoder;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import java.util.function.Predicate;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 import java.util.stream.Collectors;
@@ -42,6 +44,25 @@ public class NumericRegexNormalizer {
     private static final List<Character> ALL_DIGITS_AND_DOT = Collections
                     .unmodifiableList(Lists.newArrayList('0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '.'));
     
+    private static final Predicate<String> IS_NOT_EMPTY = (str) -> !str.isEmpty();
+    
+    private static final Predicate<String> IS_NOT_PERIOD = (str) -> !str.equals(".");
+    
+    private static final Predicate<String> DOES_NOT_CONTAIN_MULTIPLE_PERIODS = (str) -> {
+        int length = str.length();
+        boolean encounteredPeriod = false;
+        for (int i = 0; i < length; i++) {
+            if (str.charAt(i) == '.') {
+                if (encounteredPeriod) {
+                    return false;
+                } else {
+                    encounteredPeriod = true;
+                }
+            }
+        }
+        return true;
+    };
+    
     private static final char LOWERCASE_D = 'd';
     
     private static final char BACKSLASH = '\\';
@@ -70,11 +91,18 @@ public class NumericRegexNormalizer {
     
     public String normalize() {
         checkForQuickFailures();
-        parsePermutations();
-        removeInvalidPermutations();
-        return encodeAndRebuildPattern();
+        if (regexRequiresEncoding()) {
+            parsePermutations();
+            removeInvalidPermutations();
+            return encodeAndRebuildPattern();
+        } else {
+            return regex;
+        }
     }
     
+    /**
+     * Pre-validate the regex to quickly identify any indications that the regex is not valid for numerical expansion.
+     */
     private void checkForQuickFailures() {
         checkForEmptyPattern();
         checkForInvalidPattern();
@@ -85,12 +113,18 @@ public class NumericRegexNormalizer {
         checkForEmptyGroups();
     }
     
+    /**
+     * Throw an exception if the regex pattern is empty.
+     */
     private void checkForEmptyPattern() {
         if (regex.isEmpty()) {
             throw new IllegalArgumentException("Regex pattern may not be blank.");
         }
     }
     
+    /**
+     * Throw an exception if the regex cannot be compiled.
+     */
     private void checkForInvalidPattern() {
         try {
             Pattern.compile(regex);
@@ -99,6 +133,9 @@ public class NumericRegexNormalizer {
         }
     }
     
+    /**
+     * Throw an exceptions if the regex contains any letters other than \d.
+     */
     private void checkForRestrictedLetters() {
         if (RESTRICTED_LETTERS.matcher(regex).matches() || containsUnescapedLowercaseD()) {
             throw new IllegalArgumentException(
@@ -106,6 +143,9 @@ public class NumericRegexNormalizer {
         }
     }
     
+    /**
+     * Return whether the regex contains an unescaped d.
+     */
     private boolean containsUnescapedLowercaseD() {
         int pos = regex.indexOf(LOWERCASE_D);
         while (pos != -1) {
@@ -117,56 +157,120 @@ public class NumericRegexNormalizer {
         return false;
     }
     
+    /**
+     * Throw an exception if the regex contains any whitespace.
+     */
     private void checkForWhitespace() {
         if (CharMatcher.whitespace().matchesAnyOf(regex)) {
             throw new IllegalArgumentException("Regex pattern may not contain any whitespace.");
         }
     }
     
+    /**
+     * Throw an exception if the regex contains an escaped backslash.
+     */
     private void checkForEscapedBackslash() {
         if (regex.contains(ESCAPED_BACKSLASH)) {
             throw new IllegalArgumentException("Regex pattern may not contain any escaped backslashes.");
         }
     }
     
+    /**
+     * Throw an exception if the regex contains any line anchors ^ or $.
+     */
     private void checkForLineAnchors() {
         if (regex.contains(CARET) || regex.contains(DOLLAR)) {
             throw new IllegalArgumentException("Regex pattern may not contain line anchors ^ or $.");
         }
     }
     
+    /**
+     * Throw an exception if the regex contains any empty groups.
+     */
     private void checkForEmptyGroups() {
         if (regex.contains(EMPTY_GROUP)) {
             throw new IllegalArgumentException("Regex pattern may not contain empty groups '()'.");
         }
     }
     
+    /**
+     * Return whether the regex requires any numerical encoding.
+     */
+    private boolean regexRequiresEncoding() {
+        // todo - finish implementing checks here
+        return true;
+    }
+    
+    /**
+     * Parse the various numerical permutations for the regex.
+     */
     private void parsePermutations() {
         RegexParser parser = new RegexParser(regex);
         this.permutations = parser.parse();
     }
     
+    /**
+     * Remove any numerical permutations that are not valid numbers.
+     */
     private void removeInvalidPermutations() {
-        // todo - finish implementing this
+        Iterator<PermutationGroup> iterator = this.permutations.iterator();
+        while (iterator.hasNext()) {
+            PermutationGroup group = iterator.next();
+            // @formatter:off
+            List<String> validSequences = group.sequences.stream()
+                            .filter(IS_NOT_EMPTY)
+                            .filter(IS_NOT_PERIOD)
+                            .filter(DOES_NOT_CONTAIN_MULTIPLE_PERIODS)
+                            .collect(Collectors.toList());
+            // @formatter: on
+    
+            // Keep any remaining valid sequences, or otherwise delete the permutation group.
+            // Todo - maybe implement a strict flag to throw an error upon any bad permutations?
+            if(!validSequences.isEmpty()){
+                group.sequences = validSequences;
+            } else {
+                iterator.remove();
+            }
+        }
+        
+        // Check if we have any valid permutations remaining.
+        if (this.permutations.isEmpty()){
+            throw new IllegalStateException("No valid numerical sequences could be generated by the pattern " + regex);
+        }
     }
     
+    /**
+     * Encode the numerical permutations, and return the rebuilt regex pattern with these encodings.
+     */
     private String encodeAndRebuildPattern() {
         StringBuilder sb = new StringBuilder();
         boolean multipleGroups = permutations.size() > 1;
         for (PermutationGroup group : permutations) {
             boolean hasTrailingModifiers = group.qualifiers != null;
             boolean multipleSequences = group.sequences.size() > 1;
+            
+            // Separate multiple permutations with |.
             if (sb.length() != 0) {
                 sb.append("|");
             }
+            // If there are multiple sequences here, and multiple groups, we want to start a new group.
             if (multipleSequences && multipleGroups) {
                 sb.append("(");
             }
+            // Additionally, if there are any trailing modifiers like .*, we want to start a new group that the modifiers will be placed afterwards.
             if (hasTrailingModifiers) {
                 sb.append("(");
             }
-            String str = group.sequences.stream().map(NumericalEncoder::encode).map(this::escapeSpecialCharacters).collect(Collectors.joining("|"));
-            sb.append(str);
+            
+            // Append the encoded, escaped numerical sequences, separated by |.
+            // @formatter:off
+            sb.append(group.sequences.stream()
+                            .map(NumericalEncoder::encode)
+                            .map(this::escapeSpecialCharacters)
+                            .collect(Collectors.joining("|")));
+            // @formatter:on
+            
+            // Close the groups.
             if (hasTrailingModifiers) {
                 sb.append(")");
             }
@@ -177,6 +281,9 @@ public class NumericRegexNormalizer {
         return sb.toString();
     }
     
+    /**
+     * Return an encoded number with all of its special characters escaped.
+     */
     private String escapeSpecialCharacters(String str) {
         str = str.replace(".", "\\.");
         str = str.replace("!", "\\!");
@@ -205,10 +312,20 @@ public class NumericRegexNormalizer {
             this.patternArray = pattern.toCharArray();
         }
         
+        /**
+         * Parse the regex pattern and return its numerical permutations.
+         */
         public List<PermutationGroup> parse() {
             return parseExpression(false);
         }
         
+        /**
+         * Parse the next expression in the pattern where the cursor currently points.
+         * 
+         * @param currentlyParsingGroup
+         *            whether a group is currently being parsed, indicated by encountering a {@code (}. If so, parsing the current expression will stop once a
+         *            {@code )} is found.
+         */
         private List<PermutationGroup> parseExpression(boolean currentlyParsingGroup) {
             List<PermutationGroup> permutationGroups = new ArrayList<>();
             PermutationGroup currPermutations = new PermutationGroup();
@@ -256,11 +373,11 @@ public class NumericRegexNormalizer {
                                 currPermutations.qualifiers = parseQualifiers();
                                 permutationGroups.add(currPermutations);
                                 currPermutations = new PermutationGroup();
+                                break;
                             }
-                        } else {
-                            currCharGroup = parseWildcard();
-                            currPermutations.mergeWith(currCharGroup);
                         }
+                        currCharGroup = parseWildcard();
+                        currPermutations.mergeWith(currCharGroup);
                         break;
                     case '(':
                         // Do not allow nested groups.
@@ -272,12 +389,15 @@ public class NumericRegexNormalizer {
                         currPermutations.mergeWith(groupPermutations);
                         break;
                     case ')':
+                        // If a group is currently being parsed, this is the end of the group, and there is nothing left to add to the current permutations. Add
+                        // it to our list and create a new permutation group for the next regex sequence.
                         if (currentlyParsingGroup) {
                             cursor++;
                             permutationGroups.add(currPermutations);
                             return permutationGroups;
                         }
                     default:
+                        // We've encountered a regex operation that we don't support.
                         throw new UnsupportedOperationException("Encountered unsupported regex operation " + currChar + " at position " + cursor);
                     
                 }
@@ -342,20 +462,9 @@ public class NumericRegexNormalizer {
                     case '7':
                     case '8':
                     case '9':
-                    case '.':
                         // Add any numeric characters as part of the sequence. If we encounter a period, we were directed here from parseBackslash() where an
                         // escaped decimal point was identified.
                         group.add(curr);
-                        break;
-                    case '\\':
-                        // If the character after the backslash is a period, this indicates an escaped decimal point. Move the cursor to it, and add it.
-                        char next = peek();
-                        if (next == '.') {
-                            group.add(next);
-                            cursor++; // Move forward one in the cursor to skip over this period in the loop.
-                        } else {
-                            return group;
-                        }
                         break;
                     default:
                         // Any other characters indicate the end of this particular numeric sequence.
@@ -376,14 +485,8 @@ public class NumericRegexNormalizer {
          * However, if the wildcard is followed by * or +, and it is not definitively for the absolute end of a numerical sequence, an exception will be thrown.
          */
         private CharacterGroup parseWildcard() {
-            char next = peek();
-            switch (next) {
-                case '*':
-                case '+':
-                    throw new IllegalArgumentException("Unable to handle * or +");
-                default:
-                    return CharacterGroup.newList(ALL_DIGITS_AND_DOT);
-            }
+            cursor++;
+            return CharacterGroup.newList(ALL_DIGITS_AND_DOT);
         }
         
         // todo finish implementing handling qualifiers
@@ -399,7 +502,8 @@ public class NumericRegexNormalizer {
             switch (next) {
                 case DOT:
                     // If we found an escaped decimal point, capture it and any following numbers as a numerical sequence.
-                    return parseSequence();
+                    cursor++;
+                    return CharacterGroup.newList(Collections.singleton('.'));
                 case LOWERCASE_D:
                     // If we found a lowercase d, i.e. \d, this
                     cursor++;

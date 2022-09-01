@@ -132,7 +132,6 @@ public class NumericRegexNormalizerTest {
         // No leading zero.
         givenRegex("\\.55");
         assertNormalizedRegex("\\+ZE5\\.5");
-        
     }
     
     /**
@@ -214,20 +213,48 @@ public class NumericRegexNormalizerTest {
         // The character by itself.
         givenRegex("\\d");
         assertNormalizedRegex("\\+AE0|\\+aE1|\\+aE2|\\+aE3|\\+aE4|\\+aE5|\\+aE6|\\+aE7|\\+aE8|\\+aE9");
-    
+        
         // Should expand to 305, 315, 325, 335, 345, 355, 365, 375, 385, and 395.
         givenRegex("3\\d5");
         assertNormalizedRegex("\\+cE3\\.05|\\+cE3\\.15|\\+cE3\\.25|\\+cE3\\.35|\\+cE3\\.45|\\+cE3\\.55|\\+cE3\\.65|\\+cE3\\.75|\\+cE3\\.85|\\+cE3\\.95");
         
         // Same as above, but with groups.
         givenRegex("(3\\d5)|(11|23)");
-        assertNormalizedRegex("(\\+cE3\\.05|\\+cE3\\.15|\\+cE3\\.25|\\+cE3\\.35|\\+cE3\\.45|\\+cE3\\.55|\\+cE3\\.65|\\+cE3\\.75|\\+cE3\\.85|\\+cE3\\.95)|(\\+bE1\\.1|\\+bE2\\.3)");
+        assertNormalizedRegex(
+                        "(\\+cE3\\.05|\\+cE3\\.15|\\+cE3\\.25|\\+cE3\\.35|\\+cE3\\.45|\\+cE3\\.55|\\+cE3\\.65|\\+cE3\\.75|\\+cE3\\.85|\\+cE3\\.95)|(\\+bE1\\.1|\\+bE2\\.3)");
+    }
+    
+    /**
+     * Verify that the wildcard . is correctly expanded into the numbers 0-9, and .
+     */
+    @Test
+    void testDotWildcard() {
+        // The character by itself.
+        givenRegex(".");
+        assertNormalizedRegex("\\+AE0|\\+aE1|\\+aE2|\\+aE3|\\+aE4|\\+aE5|\\+aE6|\\+aE7|\\+aE8|\\+aE9");
+        
+        // Should expand to 1, 10, 11, 12, 13, 14, 15, 16, 17, 18, and 19.
+        givenRegex("1.");
+        assertNormalizedRegex("\\+bE1|\\+bE1\\.1|\\+bE1\\.2|\\+bE1\\.3|\\+bE1\\.4|\\+bE1\\.5|\\+bE1\\.6|\\+bE1\\.7|\\+bE1\\.8|\\+bE1\\.9|\\+aE1");
+        
+        // Should expand to 01, 11, 21, 31, 41, 51, 61, 71, 81, 91, and 0.1
+        givenRegex(".1");
+        assertNormalizedRegex("\\+aE1|\\+bE1\\.1|\\+bE2\\.1|\\+bE3\\.1|\\+bE4\\.1|\\+bE5\\.1|\\+bE6\\.1|\\+bE7\\.1|\\+bE8\\.1|\\+bE9\\.1|\\+ZE1");
+        
+        // Should expand to 102, 112, 122, 132, 142, 152, 162, 172, 182, 192, and 1.2
+        givenRegex("1.2");
+        assertNormalizedRegex(
+                        "\\+cE1\\.02|\\+cE1\\.12|\\+cE1\\.22|\\+cE1\\.32|\\+cE1\\.42|\\+cE1\\.52|\\+cE1\\.62|\\+cE1\\.72|\\+cE1\\.82|\\+cE1\\.92|\\+aE1\\.2");
+        
+        // Same as above, but with groups.
+        givenRegex("(1.2)|34");
+        assertNormalizedRegex(
+                        "(\\+cE1\\.02|\\+cE1\\.12|\\+cE1\\.22|\\+cE1\\.32|\\+cE1\\.42|\\+cE1\\.52|\\+cE1\\.62|\\+cE1\\.72|\\+cE1\\.82|\\+cE1\\.92|\\+aE1\\.2)|\\+bE3\\.4");
     }
     
     // todo - test cases where multiple decimal points are generated within a number
     // todo - test regex patterns that create no numbers
     // todo - test regex patterns that contain qualifiers * and +
-    // todo - test . wildcards
     
     private void givenRegex(String regex) {
         this.regex = regex;
