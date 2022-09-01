@@ -252,8 +252,17 @@ public class NumericRegexNormalizerTest {
                         "(\\+cE1\\.02|\\+cE1\\.12|\\+cE1\\.22|\\+cE1\\.32|\\+cE1\\.42|\\+cE1\\.52|\\+cE1\\.62|\\+cE1\\.72|\\+cE1\\.82|\\+cE1\\.92|\\+aE1\\.2)|\\+bE3\\.4");
     }
     
-    // todo - test cases where multiple decimal points are generated within a number
-    // todo - test regex patterns that create no numbers
+    /**
+     * Verify that if any permutations with multiple decimal points are filtered out.
+     */
+    @Test
+    void testPermutationsWithMultipleDecimalPoints() {
+        // Will generate permutations 1..3, 10.3, 11.3, 12.3, 13.3, 14.3, 15.3, 16.3, 17.3, 18.3, and 19.3. The permutation 1..3 should be filtered out before
+        // encoding occurs.
+        givenRegex("1.\\.3");
+        assertNormalizedRegex("\\+bE1\\.03|\\+bE1\\.13|\\+bE1\\.23|\\+bE1\\.33|\\+bE1\\.43|\\+bE1\\.53|\\+bE1\\.63|\\+bE1\\.73|\\+bE1\\.83|\\+bE1\\.93");
+    }
+    
     // todo - test regex patterns that contain qualifiers * and +
     
     private void givenRegex(String regex) {
