@@ -1,6 +1,7 @@
 package datawave.data.normalizer;
 
 import com.google.common.base.CharMatcher;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import datawave.data.type.util.NumericalEncoder;
 
@@ -18,31 +19,53 @@ import java.util.stream.Collectors;
 
 public class NumericRegexNormalizer {
     
-    /**
-     * Null char byte.
-     */
     private static final char NULL = '\u0000';
+    private static final char ZERO = '0';
+    private static final char ONE = '1';
+    private static final char TWO = '2';
+    private static final char THREE = '3';
+    private static final char FOUR = '4';
+    private static final char FIVE = '5';
+    private static final char SIX = '6';
+    private static final char SEVEN = '7';
+    private static final char EIGHT = '8';
+    private static final char NINE = '9';
+    private static final char LOWERCASE_D = 'd';
+    private static final char BACKSLASH = '\\';
+    private static final char PERIOD = '.';
+    private static final char HYPHEN = '-';
+    private static final char STAR = '*';
+    private static final char PLUS = '+';
+    private static final char PIPE = '|';
+    private static final char GROUP_START = '(';
+    private static final char GROUP_END = ')';
+    private static final char LIST_START = '[';
+    private static final char LIST_END = ']';
+    private static final char EXCLAMATION_POINT = '!';
+    
+    private static final String ESCAPED_BACKSLASH = "\\\\";
+    private static final String CARET = "^";
+    private static final String DOLLAR = "$";
+    private static final String EMPTY_GROUP = "()";
     
     /**
      * Use base 10 when parsing characters to ints.
      */
     private static final int DECIMAL_RADIX = 10;
+    /**
+     * The set of all digits. This reflects all possible permutations for any \d found in the regex.
+     */
+    private static final List<Character> ALL_DIGITS = ImmutableList.of(ZERO, ONE, TWO, THREE, FOUR, FIVE, SIX, SEVEN, EIGHT, NINE);
+    
+    /**
+     * The set of all digits and the dot. This reflects all possible permutations for any . wildcards found in the regex.
+     */
+    private static final List<Character> ALL_DIGITS_AND_PERIOD = ImmutableList.of(ZERO, ONE, TWO, THREE, FOUR, FIVE, SIX, SEVEN, EIGHT, NINE, PERIOD);
     
     /**
      * Matches against any unescaped d characters, and any other letters. If \d is present, that indicates a digit and is allowed.
      */
     private static final Pattern RESTRICTED_LETTERS = Pattern.compile(".*[a-ce-zA-Z].*");
-    
-    /**
-     * The set of all digits. This reflects all possible permutations for any \d found in the regex.
-     */
-    private static final List<Character> ALL_DIGITS = Collections.unmodifiableList(Lists.newArrayList('0', '1', '2', '3', '4', '5', '6', '7', '8', '9'));
-    
-    /**
-     * The set of all digits and the dot. This reflects all possible permutations for any . wildcards found in the regex.
-     */
-    private static final List<Character> ALL_DIGITS_AND_DOT = Collections
-                    .unmodifiableList(Lists.newArrayList('0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '.'));
     
     private static final Predicate<String> IS_NOT_EMPTY = (str) -> !str.isEmpty();
     
@@ -52,7 +75,7 @@ public class NumericRegexNormalizer {
         int length = str.length();
         boolean encounteredPeriod = false;
         for (int i = 0; i < length; i++) {
-            if (str.charAt(i) == '.') {
+            if (str.charAt(i) == PERIOD) {
                 if (encounteredPeriod) {
                     return false;
                 } else {
@@ -62,20 +85,6 @@ public class NumericRegexNormalizer {
         }
         return true;
     };
-    
-    private static final char LOWERCASE_D = 'd';
-    
-    private static final char BACKSLASH = '\\';
-    
-    private static final char DOT = '.';
-    
-    private static final String ESCAPED_BACKSLASH = "\\\\";
-    
-    private static final String CARET = "^";
-    
-    private static final String DOLLAR = "$";
-    
-    private static final String EMPTY_GROUP = "()";
     
     private final String regex;
     
@@ -251,15 +260,15 @@ public class NumericRegexNormalizer {
             
             // Separate multiple permutations with |.
             if (sb.length() != 0) {
-                sb.append("|");
+                sb.append(PIPE);
             }
             // If there are multiple sequences here, and multiple groups, we want to start a new group.
             if (multipleSequences && multipleGroups) {
-                sb.append("(");
+                sb.append(GROUP_START);
             }
             // Additionally, if there are any trailing modifiers like .*, we want to start a new group that the modifiers will be placed afterwards.
             if (hasTrailingModifiers) {
-                sb.append("(");
+                sb.append(GROUP_START);
             }
             
             // Append the encoded, escaped numerical sequences, separated by |.
@@ -268,14 +277,15 @@ public class NumericRegexNormalizer {
                             .map(NumericalEncoder::encode)
                             .map(this::escapeSpecialCharacters)
                             .collect(Collectors.joining("|")));
+            
             // @formatter:on
             
             // Close the groups.
             if (hasTrailingModifiers) {
-                sb.append(")");
+                sb.append(GROUP_END);
             }
             if (multipleSequences && multipleGroups) {
-                sb.append(")");
+                sb.append(GROUP_END);
             }
         }
         return sb.toString();
@@ -285,9 +295,15 @@ public class NumericRegexNormalizer {
      * Return an encoded number with all of its special characters escaped.
      */
     private String escapeSpecialCharacters(String str) {
-        str = str.replace(".", "\\.");
-        str = str.replace("!", "\\!");
-        return str.replace("+", "\\+");
+        StringBuilder sb = new StringBuilder();
+        char[] strChars = str.toCharArray();
+        for (char ch : strChars) {
+            if (ch == PERIOD || ch == EXCLAMATION_POINT || ch == PLUS) {
+                sb.append(BACKSLASH);
+            }
+            sb.append(ch);
+        }
+        return sb.toString();
     }
     
     public static class RegexParser {
@@ -334,42 +350,42 @@ public class NumericRegexNormalizer {
             while (cursor < patternLength) {
                 currChar = current();
                 switch (currChar) {
-                    case '-':
-                    case '0':
-                    case '1':
-                    case '2':
-                    case '3':
-                    case '4':
-                    case '5':
-                    case '6':
-                    case '7':
-                    case '8':
-                    case '9':
+                    case HYPHEN:
+                    case ZERO:
+                    case ONE:
+                    case TWO:
+                    case THREE:
+                    case FOUR:
+                    case FIVE:
+                    case SIX:
+                    case SEVEN:
+                    case EIGHT:
+                    case NINE:
                         // Parse a numerical sequence and add it to the current permutation group.
                         currCharGroup = parseSequence();
                         currPermutations.mergeWith(currCharGroup);
                         break;
-                    case '|':
+                    case PIPE:
                         // A pipe here indicates a top-level OR. There is nothing left to add to the current permutation group. Add it to our list and create
                         // a new permutation group for the next regex sequence.
                         permutationGroups.add(currPermutations);
                         currPermutations = new PermutationGroup();
                         cursor++;
                         break;
-                    case '\\':
+                    case BACKSLASH:
                         // A backslash indicates an escaped decimal point or a \d. Add the resulting char group to the current permutations.
                         currCharGroup = parseBackslash();
                         currPermutations.mergeWith(currCharGroup);
                         break;
-                    case '[':
+                    case LIST_START:
                         // Parse the list of numerical characters from a character list and add it to the current permutation group.
                         currCharGroup = parseList();
                         currPermutations.mergeWith(currCharGroup);
                         break;
-                    case '.':
+                    case PERIOD:
                         if (hasNext()) {
                             char next = peek();
-                            if (next == '*' || next == '+') {
+                            if (next == STAR || next == PLUS) {
                                 currPermutations.qualifiers = parseQualifiers();
                                 permutationGroups.add(currPermutations);
                                 currPermutations = new PermutationGroup();
@@ -379,7 +395,7 @@ public class NumericRegexNormalizer {
                         currCharGroup = parseWildcard();
                         currPermutations.mergeWith(currCharGroup);
                         break;
-                    case '(':
+                    case GROUP_START:
                         // Do not allow nested groups.
                         if (currentlyParsingGroup) {
                             throw new IllegalArgumentException("Nested regex groups are not supported.");
@@ -388,7 +404,7 @@ public class NumericRegexNormalizer {
                         List<PermutationGroup> groupPermutations = parseExpression(true);
                         currPermutations.mergeWith(groupPermutations);
                         break;
-                    case ')':
+                    case GROUP_END:
                         // If a group is currently being parsed, this is the end of the group, and there is nothing left to add to the current permutations. Add
                         // it to our list and create a new permutation group for the next regex sequence.
                         if (currentlyParsingGroup) {
@@ -451,17 +467,17 @@ public class NumericRegexNormalizer {
             char curr = current();
             for (;;) {
                 switch (curr) {
-                    case '-':
-                    case '0':
-                    case '1':
-                    case '2':
-                    case '3':
-                    case '4':
-                    case '5':
-                    case '6':
-                    case '7':
-                    case '8':
-                    case '9':
+                    case HYPHEN:
+                    case ZERO:
+                    case ONE:
+                    case TWO:
+                    case THREE:
+                    case FOUR:
+                    case FIVE:
+                    case SIX:
+                    case SEVEN:
+                    case EIGHT:
+                    case NINE:
                         // Add any numeric characters as part of the sequence. If we encounter a period, we were directed here from parseBackslash() where an
                         // escaped decimal point was identified.
                         group.add(curr);
@@ -486,7 +502,7 @@ public class NumericRegexNormalizer {
          */
         private CharacterGroup parseWildcard() {
             cursor++;
-            return CharacterGroup.newList(ALL_DIGITS_AND_DOT);
+            return CharacterGroup.newList(ALL_DIGITS_AND_PERIOD);
         }
         
         // todo finish implementing handling qualifiers
@@ -500,10 +516,10 @@ public class NumericRegexNormalizer {
         private CharacterGroup parseBackslash() {
             char next = next();
             switch (next) {
-                case DOT:
+                case PERIOD:
                     // If we found an escaped decimal point, capture it and any following numbers as a numerical sequence.
                     cursor++;
-                    return CharacterGroup.newList(Collections.singleton('.'));
+                    return CharacterGroup.newList(Collections.singleton(PERIOD));
                 case LOWERCASE_D:
                     // If we found a lowercase d, i.e. \d, this
                     cursor++;
@@ -523,18 +539,18 @@ public class NumericRegexNormalizer {
             char next = peek();
             while (cursor < patternLength) {
                 switch (curr) {
-                    case '0':
-                    case '1':
-                    case '2':
-                    case '3':
-                    case '4':
-                    case '5':
-                    case '6':
-                    case '7':
-                    case '8':
-                    case '9':
+                    case ZERO:
+                    case ONE:
+                    case TWO:
+                    case THREE:
+                    case FOUR:
+                    case FIVE:
+                    case SIX:
+                    case SEVEN:
+                    case EIGHT:
+                    case NINE:
                         // If the next character is a hyphen, this indicates a character list with a possible numeric range such as [1-4].
-                        if (next == '-') {
+                        if (next == HYPHEN) {
                             char charAfterNext = skip();
                             // Verify the end of the range is a number, and that we don't have a character list that looks like [4-] or [2-.].
                             if (!ALL_DIGITS.contains(charAfterNext)) {
@@ -551,14 +567,14 @@ public class NumericRegexNormalizer {
                             chars.add(curr);
                         }
                         break;
-                    case '-':
+                    case HYPHEN:
                         // If we've reached this, we have a list that contains a hyphen that is not part of a numeric range, such as [-34].
                         throw new IllegalArgumentException("Encountered invalid start to numeric range in character list at position " + cursor);
-                    case '.':
+                    case PERIOD:
                         // Allow periods to be specified as part of a character list for decimal points.
                         chars.add(curr);
                         break;
-                    case ']':
+                    case LIST_END:
                         // We've reached the end of the list. No more characters can be added.
                         cursor++;
                         return CharacterGroup.newList(chars);
