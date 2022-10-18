@@ -44,8 +44,8 @@ public class NumericRegexNormalizer {
     private static final char EXCLAMATION_POINT = '!';
     
     private static final String ESCAPED_BACKSLASH = "\\\\";
-    private static final String CARET = "^";
-    private static final String DOLLAR = "$";
+    private static final String BOUNDARY_START = "^";
+    private static final String BOUNDARY_END = "$";
     private static final String EMPTY_GROUP = "()";
     
     /**
@@ -61,6 +61,37 @@ public class NumericRegexNormalizer {
      * The set of all digits and the dot. This reflects all possible permutations for any . wildcards found in the regex.
      */
     private static final List<Character> ALL_DIGITS_AND_PERIOD = ImmutableList.of(ZERO, ONE, TWO, THREE, FOUR, FIVE, SIX, SEVEN, EIGHT, NINE, PERIOD);
+    
+    private static final List<String> INVALID_WILDCARD_COMBINATIONS = new ArrayList<>();
+    
+    // Load the invalid multi-wildcard combinations.
+    static {
+        StringBuilder sb = new StringBuilder();
+        for (Character character : ALL_DIGITS_AND_PERIOD) {
+            // Generate the invalid wildcard combination for the * wildcard.
+            sb.append(STAR).append(character);
+            INVALID_WILDCARD_COMBINATIONS.add(sb.toString());
+            sb.setLength(0);
+            
+            // Generate the invalid wildcard combination for the + wildcard.
+            sb.append(PLUS).append(character);
+            INVALID_WILDCARD_COMBINATIONS.add(sb.toString());
+            sb.setLength(0);
+        }
+        
+        // Do not allow multi-wildcards immediately followed by a group.
+        INVALID_WILDCARD_COMBINATIONS.add("*(");
+        INVALID_WILDCARD_COMBINATIONS.add("+(");
+        // Do not allow multi-wildcards immediately followed by a character list.
+        INVALID_WILDCARD_COMBINATIONS.add("*[");
+        INVALID_WILDCARD_COMBINATIONS.add("+[");
+        // Do not allow multi-wildcards immediately followed by a hyphen.
+        INVALID_WILDCARD_COMBINATIONS.add("*-");
+        INVALID_WILDCARD_COMBINATIONS.add("+-");
+        // Do not allow multi-wildcards immediately followed by a digit.
+        INVALID_WILDCARD_COMBINATIONS.add("*\\d");
+        INVALID_WILDCARD_COMBINATIONS.add("+\\d");
+    }
     
     /**
      * Matches against any unescaped d characters, and any other letters. If \d is present, that indicates a digit and is allowed.
@@ -120,6 +151,7 @@ public class NumericRegexNormalizer {
         checkForEscapedBackslash();
         checkForLineAnchors();
         checkForEmptyGroups();
+        checkForInvalidWildcards();
     }
     
     /**
@@ -188,7 +220,7 @@ public class NumericRegexNormalizer {
      * Throw an exception if the regex contains any line anchors ^ or $.
      */
     private void checkForLineAnchors() {
-        if (regex.contains(CARET) || regex.contains(DOLLAR)) {
+        if (regex.contains(BOUNDARY_START) || regex.contains(BOUNDARY_END)) {
             throw new IllegalArgumentException("Regex pattern may not contain line anchors ^ or $.");
         }
     }
@@ -203,11 +235,28 @@ public class NumericRegexNormalizer {
     }
     
     /**
+     * Throw an exception if the regex contains an invalid multi-wildcard combination.
+     */
+    private void checkForInvalidWildcards() {
+        for (String invalidCombo : INVALID_WILDCARD_COMBINATIONS) {
+            if (regex.contains(invalidCombo)) {
+                throw new IllegalArgumentException(
+                                "Regex contains multi-wildcard combo " + invalidCombo + " that cannot be expanded to a finite number of permutations.");
+            }
+        }
+    }
+    
+    /**
      * Return whether the regex requires any numerical encoding.
      */
     private boolean regexRequiresEncoding() {
-        // todo - finish implementing checks here
-        return true;
+        // Check if the regex contains any number from 0-9
+        for (Character digit : ALL_DIGITS) {
+            if (regex.indexOf(digit) > -1) {
+                return true;
+            }
+        }
+        return false;
     }
     
     /**
@@ -255,19 +304,14 @@ public class NumericRegexNormalizer {
         StringBuilder sb = new StringBuilder();
         boolean multipleGroups = permutations.size() > 1;
         for (PermutationGroup group : permutations) {
-            boolean hasTrailingModifiers = group.qualifiers != null;
+            boolean hasTrailingModifier = group.trailingModifier != null;
             boolean multipleSequences = group.sequences.size() > 1;
-            
+            boolean wrap = (multipleSequences && multipleGroups) || (multipleSequences && hasTrailingModifier);
             // Separate multiple permutations with |.
             if (sb.length() != 0) {
                 sb.append(PIPE);
             }
-            // If there are multiple sequences here, and multiple groups, we want to start a new group.
-            if (multipleSequences && multipleGroups) {
-                sb.append(GROUP_START);
-            }
-            // Additionally, if there are any trailing modifiers like .*, we want to start a new group that the modifiers will be placed afterwards.
-            if (hasTrailingModifiers) {
+            if (wrap) {
                 sb.append(GROUP_START);
             }
             
@@ -280,13 +324,14 @@ public class NumericRegexNormalizer {
             
             // @formatter:on
             
-            // Close the groups.
-            if (hasTrailingModifiers) {
+            if (wrap) {
                 sb.append(GROUP_END);
             }
-            if (multipleSequences && multipleGroups) {
-                sb.append(GROUP_END);
+            
+            if (hasTrailingModifier) {
+                sb.append(group.trailingModifier);
             }
+            
         }
         return sb.toString();
     }
@@ -345,7 +390,7 @@ public class NumericRegexNormalizer {
         private List<PermutationGroup> parseExpression(boolean currentlyParsingGroup) {
             List<PermutationGroup> permutationGroups = new ArrayList<>();
             PermutationGroup currPermutations = new PermutationGroup();
-            CharacterGroup currCharGroup;
+            Characters currCharGroup;
             char currChar;
             while (cursor < patternLength) {
                 currChar = current();
@@ -383,17 +428,23 @@ public class NumericRegexNormalizer {
                         currPermutations.mergeWith(currCharGroup);
                         break;
                     case PERIOD:
+                        // Check if this period is the start of a multi-wildcard. If so, parse it as such and use it as the trailing modifier for the current
+                        // permutation group.
                         if (hasNext()) {
                             char next = peek();
                             if (next == STAR || next == PLUS) {
-                                currPermutations.qualifiers = parseQualifiers();
-                                permutationGroups.add(currPermutations);
-                                currPermutations = new PermutationGroup();
+                                currPermutations.trailingModifier = parseMultiWildcard();
                                 break;
                             }
                         }
+                        // Otherwise, treat it as an expandable singular wildcard.
                         currCharGroup = parseWildcard();
                         currPermutations.mergeWith(currCharGroup);
+                        break;
+                    case STAR:
+                    case PLUS:
+                        // Validate and parse the multi-wildcard and use it as the trailing modifier for the current permutation group.
+                        currPermutations.trailingModifier = parseMultiWildcard();
                         break;
                     case GROUP_START:
                         // Do not allow nested groups.
@@ -462,8 +513,8 @@ public class NumericRegexNormalizer {
         /**
          * Parse and return the next numerical sequence.
          */
-        public CharacterGroup parseSequence() {
-            CharacterGroup group = CharacterGroup.newSequence();
+        public Characters parseSequence() {
+            Characters group = Characters.newSequence();
             char curr = current();
             for (;;) {
                 switch (curr) {
@@ -498,32 +549,58 @@ public class NumericRegexNormalizer {
         
         /**
          * Return a character list that are valid numeric permutations for a . wildcard. This consists of the numbers 0-9, and a period for a decimal point.
-         * However, if the wildcard is followed by * or +, and it is not definitively for the absolute end of a numerical sequence, an exception will be thrown.
          */
-        private CharacterGroup parseWildcard() {
+        private Characters parseWildcard() {
             cursor++;
-            return CharacterGroup.newList(ALL_DIGITS_AND_PERIOD);
+            return Characters.newList(ALL_DIGITS_AND_PERIOD);
         }
         
-        // todo finish implementing handling qualifiers
-        private String parseQualifiers() {
-            return "";
+        /**
+         * Return the multi-wildcards after validating their usage in the regex.
+         */
+        private String parseMultiWildcard() {
+            StringBuilder sb = new StringBuilder();
+            char curr = current();
+            for (;;) {
+                switch (curr) {
+                    case PERIOD:
+                    case STAR:
+                    case PLUS:
+                        sb.append(curr);
+                        break;
+                    case GROUP_END:
+                    case PIPE:
+                        return sb.toString();
+                    default:
+                        // If the next character is not ) or |, then these wildcards are not located at the very end of the current sub-expression, and thus we
+                        // cannot expand it into a finite number of permutations. This is here primarily to catch anything not already caught by the method
+                        // checkForInvalidWildcards().
+                        throw new IllegalArgumentException("Encountered unsupported character " + curr + " that immediately followed a multi-wildcard");
+                }
+                if (!hasNext()) {
+                    cursor++; // Increment the cursor to 'move' it past the end to ensure we will break out of all loops.
+                    break;
+                } else {
+                    curr = next();
+                }
+            }
+            return sb.toString(); // Return the complete trailing multi-wildcards.
         }
         
         /**
          * Parse the group of characters relevant for the next escaped character.
          */
-        private CharacterGroup parseBackslash() {
+        private Characters parseBackslash() {
             char next = next();
             switch (next) {
                 case PERIOD:
                     // If we found an escaped decimal point, capture it and any following numbers as a numerical sequence.
                     cursor++;
-                    return CharacterGroup.newList(Collections.singleton(PERIOD));
+                    return Characters.newList(Collections.singleton(PERIOD));
                 case LOWERCASE_D:
                     // If we found a lowercase d, i.e. \d, this
                     cursor++;
-                    return CharacterGroup.newList(ALL_DIGITS);
+                    return Characters.newList(ALL_DIGITS);
                 default:
                     throw new UnsupportedOperationException("Encountered unsupported escaped character " + next + " at position " + (cursor));
             }
@@ -532,7 +609,7 @@ public class NumericRegexNormalizer {
         /**
          * Parse the contents of a regex character list, e.g. [123-8].
          */
-        private CharacterGroup parseList() {
+        private Characters parseList() {
             // Maintain a sorted set of any characters we parse from a list for easier testing and to prevent duplicates.
             SortedSet<Character> chars = new TreeSet<>();
             char curr = next();
@@ -577,7 +654,7 @@ public class NumericRegexNormalizer {
                     case LIST_END:
                         // We've reached the end of the list. No more characters can be added.
                         cursor++;
-                        return CharacterGroup.newList(chars);
+                        return Characters.newList(chars);
                     default:
                         throw new IllegalArgumentException("Encountered invalid option in character list " + curr + " at position " + cursor);
                 }
@@ -590,19 +667,19 @@ public class NumericRegexNormalizer {
             }
             // Theoretically we should never reach this statement since a valid regex character list will always have a terminating ] that will be handled by
             // the switch above.
-            return CharacterGroup.newList();
+            return Characters.newList();
         }
     }
     
     private static class PermutationGroup {
-        private String qualifiers;
+        private String trailingModifier;
         private List<String> sequences = new ArrayList<>();
         
         public List<String> getSequences() {
             return sequences;
         }
         
-        private void mergeWith(CharacterGroup group) {
+        private void mergeWith(Characters group) {
             List<String> permutations = group.getPermutations();
             if (sequences.isEmpty()) {
                 sequences = permutations;
@@ -637,7 +714,7 @@ public class NumericRegexNormalizer {
         }
     }
     
-    private static class CharacterGroup {
+    private static class Characters {
         private enum Type {
             /**
              * Represents a list of characters that do not make up a numerical sequence, but are instead each possible options for a single position in a
@@ -673,24 +750,24 @@ public class NumericRegexNormalizer {
         private final Type type;
         private final List<Character> characters;
         
-        private static CharacterGroup newList() {
-            return new CharacterGroup(Type.LIST);
+        private static Characters newList() {
+            return new Characters(Type.LIST);
         }
         
-        private static CharacterGroup newList(Collection<Character> characters) {
-            return new CharacterGroup(Type.LIST, characters);
+        private static Characters newList(Collection<Character> characters) {
+            return new Characters(Type.LIST, characters);
         }
         
-        private static CharacterGroup newSequence() {
-            return new CharacterGroup(Type.SEQUENCE);
+        private static Characters newSequence() {
+            return new Characters(Type.SEQUENCE);
         }
         
-        private CharacterGroup(Type type) {
+        private Characters(Type type) {
             this.type = type;
             this.characters = new ArrayList<>();
         }
         
-        private CharacterGroup(Type type, Collection<Character> characters) {
+        private Characters(Type type, Collection<Character> characters) {
             this(type);
             this.characters.addAll(characters);
         }

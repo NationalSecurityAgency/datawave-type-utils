@@ -1,13 +1,29 @@
 package datawave.data.normalizer;
 
-import org.junit.jupiter.api.Assertions;
+import datawave.data.type.util.NumericalEncoder;
+import jdk.nashorn.internal.ir.annotations.Ignore;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class NumericRegexNormalizerTest {
     
     private static final String[] letters = {"a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w",
             "x", "y", "z", "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"};
+    private final List<String> data = new ArrayList<>();
+    private final List<String> normalizedData = new ArrayList<>();
     private String regex;
+    
+    @AfterEach
+    void tearDown() {
+        data.clear();
+        normalizedData.clear();
+    }
     
     /**
      * Verify that an exception is thrown for any blank regex patterns.
@@ -15,8 +31,8 @@ public class NumericRegexNormalizerTest {
     @Test
     void testEmptyRegex() {
         givenRegex("");
-        Throwable throwable = Assertions.assertThrows(IllegalArgumentException.class, this::normalize);
-        Assertions.assertEquals("Regex pattern may not be blank.", throwable.getMessage());
+        Throwable throwable = assertThrows(IllegalArgumentException.class, this::normalize);
+        assertEquals("Regex pattern may not be blank.", throwable.getMessage());
     }
     
     /**
@@ -25,12 +41,12 @@ public class NumericRegexNormalizerTest {
     @Test
     void testRegexWithInvalidPattern() {
         givenRegex("123[]"); // Empty character lists are invalid.
-        Throwable throwable = Assertions.assertThrows(IllegalArgumentException.class, this::normalize);
-        Assertions.assertEquals("Invalid numeric regex pattern provided: 123[]", throwable.getMessage());
+        Throwable throwable = assertThrows(IllegalArgumentException.class, this::normalize);
+        assertEquals("Invalid numeric regex pattern provided: 123[]", throwable.getMessage());
         
         givenRegex("123\\"); // Trailing backslashes are invalid.
-        throwable = Assertions.assertThrows(IllegalArgumentException.class, this::normalize);
-        Assertions.assertEquals("Invalid numeric regex pattern provided: 123\\", throwable.getMessage());
+        throwable = assertThrows(IllegalArgumentException.class, this::normalize);
+        assertEquals("Invalid numeric regex pattern provided: 123\\", throwable.getMessage());
     }
     
     /**
@@ -41,16 +57,15 @@ public class NumericRegexNormalizerTest {
         // Verify an exception is thrown for any letter.
         for (String letter : letters) {
             givenRegex(letter);
-            Throwable throwable = Assertions.assertThrows(IllegalArgumentException.class, this::normalize);
-            Assertions.assertEquals("Regex pattern may not contain any letters other than \\d to indicate a member of the digit character class 0-9.",
+            Throwable throwable = assertThrows(IllegalArgumentException.class, this::normalize);
+            assertEquals("Regex pattern may not contain any letters other than \\d to indicate a member of the digit character class 0-9.",
                             throwable.getMessage());
         }
         
         // Verify an exception is thrown for \D, which indicates a non-digit character in regex.
         givenRegex("\\D");
-        Throwable throwable = Assertions.assertThrows(IllegalArgumentException.class, this::normalize);
-        Assertions.assertEquals("Regex pattern may not contain any letters other than \\d to indicate a member of the digit character class 0-9.",
-                        throwable.getMessage());
+        Throwable throwable = assertThrows(IllegalArgumentException.class, this::normalize);
+        assertEquals("Regex pattern may not contain any letters other than \\d to indicate a member of the digit character class 0-9.", throwable.getMessage());
         
         // Verify an exception is not thrown for \d, which indicates a digit in regex.
         givenRegex("\\d");
@@ -63,8 +78,8 @@ public class NumericRegexNormalizerTest {
     @Test
     void testRegexWithWhitespace() {
         givenRegex(" ");
-        Throwable throwable = Assertions.assertThrows(IllegalArgumentException.class, this::normalize);
-        Assertions.assertEquals("Regex pattern may not contain any whitespace.", throwable.getMessage());
+        Throwable throwable = assertThrows(IllegalArgumentException.class, this::normalize);
+        assertEquals("Regex pattern may not contain any whitespace.", throwable.getMessage());
     }
     
     /**
@@ -73,8 +88,8 @@ public class NumericRegexNormalizerTest {
     @Test
     void testRegexWithEscapedBackslash() {
         givenRegex("\\\\234");
-        Throwable throwable = Assertions.assertThrows(IllegalArgumentException.class, this::normalize);
-        Assertions.assertEquals("Regex pattern may not contain any escaped backslashes.", throwable.getMessage());
+        Throwable throwable = assertThrows(IllegalArgumentException.class, this::normalize);
+        assertEquals("Regex pattern may not contain any escaped backslashes.", throwable.getMessage());
     }
     
     /**
@@ -83,12 +98,12 @@ public class NumericRegexNormalizerTest {
     @Test
     void testRegexWithLineAnchors() {
         givenRegex("^123");
-        Throwable throwable = Assertions.assertThrows(IllegalArgumentException.class, this::normalize);
-        Assertions.assertEquals("Regex pattern may not contain line anchors ^ or $.", throwable.getMessage());
+        Throwable throwable = assertThrows(IllegalArgumentException.class, this::normalize);
+        assertEquals("Regex pattern may not contain line anchors ^ or $.", throwable.getMessage());
         
         givenRegex("123$");
-        throwable = Assertions.assertThrows(IllegalArgumentException.class, this::normalize);
-        Assertions.assertEquals("Regex pattern may not contain line anchors ^ or $.", throwable.getMessage());
+        throwable = assertThrows(IllegalArgumentException.class, this::normalize);
+        assertEquals("Regex pattern may not contain line anchors ^ or $.", throwable.getMessage());
     }
     
     /**
@@ -97,8 +112,8 @@ public class NumericRegexNormalizerTest {
     @Test
     void testRegexWithEmptyGroupsAndLists() {
         givenRegex("123()");
-        Throwable throwable = Assertions.assertThrows(IllegalArgumentException.class, this::normalize);
-        Assertions.assertEquals("Regex pattern may not contain empty groups '()'.", throwable.getMessage());
+        Throwable throwable = assertThrows(IllegalArgumentException.class, this::normalize);
+        assertEquals("Regex pattern may not contain empty groups '()'.", throwable.getMessage());
     }
     
     /**
@@ -201,8 +216,8 @@ public class NumericRegexNormalizerTest {
         
         // Nested groups should fail.
         givenRegex("(34(343|34))");
-        Throwable throwable = Assertions.assertThrows(IllegalArgumentException.class, this::normalize);
-        Assertions.assertEquals("Nested regex groups are not supported.", throwable.getMessage());
+        Throwable throwable = assertThrows(IllegalArgumentException.class, this::normalize);
+        assertEquals("Nested regex groups are not supported.", throwable.getMessage());
     }
     
     /**
@@ -210,9 +225,9 @@ public class NumericRegexNormalizerTest {
      */
     @Test
     void testRegexDigitCharacter() {
-        // The character by itself.
+        // The character by itself should not require any encoding.
         givenRegex("\\d");
-        assertNormalizedRegex("\\+AE0|\\+aE1|\\+aE2|\\+aE3|\\+aE4|\\+aE5|\\+aE6|\\+aE7|\\+aE8|\\+aE9");
+        assertNormalizedRegex("\\d");
         
         // Should expand to 305, 315, 325, 335, 345, 355, 365, 375, 385, and 395.
         givenRegex("3\\d5");
@@ -229,9 +244,9 @@ public class NumericRegexNormalizerTest {
      */
     @Test
     void testDotWildcard() {
-        // The character by itself.
+        // The character by itself should not require any encoding.
         givenRegex(".");
-        assertNormalizedRegex("\\+AE0|\\+aE1|\\+aE2|\\+aE3|\\+aE4|\\+aE5|\\+aE6|\\+aE7|\\+aE8|\\+aE9");
+        assertNormalizedRegex(".");
         
         // Should expand to 1, 10, 11, 12, 13, 14, 15, 16, 17, 18, and 19.
         givenRegex("1.");
@@ -263,10 +278,148 @@ public class NumericRegexNormalizerTest {
         assertNormalizedRegex("\\+bE1\\.03|\\+bE1\\.13|\\+bE1\\.23|\\+bE1\\.33|\\+bE1\\.43|\\+bE1\\.53|\\+bE1\\.63|\\+bE1\\.73|\\+bE1\\.83|\\+bE1\\.93");
     }
     
+    /**
+     * Verify that the regex quantifiers * and + are handled correctly.
+     */
+    @Test
+    void testMultiWildcards() {
+        // Should return the original regex.
+        givenRegex(".*");
+        assertNormalizedRegex(".*");
+        
+        givenRegex(".+");
+        assertNormalizedRegex(".+");
+        
+        // Should throw exceptions since we can't expand to a distinct number of permutations.
+        givenRegex("1*3");
+        Throwable throwable = assertThrows(IllegalArgumentException.class, this::normalize);
+        assertEquals("Regex contains multi-wildcard combo *3 that cannot be expanded to a finite number of permutations.", throwable.getMessage());
+        
+        givenRegex("1.*3");
+        throwable = assertThrows(IllegalArgumentException.class, this::normalize);
+        assertEquals("Regex contains multi-wildcard combo *3 that cannot be expanded to a finite number of permutations.", throwable.getMessage());
+        
+        givenRegex("1+3");
+        throwable = assertThrows(IllegalArgumentException.class, this::normalize);
+        assertEquals("Regex contains multi-wildcard combo +3 that cannot be expanded to a finite number of permutations.", throwable.getMessage());
+        
+        givenRegex("1.+3");
+        throwable = assertThrows(IllegalArgumentException.class, this::normalize);
+        assertEquals("Regex contains multi-wildcard combo +3 that cannot be expanded to a finite number of permutations.", throwable.getMessage());
+        
+        givenRegex("1\\.3.*4");
+        throwable = assertThrows(IllegalArgumentException.class, this::normalize);
+        assertEquals("Regex contains multi-wildcard combo *4 that cannot be expanded to a finite number of permutations.", throwable.getMessage());
+        
+        givenRegex("1\\.3*4");
+        throwable = assertThrows(IllegalArgumentException.class, this::normalize);
+        assertEquals("Regex contains multi-wildcard combo *4 that cannot be expanded to a finite number of permutations.", throwable.getMessage());
+        
+        givenRegex("1\\.3.+4");
+        throwable = assertThrows(IllegalArgumentException.class, this::normalize);
+        assertEquals("Regex contains multi-wildcard combo +4 that cannot be expanded to a finite number of permutations.", throwable.getMessage());
+        
+        givenRegex("1\\.3+4");
+        throwable = assertThrows(IllegalArgumentException.class, this::normalize);
+        assertEquals("Regex contains multi-wildcard combo +4 that cannot be expanded to a finite number of permutations.", throwable.getMessage());
+        
+        givenRegex(".*.");
+        throwable = assertThrows(IllegalArgumentException.class, this::normalize);
+        assertEquals("Regex contains multi-wildcard combo *. that cannot be expanded to a finite number of permutations.", throwable.getMessage());
+        
+        givenRegex(".+.");
+        throwable = assertThrows(IllegalArgumentException.class, this::normalize);
+        assertEquals("Regex contains multi-wildcard combo +. that cannot be expanded to a finite number of permutations.", throwable.getMessage());
+        
+        givenRegex(".*\\d");
+        throwable = assertThrows(IllegalArgumentException.class, this::normalize);
+        assertEquals("Regex contains multi-wildcard combo *\\d that cannot be expanded to a finite number of permutations.", throwable.getMessage());
+        
+        givenRegex(".+\\d");
+        throwable = assertThrows(IllegalArgumentException.class, this::normalize);
+        assertEquals("Regex contains multi-wildcard combo +\\d that cannot be expanded to a finite number of permutations.", throwable.getMessage());
+        
+        givenRegex("1.*[34]");
+        throwable = assertThrows(IllegalArgumentException.class, this::normalize);
+        assertEquals("Regex contains multi-wildcard combo *[ that cannot be expanded to a finite number of permutations.", throwable.getMessage());
+        
+        givenRegex("1.+[34]");
+        throwable = assertThrows(IllegalArgumentException.class, this::normalize);
+        assertEquals("Regex contains multi-wildcard combo +[ that cannot be expanded to a finite number of permutations.", throwable.getMessage());
+        
+        givenRegex("1.*(3|4)");
+        throwable = assertThrows(IllegalArgumentException.class, this::normalize);
+        assertEquals("Regex contains multi-wildcard combo *( that cannot be expanded to a finite number of permutations.", throwable.getMessage());
+        
+        givenRegex("1.+(3|4)");
+        throwable = assertThrows(IllegalArgumentException.class, this::normalize);
+        assertEquals("Regex contains multi-wildcard combo +( that cannot be expanded to a finite number of permutations.", throwable.getMessage());
+        
+        // Should normalize the numeric value and append the quantifiers.
+        givenRegex("1.*");
+        assertNormalizedRegex("\\+aE1.*");
+        
+        givenRegex("1*");
+        assertNormalizedRegex("\\+aE1*");
+        
+        givenRegex("1.+");
+        assertNormalizedRegex("\\+aE1.+");
+        
+        givenRegex("1+");
+        assertNormalizedRegex("\\+aE1+");
+        
+        givenRegex("1\\.3.*");
+        assertNormalizedRegex("\\+aE1\\.3.*");
+        
+        givenRegex("1\\.3.+");
+        assertNormalizedRegex("\\+aE1\\.3.+");
+        
+        givenRegex("(1|2|3).*");
+        assertNormalizedRegex("(\\+aE1|\\+aE2|\\+aE3).*");
+        
+        givenRegex("(1|2|3).+");
+        assertNormalizedRegex("(\\+aE1|\\+aE2|\\+aE3).+");
+        
+        givenRegex("(1|2|3\\.3).*");
+        assertNormalizedRegex("(\\+aE1|\\+aE2|\\+aE3\\.3).*");
+        
+        givenRegex("(1|2|3\\.3).+");
+        assertNormalizedRegex("(\\+aE1|\\+aE2|\\+aE3\\.3).+");
+    }
+    
+    /**
+     * Verify that both the non-encoded and encoded versions of a regex will match the same corresponding values.
+     */
+    @Test
+    @Ignore
+    void testMatchFidelity() {
+        givenDataEntry("-1");
+        givenDataEntry("-2");
+        givenDataEntry("-3");
+        givenDataEntry("-4");
+        givenDataEntry("-5");
+        givenDataEntry("0");
+        givenDataEntry("0.0");
+        givenDataEntry("1");
+        givenDataEntry("2");
+        givenDataEntry("3");
+        givenDataEntry("4");
+        givenDataEntry("5");
+        givenDataEntry("1.1111");
+        givenDataEntry("1.2222");
+        
+    }
+    
     // todo - test regex patterns that contain qualifiers * and +
+    // todo - test that original patterns and new patterns match the same data set
     
     private void givenRegex(String regex) {
         this.regex = regex;
+    }
+    
+    private void givenDataEntry(String number) {
+        data.add(number);
+        normalizedData.add(NumericalEncoder.encode(number));
     }
     
     private void normalize() {
@@ -277,6 +430,6 @@ public class NumericRegexNormalizerTest {
     private void assertNormalizedRegex(String expected) {
         NumericRegexNormalizer normalizer = NumericRegexNormalizer.of(regex);
         String actual = normalizer.normalize();
-        Assertions.assertEquals(expected, actual);
+        assertEquals(expected, actual);
     }
 }
