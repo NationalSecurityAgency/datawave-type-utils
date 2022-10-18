@@ -8,7 +8,6 @@ import org.junit.jupiter.api.Test;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -430,16 +429,26 @@ public class NumericRegexNormalizerTest {
         givenData("1.111");
         givenData("1.222");
         givenData("1.333");
+        givenData("4358347958374957349");
+        givenData("43485934893");
+        givenData("43485934893983348759");
         
         // Test the fidelity of different regex combinations.
         assertFidelity(".*");
         assertFidelity("0\\.1.*");
         assertFidelity("(0\\.1|0\\.001)");
         assertFidelity("1\\.[123].*");
-        
+        assertFidelity("0\\.1|0\\.001|0\\.112|1\\.33");
+        assertFidelity("5.6081[67]");
+    
+        // original regex 435834795837.* matches 4358347958374957349: true
+        // normalized regex \+lE4\.35834795837.* matches +sE4.358347958374957349: false ==>
+        assertFidelity("435834795837.*");
+    
         // Fidelity failure: intended to match against -9.66941, but the corresponding encoded number is !ZE0.33059. The encoded regex is \!ZE0\.34.*, making it
         // not match.
         assertFidelity("-9\\.66.*");
+        
     }
     
     private void assertFidelity(String originalRegex) {
