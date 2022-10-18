@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -393,31 +394,81 @@ public class NumericRegexNormalizerTest {
     @Test
     @Ignore
     void testMatchFidelity() {
-        givenDataEntry("-1");
-        givenDataEntry("-2");
-        givenDataEntry("-3");
-        givenDataEntry("-4");
-        givenDataEntry("-5");
-        givenDataEntry("0");
-        givenDataEntry("0.0");
-        givenDataEntry("1");
-        givenDataEntry("2");
-        givenDataEntry("3");
-        givenDataEntry("4");
-        givenDataEntry("5");
-        givenDataEntry("1.1111");
-        givenDataEntry("1.2222");
+        // Establish a dataset to match regex against.
+        givenData("-9.66941");
+        givenData("-7.94383");
+        givenData("-7.45391");
+        givenData("-5.00565");
+        givenData("-4.68740");
+        givenData("-4.34627");
+        givenData("-4.07620");
+        givenData("-2.95624");
+        givenData("-2.50498");
+        givenData("-2.14797");
+        givenData("-1.49841");
+        givenData("-1.03542");
+        givenData("-0.21225");
+        givenData("2.50327");
+        givenData("2.91395");
+        givenData("2.97969");
+        givenData("3.19438");
+        givenData("4.34729");
+        givenData("5.46421");
+        givenData("5.60817");
+        givenData("5.76947");
+        givenData("6.21135");
+        givenData("6.31854");
+        givenData("8.48414");
+        givenData("8.80228");
+        givenData("0");
+        givenData("0.1");
+        givenData("0.001");
+        givenData("0.112");
+        givenData("0.113");
+        givenData("0.114");
+        givenData("0.117");
+        givenData("1.111");
+        givenData("1.222");
+        givenData("1.333");
         
+        // Test the fidelity of different regex combinations.
+        assertFidelity(".*");
+        assertFidelity("0\\.1.*");
+        assertFidelity("(0\\.1|0\\.001)");
+        assertFidelity("1\\.[123].*");
+        
+        // Fidelity failure: intended to match against -9.66941, but the corresponding encoded number is !ZE0.33059. The encoded regex is \!ZE0\.34.*, making it
+        // not match.
+        assertFidelity("-9\\.66.*");
     }
     
-    // todo - test regex patterns that contain qualifiers * and +
-    // todo - test that original patterns and new patterns match the same data set
+    private void assertFidelity(String originalRegex) {
+        assertFidelity(originalRegex, false);
+    }
+    
+    private void assertFidelity(String originalRegex, boolean verbose) {
+        String normalizedRegex = NumericRegexNormalizer.of(originalRegex).normalize();
+        int totalDataEntries = data.size();
+        for (int i = 0; i < totalDataEntries; i++) {
+            String dataEntry = data.get(i);
+            String normalizedDataEntry = normalizedData.get(i);
+            boolean normalizedMatches = normalizedDataEntry.matches(normalizedRegex);
+            boolean originalMatches = dataEntry.matches(originalRegex);
+            if (verbose) {
+                System.out.println("Original: " + originalRegex + " matches " + dataEntry + ": " + originalMatches);
+                System.out.println("Normalized: " + normalizedRegex + " matches " + normalizedDataEntry + ": " + normalizedMatches);
+            }
+            assertEquals(originalMatches, normalizedMatches,
+                            "Fidelity error: original regex " + originalRegex + " matches " + dataEntry + ": " + originalMatches + "\n    normalized regex " +
+                                            normalizedRegex + " matches " + normalizedDataEntry + ": " + normalizedMatches);
+        }
+    }
     
     private void givenRegex(String regex) {
         this.regex = regex;
     }
     
-    private void givenDataEntry(String number) {
+    private void givenData(String number) {
         data.add(number);
         normalizedData.add(NumericalEncoder.encode(number));
     }
