@@ -1,6 +1,5 @@
 package datawave.data.normalizer;
 
-import com.google.common.base.Throwables;
 import datawave.data.parser.GeometryParser;
 import org.apache.commons.codec.binary.Hex;
 import org.locationtech.geowave.core.geotime.util.GeometryUtils;
@@ -50,15 +49,10 @@ public abstract class AbstractGeometryNormalizer<T extends datawave.data.type.ut
      */
     @Override
     public String normalize(String geoString) throws IllegalArgumentException {
-        try {
-            return normalizeDelegateType(createDatawaveGeometry((G) parseGeometry(geoString)));
-        } catch (Exception e) {
-            if (validHash(geoString)) {
-                return geoString;
-            }
-            Throwables.propagateIfPossible(e, IllegalArgumentException.class);
+        if (validHash(geoString)) {
+            return geoString;
         }
-        throw new IllegalArgumentException("Unable to normalize geo string " + geoString);
+        return normalizeDelegateType(createDatawaveGeometry((G) parseGeometry(geoString)));
     }
     
     @Override
