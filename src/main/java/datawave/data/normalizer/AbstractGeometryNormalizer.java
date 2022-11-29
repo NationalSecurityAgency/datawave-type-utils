@@ -215,13 +215,19 @@ public abstract class AbstractGeometryNormalizer<T extends datawave.data.type.ut
     
     public boolean validLength(short tier, String value) {
         // determine the length of the position in hex characters
-        long posLen = (long) (Math.ceil((double) tier / 4)) * 2;
+        // ceil(tier/4) will get the number of bytes
+        long bytes = (tier >> 2) + ((tier & 0x3) == 0 ? 0 : 1);
+        
+        // multiply by 2 to get the number of hex digits
+        long posLen = 2L * bytes;
         // length is the tier length plus the position length
         return value.length() == (2 + posLen);
     }
     
     public boolean validPosition(short tier, long value) {
-        return value >= 0 && value < (long) (Math.pow(2d, 2d * tier));
+        // The maximum value must be less than pow(2, tier*2)
+        long max = 1L << (tier * 2);
+        return value >= 0 && value < max;
     }
     
 }
