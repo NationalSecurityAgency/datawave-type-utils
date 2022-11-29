@@ -35,6 +35,7 @@ public abstract class AbstractGeometryNormalizer<T extends datawave.data.type.ut
             geoParsers.add(geoParser);
     }
     
+    // NOTE: If we change the index strategy, then we will need to update the validHash method appropriately.
     abstract protected NumericIndexStrategy getIndexStrategy();
     
     abstract protected Index getIndex();
@@ -179,7 +180,8 @@ public abstract class AbstractGeometryNormalizer<T extends datawave.data.type.ut
     }
     
     /**
-     * This is used to determine if we have a valid geo hash (tier + position).
+     * This is used to determine if we have a valid geo hash (tier + position). NOTE: If we change the index strategy, then we will need to update this method
+     * appropriately.
      * 
      * @param value
      * @return true if valid
@@ -213,13 +215,13 @@ public abstract class AbstractGeometryNormalizer<T extends datawave.data.type.ut
     
     public boolean validLength(short tier, String value) {
         // determine the length of the position in hex characters
-        long posLen = Math.round(Math.ceil((double) tier / 4)) * 2;
+        long posLen = (long) (Math.ceil((double) tier / 4)) * 2;
         // length is the tier length plus the position length
         return value.length() == (2 + posLen);
     }
     
     public boolean validPosition(short tier, long value) {
-        return value >= 0 && value < Math.round(Math.pow(2.0d, 2.0d * tier));
+        return value >= 0 && value < (long) (Math.pow(2d, 2d * tier));
     }
     
 }

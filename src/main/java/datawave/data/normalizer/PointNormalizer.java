@@ -13,11 +13,11 @@ import org.locationtech.geowave.core.store.index.CustomNameIndex;
 /**
  * A normalizer that, given a parseable geometry string representing a point geometry will perform GeoWave indexing with a single-tier spatial geowave index
  * configuration
- *
  */
 public class PointNormalizer extends AbstractGeometryNormalizer<Point,org.locationtech.jts.geom.Point> {
     private static final long serialVersionUID = 171360806347433135L;
     
+    // NOTE: If we change the index strategy, then we will need to update the validHash method appropriately.
     // @formatter:off
     public static final NumericIndexStrategy indexStrategy = TieredSFCIndexFactory.createSingleTierStrategy(
             new NumericDimensionDefinition[]{
@@ -37,6 +37,7 @@ public class PointNormalizer extends AbstractGeometryNormalizer<Point,org.locati
     public static final Index index = new CustomNameIndex(indexStrategy, null, "pointIndex");
     
     protected NumericIndexStrategy getIndexStrategy() {
+        // NOTE: If we change the index strategy, then we will need to update the validHash method appropriately.
         return PointNormalizer.indexStrategy;
     }
     

@@ -16,11 +16,11 @@ import java.util.List;
 /**
  * A normalizer that, given a parseable geometry string representing an arbitrary geometry, will perform GeoWave indexing with a multi-tiered spatial geowave
  * index configuration
- *
  */
 public class GeometryNormalizer extends AbstractGeometryNormalizer<Geometry,org.locationtech.jts.geom.Geometry> implements OneToManyNormalizer<Geometry> {
     private static final long serialVersionUID = 171360806347433135L;
     
+    // NOTE: If we change the index strategy, then we will need to update the validHash method appropriately.
     // @formatter:off
     public static final NumericIndexStrategy indexStrategy = TieredSFCIndexFactory.createFullIncrementalTieredStrategy(
             new NumericDimensionDefinition[]{
@@ -40,6 +40,7 @@ public class GeometryNormalizer extends AbstractGeometryNormalizer<Geometry,org.
     public static final Index index = new CustomNameIndex(indexStrategy, null, "geometryIndex");
     
     protected NumericIndexStrategy getIndexStrategy() {
+        // NOTE: If we change the index strategy, then we will need to update the validHash method appropriately.
         return GeometryNormalizer.indexStrategy;
     }
     
