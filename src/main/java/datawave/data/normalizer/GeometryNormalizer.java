@@ -1,9 +1,11 @@
 package datawave.data.normalizer;
 
+import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
 import datawave.data.type.util.Geometry;
 import org.locationtech.geowave.core.geotime.index.dimension.LatitudeDefinition;
 import org.locationtech.geowave.core.geotime.index.dimension.LongitudeDefinition;
+import org.locationtech.geowave.core.geotime.util.GeometryUtils;
 import org.locationtech.geowave.core.index.NumericIndexStrategy;
 import org.locationtech.geowave.core.index.dimension.NumericDimensionDefinition;
 import org.locationtech.geowave.core.index.sfc.SFCFactory;
@@ -11,6 +13,7 @@ import org.locationtech.geowave.core.index.sfc.tiered.TieredSFCIndexFactory;
 import org.locationtech.geowave.core.store.api.Index;
 import org.locationtech.geowave.core.store.index.CustomNameIndex;
 
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -49,7 +52,16 @@ public class GeometryNormalizer extends AbstractGeometryNormalizer<Geometry,org.
     
     @Override
     public List<String> normalizeToMany(String geoString) throws IllegalArgumentException {
-        return normalizeDelegateTypeToMany(createDatawaveGeometry(parseGeometry(geoString)));
+        try {
+            return normalizeDelegateTypeToMany(createDatawaveGeometry(parseGeometry(geoString)));
+        } catch (Exception e) {
+            // perhaps this is a geo hash instead
+            if (validHash(geoString)) {
+                return Collections.singletonList(geoString);
+            }
+            Throwables.propagateIfPossible(e, IllegalArgumentException.class);
+        }
+        throw new IllegalArgumentException("Cannot normalize geo string " + geoString);
     }
     
     @Override
@@ -64,4 +76,5 @@ public class GeometryNormalizer extends AbstractGeometryNormalizer<Geometry,org.
     protected datawave.data.type.util.Geometry createDatawaveGeometry(org.locationtech.jts.geom.Geometry geometry) {
         return new datawave.data.type.util.Geometry(geometry);
     }
+    
 }

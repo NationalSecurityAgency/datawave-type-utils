@@ -18,6 +18,7 @@ import java.util.Collections;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class GeometryNormalizerTest {
     
@@ -105,5 +106,22 @@ public class GeometryNormalizerTest {
         String expected = IOUtils.toString(this.getClass().getClassLoader().getResourceAsStream("datawave/data/normalizer/geoRanges.txt"), "UTF8");
         
         assertEquals(expected, result.toString());
+    }
+
+    @Test
+    public void testHash() {
+        String[] validHashes = new String[] {"00", "0100", "020d", "031b", "04df", "05031e", "0604ff", "0713ff", "08c7fe", "09023fff", "0a04ffff", "0b0dffff", "0c8fffff", "0d01c00000", "0e0b000000", "0f0dfffffe", "1037ffffff", "11023fffffff", "1208ffffffff", "131c00000000", "1437ffffffff", "15023fffffffff", "16070000000000", "1723ffffffffff", "188fffffffffff", "19013fffffffffff", "1a08ffffffffffff", "1b1c000000000000", "1c4fffffffffffff", "1d01c0000000000000", "1e0700000000000000", "1f0dffffffffffffff"};
+        String[] invalidHashes = new String[] {"0", "0001", "01", "1fffffffffffffffff", "200dffffffffffffff", "1c4fffffffffffffff"};
+        for (String hash : validHashes) {
+            assertEquals(hash, normalizer.normalize(hash));
+        }
+        for (String hash : invalidHashes) {
+            try {
+                normalizer.normalize(hash);
+                fail("Should have failed to normalize " + hash);
+            } catch (Exception e) {
+                // this is expected
+            }
+        }
     }
 }

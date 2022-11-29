@@ -1,5 +1,6 @@
 package datawave.data.normalizer;
 
+import com.google.common.base.Throwables;
 import datawave.data.parser.GeometryParser;
 import org.apache.commons.codec.binary.Hex;
 import org.locationtech.geowave.core.geotime.util.GeometryUtils;
@@ -49,7 +50,15 @@ public abstract class AbstractGeometryNormalizer<T extends datawave.data.type.ut
      */
     @Override
     public String normalize(String geoString) throws IllegalArgumentException {
-        return normalizeDelegateType(createDatawaveGeometry((G) parseGeometry(geoString)));
+        try {
+            return normalizeDelegateType(createDatawaveGeometry((G) parseGeometry(geoString)));
+        } catch (Exception e) {
+            if (validHash(geoString)) {
+                return geoString;
+            }
+            Throwables.propagateIfPossible(e, IllegalArgumentException.class);
+        }
+        throw new IllegalArgumentException("Unable to normalize geo string " + geoString);
     }
     
     @Override
@@ -173,6 +182,50 @@ public abstract class AbstractGeometryNormalizer<T extends datawave.data.type.ut
             return String.format(format, new BigInteger(hexValue, 16).add(BigInteger.ONE));
         else
             return String.format(format, new BigInteger(hexValue, 16).subtract(BigInteger.ONE));
+    }
+    
+    /**
+     * This is used to determine if we have a valid geo hash (tier + position).
+     * 
+     * @param value
+     * @return true if valid
+     */
+    public boolean validHash(String value) {
+        try {
+            short tier = getTier(value);
+            if (validTier(tier) && validLength(tier, value)) {
+                return validPosition(tier, getPosition(value));
+            }
+        } catch (NumberFormatException e) {
+            // not a valid hex string in the first place
+        }
+        return false;
+    }
+    
+    public short getTier(String value) {
+        return Short.parseShort(value.substring(0, 2), 16);
+    }
+    
+    public long getPosition(String value) {
+        if (value.length() == 2) {
+            return 0;
+        }
+        return Long.parseLong(value.substring(2), 16);
+    }
+    
+    public boolean validTier(short tier) {
+        return tier >= 0 && tier <= 0x1f;
+    }
+    
+    public boolean validLength(short tier, String value) {
+        // determine the length of the position in hex characters
+        long posLen = Math.round(Math.ceil((double) tier / 4)) * 2;
+        // length is the tier length plus the position length
+        return value.length() == (2 + posLen);
+    }
+    
+    public boolean validPosition(short tier, long value) {
+        return value >= 0 && value < Math.round(Math.pow(2.0d, 2.0d * tier));
     }
     
 }

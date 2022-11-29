@@ -47,4 +47,10 @@ public class PointNormalizer extends AbstractGeometryNormalizer<Point,org.locati
     protected Point createDatawaveGeometry(org.locationtech.jts.geom.Point geometry) {
         return new Point(geometry);
     }
+    
+    @Override
+    public boolean validTier(short tier) {
+        return tier == 0x1f;
+    }
+    
 }
