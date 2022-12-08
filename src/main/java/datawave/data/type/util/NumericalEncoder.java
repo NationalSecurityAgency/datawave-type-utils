@@ -53,8 +53,11 @@ public class NumericalEncoder {
     
     /**
      * Return an unmodifiable list of letters in order from the given starting letter to the given ending letter.
-     * @param start the starting letter
-     * @param end the ending letter
+     * 
+     * @param start
+     *            the starting letter
+     * @param end
+     *            the ending letter
      * @return a list of letters
      */
     private static List<String> createLetterList(char start, char end) {
@@ -150,7 +153,6 @@ public class NumericalEncoder {
         return output;
     }
     
-   
     private static void initPositiveExponents() {
         // The order of the encoded characters here maps directly to how their corresponding exponent value is calculated, and must not be changed.
         List<String> exponents = new ArrayList<>();
