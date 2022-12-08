@@ -3,10 +3,15 @@ package datawave.data.type.util;
 import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 /**
  * Provides a one-to-one mapping between an input decimal number and a lexicographically sorted index for that number. The index is composed of two parts,
@@ -43,6 +48,23 @@ public class NumericalEncoder {
     private static final NumberFormat plainFormatter = new DecimalFormat("0.#########################################################");
     private static final NumberFormat scientificFormatter = new DecimalFormat("0.#########################################################E0");
     private static final String zero = "+AE0";
+    private static final List<String> uppercaseLetters = createLetterList('A', 'Z');
+    private static final List<String> lowercaseLetters = createLetterList('a', 'z');
+    
+    /**
+     * Return an unmodifiable list of letters in order from the given starting letter to the given ending letter.
+     * @param start the starting letter
+     * @param end the ending letter
+     * @return a list of letters
+     */
+    private static List<String> createLetterList(char start, char end) {
+        // @formatter:off
+        return Collections.unmodifiableList(
+                        IntStream.rangeClosed(start, end)
+                                        .mapToObj(c -> "" + (char) c)
+                                        .collect(Collectors.toList()));
+        // @formatter:on
+    }
     
     static {
         initNegativeExponents();
@@ -128,24 +150,12 @@ public class NumericalEncoder {
         return output;
     }
     
-    private static Map<String,String> createExponentMap(String[] exponents) {
-        Map<String,String> map = new HashMap<>();
-        for (int j = 0; j < exponents.length; j++) {
-            int exponent = j - 26;
-            map.put(exponents[j], String.valueOf(exponent));
-        }
-        return map;
-    }
-    
-    private static Map<String,String> invertMap(Map<String,String> map) {
-        return map.entrySet().stream().collect(Collectors.toMap(Map.Entry::getValue, Map.Entry::getKey));
-    }
-    
+   
     private static void initPositiveExponents() {
         // The order of the encoded characters here maps directly to how their corresponding exponent value is calculated, and must not be changed.
-        String[] exponents = new String[] {"+A", "+B", "+C", "+D", "+E", "+F", "+G", "+H", "+I", "+J", "+K", "+L", "+M", "+N", "+O", "+P", "+Q", "+R", "+S",
-                "+T", "+U", "+V", "+W", "+X", "+Y", "+Z", "+a", "+b", "+c", "+d", "+e", "+f", "+g", "+h", "+i", "+j", "+k", "+l", "+m", "+n", "+o", "+p", "+q",
-                "+r", "+s", "+t", "+u", "+v", "+w", "+x", "+y", "+z"};
+        List<String> exponents = new ArrayList<>();
+        uppercaseLetters.stream().map(letter -> "+" + letter).forEach(exponents::add);
+        lowercaseLetters.stream().map(letter -> "+" + letter).forEach(exponents::add);
         Map<String,String> map = createExponentMap(exponents);
         positiveNumsEncodeToIntExponentsMap = Collections.unmodifiableMap(map);
         positiveNumsIntToEncodeExponentsMap = Collections.unmodifiableMap(invertMap(map));
@@ -153,11 +163,32 @@ public class NumericalEncoder {
     
     private static void initNegativeExponents() {
         // The order of the encoded characters here maps directly to how their corresponding exponent value is calculated, and must not be changed.
-        String[] exponents = new String[] {"!z", "!y", "!x", "!w", "!v", "!u", "!t", "!s", "!r", "!q", "!p", "!o", "!n", "!m", "!l", "!k", "!j", "!i", "!h",
-                "!g", "!f", "!e", "!d", "!c", "!b", "!a", "!Z", "!Y", "!X", "!W", "!V", "!U", "!T", "!S", "!R", "!Q", "!P", "!O", "!N", "!M", "!L", "!K", "!J",
-                "!I", "!H", "!G", "!F", "!E", "!D", "!C", "!B", "!A"};
+        List<String> exponents = new ArrayList<>();
+        // Iterate in reverse.
+        ListIterator<String> iterator = lowercaseLetters.listIterator(lowercaseLetters.size());
+        while (iterator.hasPrevious()) {
+            exponents.add("!" + iterator.previous());
+        }
+        // Iterate in reverse.
+        iterator = uppercaseLetters.listIterator(uppercaseLetters.size());
+        while (iterator.hasPrevious()) {
+            exponents.add("!" + iterator.previous());
+        }
         Map<String,String> map = createExponentMap(exponents);
         negativeNumEncodeToIntExponentsMap = Collections.unmodifiableMap(map);
         negativeNumIntToEncodeExponentsMap = Collections.unmodifiableMap(invertMap(map));
+    }
+    
+    private static Map<String,String> createExponentMap(List<String> exponents) {
+        Map<String,String> map = new HashMap<>();
+        for (int pos = 0; pos < exponents.size(); pos++) {
+            int exponent = pos - 26;
+            map.put(exponents.get(pos), String.valueOf(exponent));
+        }
+        return map;
+    }
+    
+    private static Map<String,String> invertMap(Map<String,String> map) {
+        return map.entrySet().stream().collect(Collectors.toMap(Map.Entry::getValue, Map.Entry::getKey));
     }
 }
