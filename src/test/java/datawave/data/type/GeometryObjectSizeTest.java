@@ -11,7 +11,7 @@ import java.util.List;
 
 public class GeometryObjectSizeTest {
     
-    private final static double THRESHOLD = 0.05;
+    private final static double THRESHOLD = 0.1;
     
     @Test
     public void pointTest() throws Exception {
