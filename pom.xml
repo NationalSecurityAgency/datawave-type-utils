@@ -26,7 +26,7 @@
         <datawave.webservice.namespace>http://webservice.datawave/v1</datawave.webservice.namespace>
         <spotbugs.excludes.file>${project.basedir}/src/main/spotbugs/excludes.xml</spotbugs.excludes.file>
         <version.common-utils>1.2-SNAPSHOT</version.common-utils>
-        <version.commons-lang3>3.9</version.commons-lang3>
+        <version.commons-lang3>3.12.0</version.commons-lang3>
         <version.commons-net>3.6</version.commons-net>
         <version.geowave>1.1.0</version.geowave>
         <version.hadoop>3.3.3</version.hadoop>
