@@ -27,7 +27,7 @@
         <version.common-utils>1.1</version.common-utils>
         <version.commons-lang3>3.9</version.commons-lang3>
         <version.commons-net>3.6</version.commons-net>
-        <version.geowave>1.1.0</version.geowave>
+        <version.geowave>2.0.1</version.geowave>
         <version.hadoop>2.6.0-cdh5.9.1</version.hadoop>
         <version.jts>1.19.0</version.jts>
         <version.protostuff>1.6.2</version.protostuff>
@@ -128,6 +128,10 @@
                         <groupId>org.apache.commons</groupId>
                     </exclusion>
                     <exclusion>
+                        <artifactId>*</artifactId>
+                        <groupId>org.eclipse.emf</groupId>
+                    </exclusion>
+                    <exclusion>
                         <artifactId>bcprov-jdk15on</artifactId>
                         <groupId>org.bouncycastle</groupId>
                     </exclusion>
@@ -225,6 +229,11 @@
             </snapshots>
             <id>cloudera</id>
             <url>https://repository.cloudera.com/artifactory/cloudera-repos/</url>
+        </repository>
+        <repository>
+            <id>geosolutions</id>
+            <name>GeoSolutions Repository</name>
+            <url>https://maven.geo-solutions.it</url>
         </repository>
     </repositories>
 </project>

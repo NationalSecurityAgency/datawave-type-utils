@@ -4,7 +4,7 @@ import datawave.data.parser.GeometryParser;
 import org.apache.commons.codec.binary.Hex;
 import org.locationtech.geowave.core.geotime.util.GeometryUtils;
 import org.locationtech.geowave.core.index.NumericIndexStrategy;
-import org.locationtech.geowave.core.index.sfc.data.MultiDimensionalNumericData;
+import org.locationtech.geowave.core.index.numeric.MultiDimensionalNumericData;
 import org.locationtech.geowave.core.store.api.Index;
 import org.locationtech.jts.geom.Geometry;
 
