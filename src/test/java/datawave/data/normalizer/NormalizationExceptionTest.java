@@ -1,5 +1,6 @@
 package datawave.data.normalizer;
 
+import datawave.data.type.NumberType;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.BeforeEach;
 
@@ -17,7 +18,13 @@ public class NormalizationExceptionTest {
         message = "NormalizationException (hint: it's your fault)";
         throwable = new Throwable(message);
     }
-    
+
+    @Test
+    public void fillTheStackTrace(){
+        NumberType type = new NumberType();
+        type.normalize("+c1.23"); // will throw an exception that is caught
+    }
+
     @Test
     public void testEmptyConstructor() {
         ne = new NormalizationException();

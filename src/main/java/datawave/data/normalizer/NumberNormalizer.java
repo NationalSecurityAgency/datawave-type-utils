@@ -13,10 +13,19 @@ public class NumberNormalizer extends AbstractNormalizer<BigDecimal> {
         try {
             return NumericalEncoder.encode(fv);
         } catch (Exception e) {
+            if (NumericalEncoder.isPossiblyEncoded(fv)) {
+                try {
+                    NumericalEncoder.decode(fv);
+                    return fv;
+                } catch (Exception e2) {
+                    // in this case we could not encode nor decode the value.  Error out
+                    throw new IllegalArgumentException("Failed to normalize value as a number: " + fv);
+                }
+            }
             throw new IllegalArgumentException("Failed to normalize value as a number: " + fv);
         }
     }
-    
+
     /**
      * We cannot support regex against numbers
      */
