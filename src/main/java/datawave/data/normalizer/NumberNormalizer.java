@@ -24,7 +24,7 @@ public class NumberNormalizer extends AbstractNormalizer<BigDecimal> {
             throw new IllegalArgumentException("Failed to normalize value as a number: " + fv);
         }
     }
-
+    
     /**
      * We cannot support regex against numbers
      */

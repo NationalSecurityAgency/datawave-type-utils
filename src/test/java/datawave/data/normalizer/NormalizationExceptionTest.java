@@ -18,13 +18,13 @@ public class NormalizationExceptionTest {
         message = "NormalizationException (hint: it's your fault)";
         throwable = new Throwable(message);
     }
-
+    
     @Test
-    public void testPreEncodedValue(){
+    public void testPreEncodedValue() {
         NumberType type = new NumberType();
         assertEquals("+c1.23", type.normalize("+c1.23"));
     }
-
+    
     @Test
     public void testEmptyConstructor() {
         ne = new NormalizationException();
