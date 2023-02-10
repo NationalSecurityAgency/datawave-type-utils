@@ -20,9 +20,9 @@ public class NormalizationExceptionTest {
     }
 
     @Test
-    public void fillTheStackTrace(){
+    public void testPreEncodedValue(){
         NumberType type = new NumberType();
-        type.normalize("+c1.23"); // will throw an exception that is caught
+        assertEquals("+c1.23", type.normalize("+c1.23"));
     }
 
     @Test

@@ -10,18 +10,17 @@ public class NumberNormalizer extends AbstractNormalizer<BigDecimal> {
     private static final long serialVersionUID = -2781476072987375820L;
     
     public String normalize(String fv) {
+        if (NumericalEncoder.isPossiblyEncoded(fv)) {
+            try {
+                NumericalEncoder.decode(fv);
+                return fv;
+            } catch (Exception e2) {
+                // no problem here, we will simply try to encode it below
+            }
+        }
         try {
             return NumericalEncoder.encode(fv);
         } catch (Exception e) {
-            if (NumericalEncoder.isPossiblyEncoded(fv)) {
-                try {
-                    NumericalEncoder.decode(fv);
-                    return fv;
-                } catch (Exception e2) {
-                    // in this case we could not encode nor decode the value.  Error out
-                    throw new IllegalArgumentException("Failed to normalize value as a number: " + fv);
-                }
-            }
             throw new IllegalArgumentException("Failed to normalize value as a number: " + fv);
         }
     }
