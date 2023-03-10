@@ -25,6 +25,7 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -914,7 +915,7 @@ public class JavaRegexAnalyzerTest {
         log.debug("---testRegexAnalyzer42");
         String value = "(?#icu)Friendly";
         
-        Assertions.assertThrows(JavaRegexParseException.class, () -> new JavaRegexAnalyzer(value));
+        assertThrows(JavaRegexParseException.class, () -> new JavaRegexAnalyzer(value));
     }
     
     @Test

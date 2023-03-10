@@ -2,7 +2,7 @@ package datawave.data.type.util;
 
 import com.google.common.base.Splitter;
 import com.google.common.collect.Iterables;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * The IpV6 address
