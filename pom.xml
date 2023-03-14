@@ -29,12 +29,18 @@
         <version.commons-net>3.6</version.commons-net>
         <version.geowave>1.1.0</version.geowave>
         <version.hadoop>2.6.0-cdh5.9.1</version.hadoop>
+        <version.jaxb>2.3.3</version.jaxb>
         <version.jts>1.19.0</version.jts>
         <version.protostuff>1.6.2</version.protostuff>
         <version.slf4j>1.7.29</version.slf4j>
     </properties>
     <dependencyManagement>
         <dependencies>
+            <dependency>
+                <groupId>com.sun.xml.bind</groupId>
+                <artifactId>jaxb-impl</artifactId>
+                <version>${version.jaxb}</version>
+            </dependency>
             <dependency>
                 <groupId>commons-net</groupId>
                 <artifactId>commons-net</artifactId>
@@ -150,6 +156,14 @@
         </dependencies>
     </dependencyManagement>
     <dependencies>
+        <dependency>
+            <groupId>com.sun.xml.bind</groupId>
+            <artifactId>jaxb-impl</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>commons-net</groupId>
+            <artifactId>commons-net</artifactId>
+        </dependency>
         <dependency>
             <groupId>commons-net</groupId>
             <artifactId>commons-net</artifactId>
