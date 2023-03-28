@@ -22,30 +22,44 @@ public class GeometryNormalizer extends AbstractGeometryNormalizer<Geometry,org.
     
     // NOTE: If we change the index strategy, then we will need to update the validHash method appropriately.
     // @formatter:off
-    public static final NumericIndexStrategy indexStrategy = TieredSFCIndexFactory.createFullIncrementalTieredStrategy(
-            new NumericDimensionDefinition[]{
-                    new LongitudeDefinition(),
-                    new LatitudeDefinition(
-                            true)
-                    // just use the same range for latitude to make square sfc values in
-                    // decimal degrees (EPSG:4326)
-            },
-            new int[]{
-                    LONGITUDE_BITS,
-                    LATITUDE_BITS
-            },
-            SFCFactory.SFCType.HILBERT);
+    public static final ThreadLocal<NumericIndexStrategy> indexStrategy = ThreadLocal.withInitial(GeometryNormalizer::createIndexStrategy);
     // @formatter:on
     
-    public static final Index index = new CustomNameIndex(indexStrategy, null, "geometryIndex");
+    public static final ThreadLocal<Index> index = ThreadLocal.withInitial(() -> new CustomNameIndex(indexStrategy.get(), null, "geometryIndex"));
     
-    protected NumericIndexStrategy getIndexStrategy() {
+    protected static NumericIndexStrategy createIndexStrategy() {
+        // @formatter:off
+        return TieredSFCIndexFactory.createFullIncrementalTieredStrategy(
+                new NumericDimensionDefinition[]{
+                        new LongitudeDefinition(),
+                        new LatitudeDefinition(
+                                true)
+                        // just use the same range for latitude to make square sfc values in
+                        // decimal degrees (EPSG:4326)
+                },
+                new int[]{
+                        LONGITUDE_BITS,
+                        LATITUDE_BITS
+                },
+                SFCFactory.SFCType.HILBERT);
+        // @formatter:off
+    }
+
+    public NumericIndexStrategy getIndexStrategy() {
         // NOTE: If we change the index strategy, then we will need to update the validHash method appropriately.
-        return GeometryNormalizer.indexStrategy;
+        return GeometryNormalizer.indexStrategy.get();
+    }
+
+    public static NumericIndexStrategy getGeometryIndexStrategy() {
+        return GeometryNormalizer.indexStrategy.get();
     }
     
-    protected Index getIndex() {
-        return index;
+    public Index getIndex() {
+        return index.get();
+    }
+
+    public static Index getGeometryIndex() {
+        return index.get();
     }
     
     @Override

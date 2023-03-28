@@ -91,8 +91,8 @@ public class GeometryNormalizerTest {
         
         List<ByteArrayRange> allRanges = new ArrayList<>();
         for (MultiDimensionalNumericData range : GeometryUtils.basicConstraintsFromEnvelope(polygon.getEnvelopeInternal())
-                        .getIndexConstraints(GeometryNormalizer.index)) {
-            allRanges.addAll(Lists.reverse(GeometryNormalizer.indexStrategy.getQueryRanges(range).getCompositeQueryRanges()));
+                        .getIndexConstraints(GeometryNormalizer.getGeometryIndex())) {
+            allRanges.addAll(Lists.reverse(GeometryNormalizer.getGeometryIndexStrategy().getQueryRanges(range).getCompositeQueryRanges()));
         }
         
         assertEquals(3746, allRanges.size());
