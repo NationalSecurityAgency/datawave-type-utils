@@ -42,7 +42,7 @@ public class GeometryNormalizer extends AbstractGeometryNormalizer<Geometry,org.
                         LATITUDE_BITS
                 },
                 SFCFactory.SFCType.HILBERT);
-        // @formatter:off
+        // @formatter:on
     }
 
     public NumericIndexStrategy getIndexStrategy() {
