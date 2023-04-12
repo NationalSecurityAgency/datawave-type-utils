@@ -44,12 +44,12 @@ public class GeometryNormalizer extends AbstractGeometryNormalizer<Geometry,org.
                 SFCFactory.SFCType.HILBERT);
         // @formatter:on
     }
-
+    
     public NumericIndexStrategy getIndexStrategy() {
         // NOTE: If we change the index strategy, then we will need to update the validHash method appropriately.
         return GeometryNormalizer.indexStrategy.get();
     }
-
+    
     public static NumericIndexStrategy getGeometryIndexStrategy() {
         return GeometryNormalizer.indexStrategy.get();
     }
@@ -57,7 +57,7 @@ public class GeometryNormalizer extends AbstractGeometryNormalizer<Geometry,org.
     public Index getIndex() {
         return index.get();
     }
-
+    
     public static Index getGeometryIndex() {
         return index.get();
     }
