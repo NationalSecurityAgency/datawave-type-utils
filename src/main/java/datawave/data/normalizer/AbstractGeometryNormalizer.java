@@ -36,9 +36,9 @@ public abstract class AbstractGeometryNormalizer<T extends datawave.data.type.ut
     }
     
     // NOTE: If we change the index strategy, then we will need to update the validHash method appropriately.
-    abstract protected NumericIndexStrategy getIndexStrategy();
+    abstract public NumericIndexStrategy getIndexStrategy();
     
-    abstract protected Index getIndex();
+    abstract public Index getIndex();
     
     abstract protected T createDatawaveGeometry(G geometry);
     
