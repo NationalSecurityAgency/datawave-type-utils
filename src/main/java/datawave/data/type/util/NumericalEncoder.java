@@ -4,7 +4,6 @@ import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -107,7 +106,7 @@ public class NumericalEncoder {
             
             return encodedExponent + "E" + mantissa;
         } catch (Exception ex) {
-            throw new NumberFormatException("Error formatting input: " + input + " . Error: " + ex);
+            throw new IllegalArgumentException("Error formatting input: " + input + " . Error: " + ex, ex);
         }
     }
     
@@ -147,10 +146,18 @@ public class NumericalEncoder {
                 }
                 
             } catch (Exception ex) {
-                throw new NumberFormatException("Error decoding output: " + input + " . Error: " + ex);
+                throw new IllegalArgumentException("Error decoding output: " + input + " . Error: " + ex, ex);
             }
         }
         return output;
+    }
+    
+    public static char getPositiveBin(int index) {
+        return positiveNumsIntToEncodeExponentsMap.get(String.valueOf(index)).charAt(1);
+    }
+    
+    public static char getNegativeBin(int index) {
+        return negativeNumIntToEncodeExponentsMap.get(String.valueOf(index)).charAt(1);
     }
     
     private static void initPositiveExponents() {

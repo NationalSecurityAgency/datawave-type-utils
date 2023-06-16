@@ -1,8 +1,8 @@
 package datawave.data.normalizer;
 
 import java.math.BigDecimal;
-import java.util.regex.Pattern;
 
+import datawave.data.normalizer.regex.NumericRegexEncoder;
 import datawave.data.type.util.NumericalEncoder;
 
 public class NumberNormalizer extends AbstractNormalizer<BigDecimal> {
@@ -22,8 +22,7 @@ public class NumberNormalizer extends AbstractNormalizer<BigDecimal> {
      */
     public String normalizeRegex(String fieldRegex) {
         try {
-            NumericRegexNormalizer regexNormalizer = NumericRegexNormalizer.of(fieldRegex);
-            return regexNormalizer.normalize();
+            return NumericRegexEncoder.encode(fieldRegex);
         } catch (IllegalArgumentException e) {
             throw new IllegalArgumentException("Failed to normalize numeric field pattern", e);
         }
