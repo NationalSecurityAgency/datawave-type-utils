@@ -23,7 +23,7 @@
         <url>https://github.com/NationalSecurityAgency/datawave-type-utils</url>
     </scm>
     <properties>
-        <datawave.webservice.namespace>http://webservice.datawave/v1</datawave.webservice.namespace>
+        <datawave.webservice.namespace>http://webservice.datawave.nsa/v1</datawave.webservice.namespace>
         <spotbugs.excludes.file>${project.basedir}/src/main/spotbugs/excludes.xml</spotbugs.excludes.file>
         <version.common-utils>2.0-SNAPSHOT</version.common-utils>
         <version.commons-lang3>3.12.0</version.commons-lang3>
