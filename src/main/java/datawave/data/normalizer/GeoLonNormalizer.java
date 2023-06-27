@@ -1,10 +1,10 @@
 package datawave.data.normalizer;
 
-import datawave.data.normalizer.GeoNormalizer.ParseException;
-import datawave.data.type.util.NumericalEncoder;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import datawave.data.normalizer.GeoNormalizer.ParseException;
+import datawave.data.type.util.NumericalEncoder;
 
 public class GeoLonNormalizer extends AbstractNormalizer<String> {
     

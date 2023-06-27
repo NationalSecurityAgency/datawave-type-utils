@@ -1,14 +1,15 @@
 package datawave.webservice.query.util;
 
+import java.io.IOException;
+
+import javax.xml.bind.annotation.adapters.XmlAdapter;
+
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
-
-import javax.xml.bind.annotation.adapters.XmlAdapter;
-import java.io.IOException;
 
 /**
  * An {@link XmlAdapter} that allows a {@link String} property to be bound to XML that is encoded as an {@link OptionallyEncodedStringAdapter}.

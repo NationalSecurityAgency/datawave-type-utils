@@ -1,5 +1,7 @@
 package datawave.data.normalizer;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -16,8 +18,6 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import com.google.common.collect.Sets;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  *

@@ -1,9 +1,9 @@
 package datawave.webservice.query.util;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 import org.apache.xerces.util.XMLChar;
 import org.junit.jupiter.api.Test;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 public class XMLUtilTest {
     @Test

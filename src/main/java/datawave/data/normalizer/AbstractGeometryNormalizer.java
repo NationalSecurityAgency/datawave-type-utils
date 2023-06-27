@@ -1,6 +1,12 @@
 package datawave.data.normalizer;
 
-import datawave.data.parser.GeometryParser;
+import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.ServiceLoader;
+import java.util.TreeSet;
+
 import org.apache.commons.codec.binary.Hex;
 import org.locationtech.geowave.core.geotime.util.GeometryUtils;
 import org.locationtech.geowave.core.index.NumericIndexStrategy;
@@ -8,12 +14,7 @@ import org.locationtech.geowave.core.index.sfc.data.MultiDimensionalNumericData;
 import org.locationtech.geowave.core.store.api.Index;
 import org.locationtech.jts.geom.Geometry;
 
-import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.ServiceLoader;
-import java.util.TreeSet;
+import datawave.data.parser.GeometryParser;
 
 /**
  * A normalizer that, given a parseable geometry string representing an arbitrary geometry, will perform GeoWave indexing with a spatial geowave index

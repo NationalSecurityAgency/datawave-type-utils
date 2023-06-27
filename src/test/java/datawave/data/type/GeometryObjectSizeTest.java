@@ -1,15 +1,16 @@
 package datawave.data.type;
 
-import datawave.data.type.util.Geometry;
-import datawave.data.type.util.Point;
-import datawave.webservice.query.data.ObjectSizeOf;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.util.List;
+
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.locationtech.jts.io.WKTReader;
 
-import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import datawave.data.type.util.Geometry;
+import datawave.data.type.util.Point;
+import datawave.webservice.query.data.ObjectSizeOf;
 
 public class GeometryObjectSizeTest {
     

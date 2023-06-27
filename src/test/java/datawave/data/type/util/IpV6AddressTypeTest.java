@@ -5,10 +5,10 @@
 
 package datawave.data.type.util;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import org.apache.log4j.Logger;
 import org.junit.jupiter.api.Test;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * 

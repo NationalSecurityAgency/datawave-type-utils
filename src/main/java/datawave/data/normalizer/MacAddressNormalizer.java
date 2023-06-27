@@ -1,8 +1,9 @@
 package datawave.data.normalizer;
 
+import org.apache.commons.lang3.StringUtils;
+
 import com.google.common.base.Splitter;
 import com.google.common.collect.Iterables;
-import org.apache.commons.lang3.StringUtils;
 
 public class MacAddressNormalizer extends AbstractNormalizer<String> {
     

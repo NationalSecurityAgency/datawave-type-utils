@@ -1,6 +1,5 @@
 package datawave.data.normalizer;
 
-import datawave.data.type.util.Point;
 import org.locationtech.geowave.core.geotime.index.dimension.LatitudeDefinition;
 import org.locationtech.geowave.core.geotime.index.dimension.LongitudeDefinition;
 import org.locationtech.geowave.core.index.NumericIndexStrategy;
@@ -9,6 +8,8 @@ import org.locationtech.geowave.core.index.sfc.SFCFactory;
 import org.locationtech.geowave.core.index.sfc.tiered.TieredSFCIndexFactory;
 import org.locationtech.geowave.core.store.api.Index;
 import org.locationtech.geowave.core.store.index.CustomNameIndex;
+
+import datawave.data.type.util.Point;
 
 /**
  * A normalizer that, given a parseable geometry string representing a point geometry will perform GeoWave indexing with a single-tier spatial geowave index

@@ -1,12 +1,13 @@
 package datawave.data.parser;
 
-import com.google.common.io.BaseEncoding;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import org.junit.jupiter.api.Test;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.io.WKBWriter;
 import org.locationtech.jts.io.WKTReader;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import com.google.common.io.BaseEncoding;
 
 public class WKBParserTest {
     

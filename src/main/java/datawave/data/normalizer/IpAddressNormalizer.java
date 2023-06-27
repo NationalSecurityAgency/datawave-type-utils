@@ -1,9 +1,10 @@
 package datawave.data.normalizer;
 
+import org.apache.commons.net.util.SubnetUtils;
+
 import datawave.data.type.util.IpAddress;
 import datawave.query.parser.JavaRegexAnalyzer;
 import datawave.query.parser.JavaRegexAnalyzer.JavaRegexParseException;
-import org.apache.commons.net.util.SubnetUtils;
 
 public class IpAddressNormalizer extends AbstractNormalizer<IpAddress> {
     

@@ -28,7 +28,6 @@ import datawave.data.type.IpAddressType;
 import datawave.data.type.NoOpType;
 import datawave.data.type.NumberType;
 import datawave.data.type.Type;
-
 import datawave.webservice.query.data.ObjectSizeOf;
 import io.protostuff.Input;
 import io.protostuff.Message;
