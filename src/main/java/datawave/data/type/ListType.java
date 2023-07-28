@@ -6,16 +6,16 @@ import datawave.util.StringUtils;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ListType extends BaseType implements OneToManyNormalizerType {
-    private static final String delimiter = ",|;";
+public abstract class ListType extends BaseType implements OneToManyNormalizerType {
+    protected static final String delimiter = ",|;";
     List<String> normalizedValues;
-    
-    public ListType(String delegateString) {
-        super(delegateString, Normalizer.LC_NO_DIACRITICS_NORMALIZER);
-    }
     
     public ListType(Normalizer normalizer) {
         super(normalizer);
+    }
+    
+    public ListType(String delegateString, Normalizer normalizer) {
+        super(delegateString, normalizer);
     }
     
     @Override
@@ -36,5 +36,4 @@ public class ListType extends BaseType implements OneToManyNormalizerType {
     public List<String> getNormalizedValues() {
         return normalizedValues;
     }
-    
 }

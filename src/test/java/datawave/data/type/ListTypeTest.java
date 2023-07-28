@@ -13,8 +13,10 @@ public class ListTypeTest {
     public void test() {
         String str = "1,2,3;a;b;c";
         
-        ListType t = new ListType(str);
+        LcNoDiacriticsListType t = new LcNoDiacriticsListType(str);
         Assert.equals(6, t.normalizeToMany(str).size());
+        List<String> expected = Arrays.asList(new String[] {"1", "2", "3", "a", "b", "c"});
+        Assert.equals(expected, t.normalizeToMany(str));
     }
     
     @Test
