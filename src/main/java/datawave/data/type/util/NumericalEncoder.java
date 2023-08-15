@@ -16,7 +16,7 @@ import java.util.stream.IntStream;
  * Provides a one-to-one mapping between an input decimal number and a lexicographically sorted index for that number. The index is composed of two parts,
  * roughly derived from scientific notation: the two digit exponential bin and the mantissa, with 'E' as a separator. Thus, an index takes this format:
  * {@code 'bin'E'mantissa'}.
- * <p/>
+ * <p>
  * The bins are broken into four groups:
  * <ol>
  * <li>!A through !Z represent negative numbers with magnitude greater than one (exponents 25 through 0, respectively)</li>
@@ -26,7 +26,7 @@ import java.util.stream.IntStream;
  * </ol>
  * For positive numbers, the mantissa exactly matches the mantissa of scientific notation. For negative numbers, the mantissa equals ten minus the mantissa of
  * scientific notation.
- * <p/>
+ * <p>
  * Some example inputs and encodings:
  * <ul>
  * <li>-12344984165 becomes !PE8.7655015835</li>
