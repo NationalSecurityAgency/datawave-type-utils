@@ -57,19 +57,4 @@ public class NumericalEncoderTest {
         }
         
     }
-    
-    @Test
-    public void testOutputs() {
-        printEncoding("44444444.343433");
-        printEncoding("44444444.3434333453453424");
-        printEncoding("1.111");
-        printEncoding("1111");
-        printEncoding("0.1");
-        System.out.println("+aE1.111".matches("\\+[a-z]E1\\.*111"));
-        
-    }
-    
-    private void printEncoding(String original) {
-        System.out.println("Original: " + original + " Encoded: " + NumericalEncoder.encode(original));
-    }
 }
