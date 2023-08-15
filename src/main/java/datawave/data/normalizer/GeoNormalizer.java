@@ -68,16 +68,20 @@ public class GeoNormalizer extends AbstractNormalizer<String> {
      */
     @Override
     public String normalize(String fieldValue) throws IllegalArgumentException {
-        int split = findSplit(fieldValue);
-        if (split > 0) {
-            try {
-                return combineLatLon(fieldValue.substring(0, split), fieldValue.substring(split + 1, fieldValue.length()));
-            } catch (Exception e) {
+        String normalized = fieldValue;
+        if (!isNormalized(fieldValue)) {
+            int split = findSplit(fieldValue);
+            if (split > 0) {
+                try {
+                    normalized = combineLatLon(fieldValue.substring(0, split), fieldValue.substring(split + 1));
+                } catch (Exception e) {
+                    throw new IllegalArgumentException("Failed to normalize value as a Geo: " + fieldValue);
+                }
+            } else {
                 throw new IllegalArgumentException("Failed to normalize value as a Geo: " + fieldValue);
             }
-        } else {
-            throw new IllegalArgumentException("Failed to normalize value as a Geo: " + fieldValue);
         }
+        return normalized;
     }
     
     /**

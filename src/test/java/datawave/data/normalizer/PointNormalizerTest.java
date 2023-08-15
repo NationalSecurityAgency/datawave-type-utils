@@ -96,8 +96,8 @@ public class PointNormalizerTest {
         
         List<ByteArrayRange> allRanges = new ArrayList<>();
         for (MultiDimensionalNumericData range : GeometryUtils.basicConstraintsFromEnvelope(polygon.getEnvelopeInternal())
-                        .getIndexConstraints(PointNormalizer.index)) {
-            allRanges.addAll(Lists.reverse(PointNormalizer.indexStrategy.getQueryRanges(range).getCompositeQueryRanges()));
+                        .getIndexConstraints(PointNormalizer.getPointIndex())) {
+            allRanges.addAll(Lists.reverse(PointNormalizer.getPointIndexStrategy().getQueryRanges(range).getCompositeQueryRanges()));
         }
         
         assertEquals(171, allRanges.size());
@@ -120,8 +120,8 @@ public class PointNormalizerTest {
         
         List<ByteArrayRange> allPointRanges = new ArrayList<>();
         for (MultiDimensionalNumericData range : GeometryUtils.basicConstraintsFromEnvelope(polygon.getEnvelopeInternal())
-                        .getIndexConstraints(PointNormalizer.index)) {
-            allPointRanges.addAll(Lists.reverse(PointNormalizer.indexStrategy.getQueryRanges(range).getCompositeQueryRanges()));
+                        .getIndexConstraints(PointNormalizer.getPointIndex())) {
+            allPointRanges.addAll(Lists.reverse(PointNormalizer.getPointIndexStrategy().getQueryRanges(range).getCompositeQueryRanges()));
         }
         
         assertEquals(171, allPointRanges.size());
@@ -134,8 +134,8 @@ public class PointNormalizerTest {
         
         List<ByteArrayRange> allGeoRanges = new ArrayList<>();
         for (MultiDimensionalNumericData range : GeometryUtils.basicConstraintsFromEnvelope(polygon.getEnvelopeInternal())
-                        .getIndexConstraints(GeometryNormalizer.index)) {
-            allGeoRanges.addAll(Lists.reverse(GeometryNormalizer.indexStrategy.getQueryRanges(range).getCompositeQueryRanges()));
+                        .getIndexConstraints(GeometryNormalizer.getGeometryIndex())) {
+            allGeoRanges.addAll(Lists.reverse(GeometryNormalizer.getGeometryIndexStrategy().getQueryRanges(range).getCompositeQueryRanges()));
         }
         
         assertEquals(3746, allGeoRanges.size());

@@ -35,9 +35,10 @@ public abstract class AbstractGeometryNormalizer<T extends datawave.data.type.ut
             geoParsers.add(geoParser);
     }
     
-    abstract protected NumericIndexStrategy getIndexStrategy();
+    // NOTE: If we change the index strategy, then we will need to update the validHash method appropriately.
+    abstract public NumericIndexStrategy getIndexStrategy();
     
-    abstract protected Index getIndex();
+    abstract public Index getIndex();
     
     abstract protected T createDatawaveGeometry(G geometry);
     
@@ -49,6 +50,9 @@ public abstract class AbstractGeometryNormalizer<T extends datawave.data.type.ut
      */
     @Override
     public String normalize(String geoString) throws IllegalArgumentException {
+        if (validHash(geoString)) {
+            return geoString;
+        }
         return normalizeDelegateType(createDatawaveGeometry((G) parseGeometry(geoString)));
     }
     
@@ -173,6 +177,57 @@ public abstract class AbstractGeometryNormalizer<T extends datawave.data.type.ut
             return String.format(format, new BigInteger(hexValue, 16).add(BigInteger.ONE));
         else
             return String.format(format, new BigInteger(hexValue, 16).subtract(BigInteger.ONE));
+    }
+    
+    /**
+     * This is used to determine if we have a valid geo hash (tier + position). NOTE: If we change the index strategy, then we will need to update this method
+     * appropriately.
+     * 
+     * @param value
+     * @return true if valid
+     */
+    public boolean validHash(String value) {
+        try {
+            short tier = getTier(value);
+            if (validTier(tier) && validLength(tier, value)) {
+                return validPosition(tier, getPosition(value));
+            }
+        } catch (NumberFormatException e) {
+            // not a valid hex string in the first place
+        }
+        return false;
+    }
+    
+    public short getTier(String value) {
+        return Short.parseShort(value.substring(0, 2), 16);
+    }
+    
+    public long getPosition(String value) {
+        if (value.length() == 2) {
+            return 0;
+        }
+        return Long.parseLong(value.substring(2), 16);
+    }
+    
+    public boolean validTier(short tier) {
+        return tier >= 0 && tier <= 0x1f;
+    }
+    
+    public boolean validLength(short tier, String value) {
+        // determine the length of the position in hex characters
+        // ceil(tier/4) will get the number of bytes
+        int bytes = (tier >> 2) + ((tier & 0x3) == 0 ? 0 : 1);
+        
+        // multiply by 2 to get the number of hex digits
+        int posLen = 2 * bytes;
+        // length is the tier length plus the position length
+        return value.length() == (2 + posLen);
+    }
+    
+    public boolean validPosition(short tier, long value) {
+        // The maximum value must be less than pow(2, tier*2)
+        long max = 1L << (tier * 2);
+        return value >= 0 && value < max;
     }
     
 }
