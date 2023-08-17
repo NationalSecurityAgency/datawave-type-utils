@@ -1,7 +1,8 @@
 package datawave.data.normalizer.regex;
 
+import datawave.data.normalizer.regex.visitor.Visitor;
+
 import java.util.Collection;
-import java.util.List;
 
 /**
  * Represents a regex alternation, i.e. {@code |}.

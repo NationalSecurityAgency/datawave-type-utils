@@ -19,7 +19,6 @@ import datawave.data.normalizer.regex.OptionalNode;
 import datawave.data.normalizer.regex.RepetitionNode;
 import datawave.data.normalizer.regex.SingleCharNode;
 import datawave.data.normalizer.regex.StartAnchorNode;
-import datawave.data.normalizer.regex.Visitor;
 import datawave.data.normalizer.regex.ZeroOrMoreNode;
 
 /**

@@ -1,5 +1,7 @@
 package datawave.data.normalizer.regex;
 
+import datawave.data.normalizer.regex.visitor.Visitor;
+
 /**
  * Represents the plus sign in a regex pattern.
  */

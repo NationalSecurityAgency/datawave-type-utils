@@ -4,8 +4,6 @@ import datawave.data.normalizer.regex.CharClassNode;
 import datawave.data.normalizer.regex.CharRangeNode;
 import datawave.data.normalizer.regex.EncodedPatternNode;
 import datawave.data.normalizer.regex.EscapedSingleCharNode;
-import datawave.data.normalizer.regex.GTEOneBinFinder;
-import datawave.data.normalizer.regex.LTOneBinFinder;
 import datawave.data.normalizer.regex.Node;
 import datawave.data.normalizer.regex.RegexConstants;
 import datawave.data.normalizer.regex.RegexUtils;

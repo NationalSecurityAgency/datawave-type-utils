@@ -1,5 +1,6 @@
 package datawave.data.normalizer.regex;
 
+import datawave.data.normalizer.regex.visitor.EqualityVisitor;
 import datawave.data.normalizer.regex.visitor.PrintVisitor;
 import datawave.data.normalizer.regex.visitor.StringVisitor;
 import org.assertj.core.api.AbstractAssert;

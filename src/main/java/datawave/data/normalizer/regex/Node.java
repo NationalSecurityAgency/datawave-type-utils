@@ -1,10 +1,10 @@
 package datawave.data.normalizer.regex;
 
+import datawave.data.normalizer.regex.visitor.Visitor;
+
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Set;
 

@@ -1,5 +1,9 @@
-package datawave.data.normalizer.regex;
+package datawave.data.normalizer.regex.visitor;
 
+import datawave.data.normalizer.regex.AnyCharNode;
+import datawave.data.normalizer.regex.Node;
+import datawave.data.normalizer.regex.NodeType;
+import datawave.data.normalizer.regex.RegexUtils;
 import org.apache.commons.lang3.tuple.Pair;
 
 /**
