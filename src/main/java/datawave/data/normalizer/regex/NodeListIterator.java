@@ -43,43 +43,6 @@ public class NodeListIterator {
     }
     
     /**
-     * Return true if there are previous nodes to return from the list.
-     * 
-     * @return true if there is a previous node to return
-     */
-    public boolean hasPrevious() {
-        return this.index > 0;
-    }
-    
-    /**
-     * Return the previous node from the list.
-     * 
-     * @return the previous node
-     * @throws NoSuchElementException
-     *             if there is no previous node
-     */
-    public Node previous() {
-        if (!hasPrevious()) {
-            throw new NoSuchElementException();
-        }
-        return nodes.get(--index);
-    }
-    
-    /**
-     * Return the previous node from the list without modifying the current iterator index.
-     * 
-     * @return the previous node
-     * @throws NoSuchElementException
-     *             if there is no previous node
-     */
-    public Node peekPrevious() {
-        if (!hasPrevious()) {
-            throw new NoSuchElementException();
-        }
-        return nodes.get((index - 1));
-    }
-    
-    /**
      * Return true if there are more nodes to return from the list.
      * 
      * @return true if there are a next node to return
@@ -186,15 +149,6 @@ public class NodeListIterator {
     public void seekPastOptional() {
         if (hasNext() && isNextInstanceOf(OptionalNode.class)) {
             next();
-        }
-    }
-    
-    public void seekPastDecimalPoint() {
-        while (hasNext()) {
-            Node next = next();
-            if (RegexUtils.isDecimalPoint(next)) {
-                return;
-            }
         }
     }
     
