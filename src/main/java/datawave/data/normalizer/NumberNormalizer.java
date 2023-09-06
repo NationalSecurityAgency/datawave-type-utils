@@ -24,7 +24,7 @@ public class NumberNormalizer extends AbstractNormalizer<BigDecimal> {
         try {
             return NumericRegexEncoder.encode(fieldRegex);
         } catch (IllegalArgumentException e) {
-            throw new IllegalArgumentException("Failed to normalize numeric field pattern", e);
+            throw new IllegalArgumentException("Failed to normalize numeric field pattern '" + fieldRegex + "'", e);
         }
     }
     
