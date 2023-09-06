@@ -146,9 +146,7 @@ public class DecimalPointPlacer extends CopyVisitor {
             while (iter.hasNext()) {
                 Node element = iter.next();
                 Node quantifier = iter.isNextQuantifier() ? iter.next() : null;
-                if (iter.isNextOptional()) {
-                    iter.next();
-                }
+                iter.seekPastOptional();
                 
                 // If there is a second element, we cannot skip adding decimal points.
                 if (iter.hasNext()) {

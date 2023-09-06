@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.NoSuchElementException;
 
 /**
- * Iterator implementation that can traverse back and forth over a list of nodes.
+ * An iterator for traversing over a list of {@link Node} instances, with functionality for skipping over nodes that meet certain conditions.
  */
 public class NodeListIterator {
     
@@ -106,6 +106,11 @@ public class NodeListIterator {
         return types.stream().anyMatch((type) -> type.isInstance(previous));
     }
     
+    /**
+     * Update the iterator so that the next call to {@link #next()} will return the first node is not a regex element that can match against the character '0',
+     * starting from the iterator's current position in the list. If no such node is found, the iterator will be moved to the end of the list,
+     * {@link #hasNext()} will return false and any call to {@link #next()} will result in a {@link NoSuchElementException}.
+     */
     public void seekPastZeroMatchingElements() {
         while (hasNext()) {
             // Peek at the next node.
@@ -123,6 +128,11 @@ public class NodeListIterator {
         }
     }
     
+    /**
+     * Update the iterator so that the next call to {@link #next()} will return the first node is not a regex element that can match only the character '0',
+     * starting from the iterator's current position in the list. If no such node is found, the iterator will be moved to the end of the list,
+     * {@link #hasNext()} will return false and any call to {@link #next()} will result in a {@link NoSuchElementException}.
+     */
     public void seekPastZeroOnlyElements() {
         while (hasNext()) {
             // Peek at the next node.
@@ -140,22 +150,42 @@ public class NodeListIterator {
         }
     }
     
+    /**
+     * Update the iterator so that the next call to {@link #next()} will return the first node that is not a {@link ZeroOrMoreNode}, {@link OneOrMoreNode}, or
+     * {@link RepetitionNode}, starting from the iterator's current position in the list. If no such node is found, the iterator will be moved to the end of the
+     * list, {@link #hasNext()} will return false and any call to {@link #next()} will result in a {@link NoSuchElementException}.
+     */
     public void seekPastQuantifier() {
-        if (hasNext() && isNextInstanceOfAny(RegexConstants.QUANTIFIER_TYPES)) {
+        while (isNextQuantifier()) {
             next();
         }
     }
     
+    /**
+     * Update the iterator so that the next call to {@link #next()} will return the first node that is not an {@link OptionalNode}, starting from the iterator's
+     * current position in the list. If no such node is found, the iterator will be moved to the end of the list, {@link #hasNext()} will return false and any
+     * call to {@link #next()} will result in a {@link NoSuchElementException}.
+     */
     public void seekPastOptional() {
-        if (hasNext() && isNextInstanceOf(OptionalNode.class)) {
+        while (isNextOptional()) {
             next();
         }
     }
     
+    /**
+     * Return whether the next node in the list is a {@link ZeroOrMoreNode}, {@link OneOrMoreNode}, or a {@link RepetitionNode}.
+     * 
+     * @return true if the next node in the list is a quantifier type, or false otherwise
+     */
     public boolean isNextQuantifier() {
         return hasNext() && isNextInstanceOfAny(RegexConstants.QUANTIFIER_TYPES);
     }
     
+    /**
+     * Return whether the next node in the list is a {@link OptionalNode}.
+     * 
+     * @return true if the next node in the list is an {@link OptionalNode}, or false otherwise
+     */
     public boolean isNextOptional() {
         return hasNext() && isNextInstanceOf(OptionalNode.class);
     }
