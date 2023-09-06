@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Random;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -41,6 +42,59 @@ class NumericRegexEncoderTest {
                                         .mapToObj(c -> "" + (char) c)
                                         .collect(Collectors.toList()));
         // @formatter:on
+    }
+
+    @Test
+    void testRandomPatterns() {
+        Random random = new Random();
+        NumberNormalizer normalizer = new NumberNormalizer();
+        for (int i = 0; i < 1000; i++) {
+            String num = Double.toString(random.nextDouble());
+            while (num.contains("E")) {
+                num = Double.toString(random.nextDouble());
+            }
+            // now generate random patterns
+            for (int j = 0; j < 100; j++) {
+                boolean preDecimal = true;
+                StringBuilder pattern = new StringBuilder();
+                if (random.nextBoolean()) {
+                    pattern.append(".*");
+                }
+                for (int c = 0; c < num.length(); c++) {
+                    char d = num.charAt(c);
+                    if (Character.isDigit(d)) {
+                        if (random.nextBoolean()) {
+                            pattern.append("[12" + d + "34]");
+                        } else if (random.nextBoolean()) {
+                            pattern.append('.');
+                        } else {
+                            pattern.append(d);
+                        }
+                        if (random.nextBoolean()) {
+                            pattern.append("*");
+                        }
+                    } else if (d == '.') {
+                        preDecimal = false;
+                        pattern.append("\\.");
+                    } else {
+                        pattern.append(d);
+                    }
+                }
+                if (!preDecimal && random.nextBoolean()) {
+                    pattern.append(".*");
+                }
+
+                // now verify the pattern matches
+                assertThat(Pattern.compile(pattern.toString()).matcher(num).matches()).as("matching " + pattern + " to " + num).isTrue();
+
+                // create the normalized form of the number
+                String numNormalized = normalizer.normalize(num);
+                String patternNormalized = normalizer.normalizeRegex(pattern.toString());
+
+                // check the normalized match
+                assertThat(Pattern.compile(patternNormalized).matcher(numNormalized).matches()).as("matching " + pattern + " -> " + patternNormalized + " to " + num + " -> " + numNormalized).isTrue();
+            }
+        }
     }
     
     /**
