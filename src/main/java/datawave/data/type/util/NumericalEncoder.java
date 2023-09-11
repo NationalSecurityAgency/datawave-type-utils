@@ -6,6 +6,7 @@ import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 /**
  * Provides a one-to-one mapping between an input decimal number and a lexigraphically sorted index for that number. The index is composed of two parts, roughly
@@ -31,6 +32,8 @@ public class NumericalEncoder {
     private static NumberFormat plainFormatter = new DecimalFormat("0.#########################################################");
     private static NumberFormat scientificFormatter = new DecimalFormat("0.#########################################################E0");
     private static final String zero = "+AE0";
+    private static final String encodedRegex = "(\\!|\\+)[a-zA-Z]E[0-9].?[0-9]*";
+    private static final Pattern encodedPattern = Pattern.compile(encodedRegex);
     
     static {
         initNegativeExponents();
@@ -84,8 +87,8 @@ public class NumericalEncoder {
     public static boolean isPossiblyEncoded(String input) {
         if (null == input || input.isEmpty())
             return false;
-        char c = input.charAt(0);
-        return (c == '+' || c == '!');
+        
+        return encodedPattern.matcher(input).matches();
     }
     
     public static BigDecimal decode(String input) {
