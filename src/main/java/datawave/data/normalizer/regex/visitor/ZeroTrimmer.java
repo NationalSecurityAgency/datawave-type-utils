@@ -73,24 +73,42 @@ public class ZeroTrimmer extends CopyVisitor {
             return trimmed;
         }
         
-        // Trim any leading zeros.
-        nodes = trimLeadingZeroOnlyElements(nodes);
-        
-        // Consolidate any possible leading zeros.
-        nodes = consolidatePossibleLeadingZeros(nodes);
-        
-        // Trim any trailing zeros.
-        nodes = trimTrailingZeroOnlyElements(nodes);
-        
-        // Consolidate any possible trailing zeros.
-        nodes = consolidatePossibleTrailingZeros(nodes);
-        
-        // The nodes are in reverse order after trimming trailing zeros. Correct the order.
-        Collections.reverse(nodes);
+        // Trim leading and trailing zeros.
+        nodes = trimLeadingZeros(nodes);
+        nodes = trimTrailingZeros(nodes);
         
         // Add the new nodes to the node to return.
         trimmed.addChildren(nodes);
         return trimmed;
+    }
+    
+    /**
+     * Trim/consolidate leading zeros.
+     * 
+     * @param nodes
+     *            the nodes to trim
+     * @return the trimmed nodes
+     */
+    private List<Node> trimLeadingZeros(List<Node> nodes) {
+        nodes = trimLeadingZeroOnlyElements(nodes);
+        return consolidatePossibleLeadingZeros(nodes);
+    }
+    
+    /**
+     * Trim/consolidate trailing zeros.
+     * 
+     * @param nodes
+     *            the nodes to trim
+     * @return the trimmed nodes
+     */
+    private List<Node> trimTrailingZeros(List<Node> nodes) {
+        // Reverse the nodes.
+        Collections.reverse(nodes);
+        nodes = trimTrailingZeroOnlyElements(nodes);
+        nodes = consolidatePossibleTrailingZeros(nodes);
+        // Restore the original order.
+        Collections.reverse(nodes);
+        return nodes;
     }
     
     /**
@@ -195,14 +213,8 @@ public class ZeroTrimmer extends CopyVisitor {
                         nodes.add(iter.next());
                     }
                 } else {
-                    // If the node is not followed by a quantifier, check if the current node is a zero. If so, remove the possibility for the character class
-                    // to match against zero.
-                    if (next instanceof CharClassNode) {
-                        nodes.add(removeZeroFromCharClass(next));
-                    } else {
-                        nodes.add(next);
-                    }
-                    // Make the node optional since it can possibly be a leading zero, and thus must be optional.
+                    // Add the node and make it optional since it can possibly be a leading zero, and thus must be optional.
+                    nodes.add(next);
                     nodes.add(new OptionalNode());
                 }
                 
@@ -319,8 +331,6 @@ public class ZeroTrimmer extends CopyVisitor {
      * @return a list of trimmed nodes
      */
     private List<Node> trimTrailingZeroOnlyElements(List<Node> nodes) {
-        // Reverse the list so that we iterate over it in reverse order.
-        Collections.reverse(nodes);
         NodeListIterator iter = new NodeListIterator(nodes);
         
         while (iter.hasNext()) {
@@ -440,13 +450,7 @@ public class ZeroTrimmer extends CopyVisitor {
                 } else {
                     // This is a single element. Make it optional.
                     nodes.add(new OptionalNode());
-                    // If the next node did not have a quantifier, check if the current node is a character class. If so, remove the possibility for the
-                    // character class to match against zero.
-                    if (next instanceof CharClassNode) {
-                        nodes.add(removeZeroFromCharClass(next));
-                    } else {
-                        nodes.add(next);
-                    }
+                    nodes.add(next);
                 }
                 
                 // If there are any elements after the current element that only match zero, consolidate then and add the result.
@@ -567,42 +571,5 @@ public class ZeroTrimmer extends CopyVisitor {
         }
         
         return nodes;
-    }
-    
-    /**
-     * Remove the ability for the character class to match the character '0'.
-     * 
-     * @param node
-     *            the character class node
-     * @return a new character class that cannot match '0'.
-     */
-    private Node removeZeroFromCharClass(Node node) {
-        CharClassNode charClass = new CharClassNode();
-        if (charClass.isNegated()) {
-            // If the character class is negated, simply add a zero to it.
-            charClass.addChild(new SingleCharNode(RegexConstants.ZERO));
-        } else {
-            // If the character class is not negated, remove 0 from it.
-            for (Node child : node.getChildren()) {
-                if (child instanceof SingleCharNode) {
-                    // Only retain single characters that are not zero.
-                    if (!RegexUtils.isChar(child, RegexConstants.ZERO)) {
-                        charClass.addChild(child);
-                    }
-                } else {
-                    // If the range starts at zero, make the range start at one.
-                    CharRangeNode range = (CharRangeNode) child;
-                    if (range.getStart() == RegexConstants.ZERO) {
-                        if (range.getEnd() != RegexConstants.ZERO) {
-                            range.setStart(RegexConstants.ONE);
-                            charClass.addChild(range);
-                        }
-                    } else {
-                        charClass.addChild(range);
-                    }
-                }
-            }
-        }
-        return charClass;
     }
 }

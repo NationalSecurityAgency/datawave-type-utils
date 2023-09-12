@@ -1,15 +1,22 @@
 package datawave.data.normalizer;
 
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import com.google.common.base.Stopwatch;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
+import java.util.regex.Pattern;
 
 public class NumberNormalizerTest {
     
     private final NumberNormalizer normalizer = new NumberNormalizer();
+    private final ThreadLocalRandom random = ThreadLocalRandom.current();
     
     /**
      * Verify that the equivalent numbers 1 and 1.00000000 are normalized to the same encoding.
@@ -97,16 +104,141 @@ public class NumberNormalizerTest {
         }
     }
     
-    private void assertNormalizeRegexResult(String input, String expected) {
-        assertEquals(normalizer.normalizeRegex(input), expected);
+    /**
+     * Generate random numbers and corresponding regex patterns, and verify that the patterns match against the numbers, and that the corresponding normalized
+     * regex patterns match against the corresponding normalized numbers.
+     */
+    @Test
+    void testRandomRegexPatterns() {
+        for (int i = 0; i < 1000; i++) {
+            // Get a random number. Call getFastRandomNumber() for a quick test that takes less than a minute to complete. Call getRandomNumber() to get numbers
+            // that are random across a much larger scale, but expect the test to take possibly more than 20 minutes to complete.
+            String num = getFastRandomNumber();
+            String normalizedNum = normalizer.normalize(num);
+            
+            // Generate 100 random patterns that should match against the number.
+            for (int j = 0; j < 100; j++) {
+                StringBuilder pattern = new StringBuilder();
+                
+                int startPos = 0;
+                // Randomly start the regex with .*
+                if (random.nextBoolean()) {
+                    pattern.append(".*");
+                    // If the number originally started with a '-', skip over it when appending to the pattern.
+                    if (num.charAt(0) == '-') {
+                        startPos = 1;
+                    }
+                }
+                
+                boolean seenDecimal = false;
+                for (int pos = startPos; pos < num.length(); pos++) {
+                    char character = num.charAt(pos);
+                    if (Character.isDigit(character)) {
+                        if (random.nextBoolean()) {
+                            pattern.append("[12").append(character).append("34]");
+                        } else if (random.nextBoolean()) {
+                            pattern.append('.');
+                        } else {
+                            pattern.append(character);
+                        }
+                        if (random.nextBoolean()) {
+                            pattern.append("*");
+                        }
+                    } else if (character == '.') {
+                        seenDecimal = true;
+                        pattern.append("\\.");
+                    } else {
+                        pattern.append(character);
+                    }
+                }
+                
+                // If we've seen a decimal point, randomly append a trailing .*
+                if (seenDecimal && random.nextBoolean()) {
+                    pattern.append(".*");
+                }
+                
+                // Verify the pattern matches the original number.
+                assertThat(Pattern.compile(pattern.toString()).matcher(num).matches()).as("matching " + pattern + " to " + num).isTrue();
+                
+                // Normalize the pattern.
+                String normalizedPattern = normalizer.normalizeRegex(pattern.toString());
+                
+                assertThat(Pattern.compile(normalizedPattern).matcher(normalizedNum).matches())
+                                .as("matching " + pattern + " -> " + normalizedPattern + " to " + num + " -> " + normalizedNum).isTrue();
+            }
+        }
     }
     
-    private void assertNormalizeDelegateTypeResult(BigDecimal input, String expected) {
-        assertEquals(normalizer.normalizeDelegateType(input), expected);
+    /**
+     * Return a random number that when used in {@link #testRandomRegexPatterns()}, will not make the test take more than a minute to complete.
+     * 
+     * @return a random number
+     */
+    private String getFastRandomNumber() {
+        String num = Double.toString(random.nextDouble());
+        if (num.contains("E")) {
+            num = Double.toString(random.nextDouble());
+        }
+        return num;
     }
     
-    private void assertDenormalizeResult(String input, BigDecimal expected) {
-        assertEquals(normalizer.denormalize(input), expected);
+    /**
+     * Return a random number. Note: when used in {@link #testRandomRegexPatterns()}, the test can take more than 20 minutes to complete.
+     * 
+     * @return a random number
+     */
+    private String getRandomNumber() {
+        return random.nextBoolean() ? getRandomNumberLessThanZero() : getRandomNumberGreaterThanZero();
     }
     
+    /**
+     * Return a random number that is larger than zero, randomly negative, and randomly whole.
+     * 
+     * @return a random number
+     */
+    private String getRandomNumberGreaterThanZero() {
+        BigDecimal decimal = getRandomBigDecimal();
+        
+        // Move the decimal point to the right randomly.
+        int leadingZeros = random.nextInt(0, 26);
+        decimal = decimal.movePointRight(leadingZeros);
+        
+        // Randomly trim the mantissa to make the number whole.
+        if (random.nextBoolean()) {
+            decimal = decimal.setScale(0, RoundingMode.FLOOR);
+        }
+        
+        return decimal.toPlainString();
+    }
+    
+    /**
+     * Return a random number that is less than zero, and randomly negative.
+     * 
+     * @return a random number
+     */
+    private String getRandomNumberLessThanZero() {
+        BigDecimal decimal = getRandomBigDecimal();
+        
+        // Move the decimal point to the left randomly.
+        int leadingZeros = random.nextInt(0, 26);
+        decimal = decimal.movePointLeft(leadingZeros);
+        
+        // Limit the mantissa length.
+        decimal = decimal.setScale(26, RoundingMode.FLOOR);
+        
+        return decimal.toPlainString();
+    }
+    
+    /**
+     * Return a random big decimal that is randomly negative.
+     * 
+     * @return a new big decimal
+     */
+    private BigDecimal getRandomBigDecimal() {
+        BigDecimal decimal = BigDecimal.valueOf(random.nextDouble());
+        if (random.nextBoolean()) {
+            decimal = decimal.negate();
+        }
+        return decimal;
+    }
 }
