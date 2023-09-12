@@ -22,7 +22,7 @@ public class NormalizationExceptionTest {
     @Test
     public void testPreEncodedValue() {
         NumberType type = new NumberType();
-        assertEquals("+c1.23", type.normalize("+c1.23"));
+        assertEquals("+cE1.23", type.normalize("+cE1.23"));
     }
     
     @Test
