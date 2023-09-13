@@ -1,14 +1,12 @@
 package datawave.data.normalizer;
 
-import datawave.data.type.NumberType;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.BeforeEach;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
+import datawave.data.type.NumberType;
 
 public class NormalizationExceptionTest {
     
