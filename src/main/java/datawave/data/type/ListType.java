@@ -1,6 +1,7 @@
 package datawave.data.type;
 
 import datawave.data.normalizer.Normalizer;
+
 import datawave.util.StringUtils;
 
 import java.util.ArrayList;
@@ -30,6 +31,13 @@ public abstract class ListType extends BaseType implements OneToManyNormalizerTy
         }
         
         return strings;
+    }
+    
+    @Override
+    public void setDelegateFromString(String in) {
+        this.normalizedValues = normalizeToMany(in);
+        this.delegate = in;
+        setNormalizedValue(in);
     }
     
     @Override

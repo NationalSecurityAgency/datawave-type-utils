@@ -11,6 +11,7 @@ import java.util.ListIterator;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import java.util.regex.Pattern;
 
 /**
  * Provides a one-to-one mapping between an input decimal number and a lexicographically sorted index for that number. The index is composed of two parts,
@@ -49,6 +50,13 @@ public class NumericalEncoder {
     private static final String zero = "+AE0";
     private static final List<String> uppercaseLetters = createLetterList('A', 'Z');
     private static final List<String> lowercaseLetters = createLetterList('a', 'z');
+    private static final String encodedRegex = "(\\!|\\+)[a-zA-Z]E[0-9].?[0-9]*";
+    private static final Pattern encodedPattern = Pattern.compile(encodedRegex);
+    
+    static {
+        initNegativeExponents();
+        initPositiveExponents();
+    }
     
     /**
      * Return an unmodifiable list of letters in order from the given starting letter to the given ending letter.
@@ -66,11 +74,6 @@ public class NumericalEncoder {
                                         .mapToObj(c -> "" + (char) c)
                                         .collect(Collectors.toList()));
         // @formatter:on
-    }
-    
-    static {
-        initNegativeExponents();
-        initPositiveExponents();
     }
     
     public static String encode(String input) {
@@ -121,8 +124,8 @@ public class NumericalEncoder {
     public static boolean isPossiblyEncoded(String input) {
         if (null == input || input.isEmpty())
             return false;
-        char c = input.charAt(0);
-        return (c == '+' || c == '!');
+        
+        return encodedPattern.matcher(input).matches();
     }
     
     public static BigDecimal decode(String input) {
