@@ -3,13 +3,13 @@ package datawave.data.normalizer;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import com.google.common.base.Stopwatch;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.Random;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.regex.Pattern;
 
@@ -135,14 +135,29 @@ public class NumberNormalizerTest {
                     char character = num.charAt(pos);
                     if (Character.isDigit(character)) {
                         if (random.nextBoolean()) {
-                            pattern.append("[12").append(character).append("34]");
+                            Set<Integer> candidates = new HashSet<>();
+                            for (int count = 0; count < 10; count++) {
+                                if (random.nextBoolean()) {
+                                    candidates.add(random.nextInt(10));
+                                }
+                            }
+                            candidates.add(Integer.valueOf(String.valueOf(character)));
+                            pattern.append('[');
+                            candidates.stream().forEach(digit -> pattern.append(digit));
+                            pattern.append(']');
                         } else if (random.nextBoolean()) {
                             pattern.append('.');
+                        } else if (random.nextBoolean()) {
+                            pattern.append("\\d");
                         } else {
                             pattern.append(character);
                         }
                         if (random.nextBoolean()) {
                             pattern.append("*");
+                        } else if (random.nextBoolean()) {
+                            pattern.append("+");
+                        } else if (random.nextBoolean()) {
+                            pattern.append("{1,3}");
                         }
                     } else if (character == '.') {
                         seenDecimal = true;
@@ -158,13 +173,14 @@ public class NumberNormalizerTest {
                 }
                 
                 // Verify the pattern matches the original number.
-                assertThat(Pattern.compile(pattern.toString()).matcher(num).matches()).as("matching " + pattern + " to " + num).isTrue();
+                assertThat(Pattern.compile(pattern.toString()).matcher(num).matches()).as("matching \n\"" + pattern + "\"\n to " + num).isTrue();
                 
                 // Normalize the pattern.
                 String normalizedPattern = normalizer.normalizeRegex(pattern.toString());
                 
+                // check the normalized match
                 assertThat(Pattern.compile(normalizedPattern).matcher(normalizedNum).matches())
-                                .as("matching " + pattern + " -> " + normalizedPattern + " to " + num + " -> " + normalizedNum).isTrue();
+                                .as("matching \n\"" + pattern + "\" -> \n\"" + normalizedPattern + "\"\n to " + num + " -> " + normalizedNum).isTrue();
             }
         }
     }
