@@ -26,7 +26,7 @@
         <spotbugs.excludes.file>${project.basedir}/src/main/spotbugs/excludes.xml</spotbugs.excludes.file>
         <version.common-utils>1.1</version.common-utils>
         <version.commons-lang3>3.9</version.commons-lang3>
-        <version.commons-net>3.6</version.commons-net>
+        <version.commons-net>3.9.0</version.commons-net>
         <version.geowave>1.2.0</version.geowave>
         <version.hadoop>2.6.0-cdh5.9.1</version.hadoop>
         <version.jaxb>2.3.3</version.jaxb>
