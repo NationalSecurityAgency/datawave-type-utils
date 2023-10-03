@@ -32,7 +32,7 @@ public class NumericalEncoder {
     private static NumberFormat plainFormatter = new DecimalFormat("0.#########################################################");
     private static NumberFormat scientificFormatter = new DecimalFormat("0.#########################################################E0");
     private static final String zero = "+AE0";
-    private static final String encodedRegex = "(\\!|\\+)[a-zA-Z]E[0-9].?[0-9]*";
+    private static final String encodedRegex = "(\\!|\\+)[a-zA-Z][E|e][0-9].?[0-9]*";
     private static final Pattern encodedPattern = Pattern.compile(encodedRegex);
     
     static {

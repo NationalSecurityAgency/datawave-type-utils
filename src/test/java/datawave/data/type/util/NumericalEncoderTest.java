@@ -18,6 +18,7 @@ public class NumericalEncoderTest {
         assertFalse(NumericalEncoder.isPossiblyEncoded("+1"));
         assertFalse(NumericalEncoder.isPossiblyEncoded("!1"));
         assertTrue(NumericalEncoder.isPossiblyEncoded("+aE5.4"));
+        assertTrue(NumericalEncoder.isPossiblyEncoded("+ae5.4"));
         assertFalse(NumericalEncoder.isPossiblyEncoded("+aE5.4.4.4.4"));
         assertTrue(NumericalEncoder.isPossiblyEncoded("+AE0"));
         assertFalse(NumericalEncoder.isPossiblyEncoded("+AE0.."));
