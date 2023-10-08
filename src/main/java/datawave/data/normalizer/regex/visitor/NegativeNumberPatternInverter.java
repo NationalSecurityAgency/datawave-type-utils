@@ -8,7 +8,7 @@ import datawave.data.normalizer.regex.ExpressionNode;
 import datawave.data.normalizer.regex.GroupNode;
 import datawave.data.normalizer.regex.Node;
 import datawave.data.normalizer.regex.NodeListIterator;
-import datawave.data.normalizer.regex.OptionalNode;
+import datawave.data.normalizer.regex.QuestionMarkNode;
 import datawave.data.normalizer.regex.RegexConstants;
 import datawave.data.normalizer.regex.RegexUtils;
 import datawave.data.normalizer.regex.RepetitionNode;
@@ -52,13 +52,10 @@ public class NegativeNumberPatternInverter extends CopyVisitor {
         // Operate on a copy of the pattern tree.
         Node copy = copy(node);
         
-        // If the first character is not a minus sign, this is not a negative number pattern. Return the copy.
-        if (!RegexUtils.isChar(copy.getFirstChild(), RegexConstants.HYPHEN)) {
+        // If the first character is not !, this is not a negative number pattern. Return the copy.
+        if (!RegexUtils.isChar(copy.getFirstChild(), RegexConstants.EXCLAMATION_POINT)) {
             return copy;
         }
-        
-        // Remove the hyphen from the copy.
-        copy.removeFirstChild();
         
         // Create an initial encoded pattern node with all the leading bin info.
         EncodedPatternNode encodedPattern = new EncodedPatternNode();
@@ -117,8 +114,8 @@ public class NegativeNumberPatternInverter extends CopyVisitor {
         // The most recent quantifier.
         Node currentQuantifier;
         
-        // The most recent optional.
-        Node currentOptional;
+        // The most recent question mark.
+        Node currentQuestionMark;
         
         // Whether the current element was expanded to a group after being inverted.
         boolean currentElementExpandedToGroup;
@@ -157,15 +154,16 @@ public class NegativeNumberPatternInverter extends CopyVisitor {
          * Invert the next element in the node list iterator.
          */
         private void invertNext() {
-            // Capture the next element, along with its quantifier, and optional, if present.
+            // Capture the next element, along with its quantifier, and question mark, if present.
             captureNext();
             
             switch (currentElement.getType()) {
+                case ESCAPED_SINGLE_CHAR:
                 case ANY_CHAR:
                 case DIGIT_CHAR_CLASS:
-                    // If the current element is a wildcard or digit character class, no inversion needs to happen. Add the current element nodes to the
-                    // inverted list in reverse order.
-                    addCurrentOptionalToInverted();
+                    // If the current element is a decimal point, wildcard or digit character class, no inversion needs to happen. Add the current element nodes
+                    // to the inverted list in reverse order.
+                    addCurrentQuestionMarkToInverted();
                     addCurrentQuantifierToInverted();
                     addCurrentElementToInverted();
                     break;
@@ -175,13 +173,14 @@ public class NegativeNumberPatternInverter extends CopyVisitor {
                     // Invert the current element.
                     Node invertedElement = invertCurrentElement();
                     if (currentElementExpandedToGroup) {
-                        // If the current element was expanded to a group, only add the optional to the inverted list before adding the group. If a quantifier
+                        // If the current element was expanded to a group, only add the question mark to the inverted list before adding the group. If a
+                        // quantifier
                         // was present, it will be in the group.
-                        addCurrentOptionalToInverted();
+                        addCurrentQuestionMarkToInverted();
                         inverted.add(invertedElement);
                     } else {
-                        // Otherwise add the optional, quantifier, and inverted element to the inverted list in reverse order.
-                        addCurrentOptionalToInverted();
+                        // Otherwise add the question mark, quantifier, and inverted element to the inverted list in reverse order.
+                        addCurrentQuestionMarkToInverted();
                         addCurrentQuantifierToInverted();
                         inverted.add(invertedElement);
                     }
@@ -200,11 +199,11 @@ public class NegativeNumberPatternInverter extends CopyVisitor {
         }
         
         /**
-         * Add the current optional to the inverted list if it is not null.
+         * Add the current question mark to the inverted list if it is not null.
          */
-        private void addCurrentOptionalToInverted() {
-            if (currentOptional != null) {
-                inverted.add(currentOptional);
+        private void addCurrentQuestionMarkToInverted() {
+            if (currentQuestionMark != null) {
+                inverted.add(currentQuestionMark);
             }
         }
         
@@ -239,37 +238,37 @@ public class NegativeNumberPatternInverter extends CopyVisitor {
                     if (currentQuantifier instanceof ZeroOrMoreNode) {
                         return true;
                     } else if (currentQuantifier instanceof RepetitionNode) {
-                        return RegexUtils.canBeZeroLength((RepetitionNode) currentQuantifier);
+                        return RegexUtils.canOccurZeroTimes((RepetitionNode) currentQuantifier);
                     }
                 } else {
-                    // If there is no quantifier, the minuend can NINE_OR_TEN if the current element is optional.
-                    return currentOptional != null;
+                    // If there is no quantifier, the minuend can NINE_OR_TEN if the current element is a question mark.
+                    return currentQuestionMark != null;
                 }
             }
             return false;
         }
         
         /**
-         * Capture the next element, quantifier, and current optional. Additionally, reset {@link #currentElementExpandedToGroup} to false.
+         * Capture the next element, quantifier, and current question mark. Additionally, reset {@link #currentElementExpandedToGroup} to false.
          */
         private void captureNext() {
             // Reset current items to null.
             currentElement = null;
             currentQuantifier = null;
-            currentOptional = null;
+            currentQuestionMark = null;
             currentElementExpandedToGroup = false;
             
             // Extract the next element, quantifier, and
             while (iter.hasNext()) {
                 Node prev = iter.next();
-                if (prev instanceof OptionalNode) {
-                    // If the next element is an optional, it does not need to be inverted. Add it to the list of inverted elements.
-                    currentOptional = prev;
+                if (prev instanceof QuestionMarkNode) {
+                    // If the next element is a question mark, it does not need to be inverted. Add it to the list of inverted elements.
+                    currentQuestionMark = prev;
                 } else if (RegexUtils.isQuantifier(prev)) {
                     // If the next element is a quantifier, it does not need to be inverted. Add it to the list of inverted elements.
                     currentQuantifier = prev;
                 } else {
-                    // If we've reached an element that is not an optional or quantifier, we've reached an element that may need to be inverted.
+                    // If we've reached an element that is not a question mark or quantifier, we've reached an element that may need to be inverted.
                     currentElement = prev;
                     break;
                 }

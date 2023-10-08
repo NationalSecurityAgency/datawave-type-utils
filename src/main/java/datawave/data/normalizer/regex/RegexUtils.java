@@ -194,14 +194,37 @@ public class RegexUtils {
         return -1;
     }
     
+    /**
+     * Returns whether the first child in the given node tree is a minus sign.
+     * 
+     * @param node
+     *            the node
+     * @return true if the first child is a minus sign, or false otherwise
+     */
     public static boolean isNegativeRegex(Node node) {
         return isChar(node.getFirstChild(), RegexConstants.HYPHEN);
     }
     
+    /**
+     * Return whether the given node is an escaped period.
+     * 
+     * @param node
+     *            the node
+     * @return true if the given node is an escaped period, or false otherwise.
+     */
     public static boolean isDecimalPoint(Node node) {
         return node instanceof EscapedSingleCharNode && ((EscapedSingleCharNode) node).getCharacter() == RegexConstants.PERIOD;
     }
     
+    /**
+     * Return whether the given node is the given character, escaped or otherwise.
+     * 
+     * @param node
+     *            the node
+     * @param character
+     *            the character
+     * @return true if the given node is the given character, or false otherwise
+     */
     public static boolean isChar(Node node, char character) {
         if (node instanceof SingleCharNode) {
             return ((SingleCharNode) node).getCharacter() == character;
@@ -211,7 +234,18 @@ public class RegexUtils {
         return false;
     }
     
-    public static boolean containsChar(Node node, char character) {
+    /**
+     * Return whether the given node is a character class that would match against the given character.
+     * 
+     * @param node
+     *            the node
+     * @param character
+     *            the character
+     * @return true if the given character class would match against the given character, or false otherwise
+     * @throws IllegalArgumentException
+     *             if the given node is not a {@link CharClassNode}
+     */
+    public static boolean matchesChar(Node node, char character) {
         if (node instanceof CharClassNode) {
             CharClassNode charClass = (CharClassNode) node;
             boolean matchFound = false;
@@ -234,13 +268,20 @@ public class RegexUtils {
                     }
                 }
             }
-            // If the character class was negated, e.g. [^1-5], the char class is considered to contain the character if a direct match was not found.
-            // Otherwise, for a non-negated character class, the char class is considered to contain the character only if a direct match was found.
+            // If the character class was negated, e.g. [^1-5], it matches against the character if no direct match was found.
             return charClass.isNegated() != matchFound;
+        } else {
+            throw new IllegalArgumentException("Node must be a " + CharClassNode.class.getSimpleName());
         }
-        return false;
     }
     
+    /**
+     * Return whether the given node is a regex element that can match against the character '0'.
+     * 
+     * @param node
+     *            the node
+     * @return true if the node can match against '0' or false otherwise.
+     */
     public static boolean matchesZero(Node node) {
         switch (node.getType()) {
             case DIGIT_CHAR_CLASS:
@@ -249,12 +290,19 @@ public class RegexUtils {
             case SINGLE_CHAR:
                 return isChar(node, RegexConstants.ZERO);
             case CHAR_CLASS:
-                return containsChar(node, RegexConstants.ZERO);
+                return matchesChar(node, RegexConstants.ZERO);
             default:
                 return false;
         }
     }
     
+    /**
+     * Return whether the given node is a regex element that can only match against the character '0'.
+     * 
+     * @param node
+     *            the node
+     * @return true if the node can match only against '0' or false otherwise.
+     */
     public static boolean matchesZeroOnly(Node node) {
         switch (node.getType()) {
             case SINGLE_CHAR:
@@ -278,40 +326,61 @@ public class RegexUtils {
         }
     }
     
+    /**
+     * Return whether the given node is a quantifier type.
+     * 
+     * @param node
+     *            the node
+     * @return true if the node is a quantifier type, or false otherwise
+     */
     public static boolean isQuantifier(Node node) {
         return RegexConstants.QUANTIFIER_TYPES.contains(node.getClass());
     }
     
+    /**
+     * Return a range representing the number of occurrences the given node can match against. The left side will be at a minimum, 0, and the right side may be
+     * a number, or null (infinity).
+     * 
+     * @param node
+     *            the node
+     * @return the occurrence range
+     * @throws IllegalArgumentException
+     *             if the given node is not a quantifier type
+     */
     public static Pair<Integer,Integer> getQuantifierRange(Node node) {
         if (!isQuantifier(node)) {
             throw new IllegalArgumentException("Node must be one of the following quantifier types: " + RegexConstants.QUANTIFIER_TYPES);
         }
-        Integer lower = null;
-        Integer upper = null;
+        Integer min;
+        Integer max = null;
         switch (node.getType()) {
             case ZERO_OR_MORE:
-                lower = 0;
+                // Minimum occurrence of 0.
+                min = 0;
                 break;
             case ONE_OR_MORE:
-                lower = 1;
+                // Minimum occurrence of 1.
+                min = 1;
                 break;
             case REPETITION:
                 Node child = node.getFirstChild();
                 if (child instanceof IntegerNode) {
-                    lower = ((IntegerNode) child).getValue();
-                    upper = lower;
+                    // Minimum and maximum occurrences will be the same.
+                    min = ((IntegerNode) child).getValue();
+                    max = min;
                 } else {
                     IntegerRangeNode rangeNode = (IntegerRangeNode) child;
-                    lower = rangeNode.getStart();
+                    // Minimum is defined in range. Maximum may be infinity if not defined.
+                    min = rangeNode.getStart();
                     if (rangeNode.isEndBounded()) {
-                        upper = rangeNode.getEnd();
+                        max = rangeNode.getEnd();
                     }
                 }
                 break;
             default:
-                throw new IllegalArgumentException("Node must be one of the following quantifier types: " + RegexConstants.QUANTIFIER_TYPES);
+                throw new IllegalArgumentException("Unhandled quantifier type: " + RegexConstants.QUANTIFIER_TYPES);
         }
-        return Pair.of(lower, upper);
+        return Pair.of(min, max);
     }
     
     /**
@@ -329,25 +398,75 @@ public class RegexUtils {
         return RegexConstants.SIMPLE_NUMBER_REGEX_PATTERN.matcher(expression).matches();
     }
     
+    /**
+     * Return the given digit character as an integer.
+     * 
+     * @param digit
+     *            the digit character
+     * @return the integer form
+     */
     public static int toInt(char digit) {
         return Character.digit(digit, RegexConstants.DECIMAL_RADIX);
     }
     
+    /**
+     * Return the given int as a digit character.
+     * 
+     * @param digit
+     *            the int
+     * @return the digit character
+     */
     public static char toChar(int digit) {
         return Character.forDigit(digit, RegexConstants.DECIMAL_RADIX);
     }
     
-    public static boolean canBeZeroLength(RepetitionNode node) {
+    /**
+     * Return whether the given repetition quantifier node allows for zero occurrences.
+     * 
+     * @param node
+     *            the node
+     * @return true if the quantifier allows for zero occurrences, or false otherwise
+     */
+    public static boolean canOccurZeroTimes(RepetitionNode node) {
         Node child = node.getFirstChild();
         if (child instanceof IntegerNode) {
-            return ((IntegerNode) (child)).getValue() == 0;
+            return ((IntegerNode) child).getValue() == 0;
         } else {
             return ((IntegerRangeNode) child).getStart() == 0;
         }
     }
     
+    /**
+     * Return whether the given repetition quantifier is not a defined range, e.g. {x} rather than {x,y} or {x,}.
+     * 
+     * @param node
+     *            the node
+     * @return true if the repetition is not a range, or false otherwise
+     */
+    public static boolean isNotRange(RepetitionNode node) {
+        return node.getFirstChild() instanceof IntegerNode;
+    }
+    
+    /**
+     * Return a copy of the given repetition as a range starting from zero.
+     * 
+     * @param node
+     *            the node
+     * @return the new repetition quantifier
+     */
+    public static RepetitionNode createRangeStartingFromZero(RepetitionNode node) {
+        IntegerRangeNode range = new IntegerRangeNode();
+        range.setStart(0);
+        Node child = node.getFirstChild();
+        if (child instanceof IntegerNode) {
+            range.setEnd(((IntegerNode) child).getValue());
+        } else {
+            range.setEnd(((IntegerRangeNode) child).getEnd());
+        }
+        return new RepetitionNode(range);
+    }
+    
     private RegexUtils() {
         throw new UnsupportedOperationException();
     }
-    
 }

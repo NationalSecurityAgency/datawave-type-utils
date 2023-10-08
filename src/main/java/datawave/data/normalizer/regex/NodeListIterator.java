@@ -119,9 +119,9 @@ public class NodeListIterator {
             if (RegexUtils.matchesZero(next)) {
                 // Explicitly call next so that we increment the iterator index.
                 next();
-                // Seek past a succeeding quantifier and optional if present.
-                seekPastQuantifier();
-                seekPastOptional();
+                // Seek past a succeeding quantifier and question mark if present.
+                seekPastQuantifiers();
+                seekPastQuestionMarks();
             } else {
                 return;
             }
@@ -141,9 +141,9 @@ public class NodeListIterator {
             if (RegexUtils.matchesZeroOnly(next)) {
                 // Explicitly call next so that we increment the iterator index.
                 next();
-                // Seek past a succeeding quantifier and optional if present.
-                seekPastQuantifier();
-                seekPastOptional();
+                // Seek past a succeeding quantifier and question mark if present.
+                seekPastQuantifiers();
+                seekPastQuestionMarks();
             } else {
                 return;
             }
@@ -155,19 +155,19 @@ public class NodeListIterator {
      * {@link RepetitionNode}, starting from the iterator's current position in the list. If no such node is found, the iterator will be moved to the end of the
      * list, {@link #hasNext()} will return false and any call to {@link #next()} will result in a {@link NoSuchElementException}.
      */
-    public void seekPastQuantifier() {
+    public void seekPastQuantifiers() {
         while (isNextQuantifier()) {
             next();
         }
     }
     
     /**
-     * Update the iterator so that the next call to {@link #next()} will return the first node that is not an {@link OptionalNode}, starting from the iterator's
-     * current position in the list. If no such node is found, the iterator will be moved to the end of the list, {@link #hasNext()} will return false and any
-     * call to {@link #next()} will result in a {@link NoSuchElementException}.
+     * Update the iterator so that the next call to {@link #next()} will return the first node that is not an {@link QuestionMarkNode}, starting from the
+     * iterator's current position in the list. If no such node is found, the iterator will be moved to the end of the list, {@link #hasNext()} will return
+     * false and any call to {@link #next()} will result in a {@link NoSuchElementException}.
      */
-    public void seekPastOptional() {
-        while (isNextOptional()) {
+    public void seekPastQuestionMarks() {
+        while (isNextQuestionMark()) {
             next();
         }
     }
@@ -182,11 +182,11 @@ public class NodeListIterator {
     }
     
     /**
-     * Return whether the next node in the list is a {@link OptionalNode}.
+     * Return whether the next node in the list is a {@link QuestionMarkNode}.
      * 
-     * @return true if the next node in the list is an {@link OptionalNode}, or false otherwise
+     * @return true if the next node in the list is an {@link QuestionMarkNode}, or false otherwise
      */
-    public boolean isNextOptional() {
-        return hasNext() && isNextInstanceOf(OptionalNode.class);
+    public boolean isNextQuestionMark() {
+        return hasNext() && isNextInstanceOf(QuestionMarkNode.class);
     }
 }

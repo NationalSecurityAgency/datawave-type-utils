@@ -1,19 +1,12 @@
 package datawave.data.normalizer.regex.visitor;
 
 import datawave.data.normalizer.regex.Node;
-import datawave.data.normalizer.regex.visitor.GroupAlternationsExpander;
-import datawave.data.normalizer.regex.visitor.OptionalVariantExpander;
 import org.junit.jupiter.api.Test;
 
 import static datawave.data.normalizer.regex.NodeAssert.assertThat;
 import static datawave.data.normalizer.regex.RegexParser.parse;
 
 class OptionalVariantExpanderTest {
-    
-    @Test
-    void testExpandingNull() {
-        assertThat(GroupAlternationsExpander.expand(null)).isNull();
-    }
     
     @Test
     void testExpandingEmptyPattern() {
@@ -83,8 +76,7 @@ class OptionalVariantExpanderTest {
         if (expectedPattern == null) {
             assertThat(actual).isNull();
         } else {
-            Node expected = parse(expectedPattern);
-            assertThat(actual).isEqualTreeTo(expected);
+            assertThat(actual).asTreeString().isEqualTo(expectedPattern);
         }
     }
 }

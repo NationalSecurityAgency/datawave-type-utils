@@ -1,6 +1,5 @@
-package datawave.data.normalizer;
+package datawave.data.normalizer.regex;
 
-import datawave.data.normalizer.regex.NumericRegexEncoder;
 import datawave.data.type.util.NumericalEncoder;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -134,20 +133,12 @@ class NumericRegexEncoderTest {
         assertExceptionThrown("1\\$", "Regex pattern may not contain any escaped characters other than \\. \\- or \\d.");
     }
     
+    /**
+     * Verify that an exception is thrown for regexes with groups.
+     */
     @Test
-    void testRegexWithInvalidGroups() {
-        // Verify no exceptions are thrown for supported groups.
-        NumericRegexEncoder.encode("(123)");
-        NumericRegexEncoder.encode("(123)[234]");
-        NumericRegexEncoder.encode("(123)\\d");
-        NumericRegexEncoder.encode("(123)\\.");
-        NumericRegexEncoder.encode("(123).");
-        
-        // Verify exceptions are thrown for unsupported group modifiers.
-        assertExceptionThrown("(234)*", "Regex pattern may not contain any groups that are directly followed by * + ? or {}");
-        assertExceptionThrown("(234)+", "Regex pattern may not contain any groups that are directly followed by * + ? or {}");
-        assertExceptionThrown("(234)?", "Regex pattern may not contain any groups that are directly followed by * + ? or {}");
-        assertExceptionThrown("(234){3}", "Regex pattern may not contain any groups that are directly followed by * + ? or {}");
+    void testRegexWithGroups() {
+        assertExceptionThrown("(234)*", "Regex pattern may not contain any groups.");
     }
     
     /**
@@ -159,13 +150,24 @@ class NumericRegexEncoderTest {
     }
     
     /**
-     * Verify that an exception is thrown for regexes with nested groups.
+     * Verify that invalid decimal points are not allowed.
      */
     @Test
-    void testRegexWithNestedGroups() {
-        assertExceptionThrown("(1|(3|4))", "Nested groups are not supported.");
+    void testInvalidDecimalPoints() {
+        // Verify quantifiers and optionals result in exceptions.
+        assertExceptionThrown("234\\.?34", "Regex pattern may not contain any decimal points that are directly followed by * ? or {}.");
+        assertExceptionThrown("234\\.*34", "Regex pattern may not contain any decimal points that are directly followed by * ? or {}.");
+        assertExceptionThrown("234\\.+34", "Regex pattern may not contain any decimal points that are directly followed by * ? or {}.");
+        assertExceptionThrown("234\\.{3}34", "Regex pattern may not contain any decimal points that are directly followed by * ? or {}.");
+        
+        // Verify multiple required decimal points result in exceptions.
+        assertExceptionThrown("3\\.34\\.3", "Regex may not contain expressions with than one decimal point.");
+        assertExceptionThrown("543.*|3\\.34\\.3", "Regex may not contain expressions with than one decimal point.");
     }
     
+    /**
+     * Verify that patterns that are ultimately empty after trimming all zero-length repetitions are not allowed.
+     */
     @Test
     void testRegexConsistingOfZeroLengthRepetition() {
         assertExceptionThrown("3{0}?", "Regex pattern is empty after trimming all characters followed by {0} or {0,0}.");
@@ -229,24 +231,6 @@ class NumericRegexEncoderTest {
                         .matchesAllOf("12", "-45", "23.45");
         assertRegex("^12|-45|23\\.45$").normalizesTo("\\+bE1\\.2|!YE5\\.5|\\+bE2\\.345")
                         .matchesAllOf("12", "-45", "23.45");
-        
-        // Verify no issues with grouped simple numbers. We should see the groups flattened.
-        assertRegex("(123)").normalizesTo("\\+cE1\\.23")
-                        .matches("123");
-        assertRegex("^(123)$").normalizesTo("\\+cE1\\.23")
-                        .matches("123");
-        assertRegex("(123|-456)").normalizesTo("\\+cE1\\.23|!XE5\\.44")
-                        .matchesAllOf("123", "-456")
-                        .matchesNoneOf("-123", "456");
-        assertRegex("(^123$|^-456$)").normalizesTo("\\+cE1\\.23|!XE5\\.44")
-                        .matchesAllOf("123", "-456")
-                        .matchesNoneOf("-123", "456");
-        assertRegex("(123)|(-456)").normalizesTo("\\+cE1\\.23|!XE5\\.44")
-                        .matchesAllOf("123", "-456")
-                        .matchesNoneOf("-123", "456");
-        assertRegex("(123)|(-456)|12").normalizesTo("\\+cE1\\.23|!XE5\\.44|\\+bE1\\.2")
-                        .matchesAllOf("123", "-456", "12")
-                        .matchesNoneOf("-123", "456", "-12");
         // @formatter:on
     }
     
@@ -368,14 +352,33 @@ class NumericRegexEncoderTest {
     void testLeadingZeroOrMoreQuantifier() {
         // @formatter:off
         // Test .* at start of regex. The .* can remain a .* after the decimal point since it is a zero or more match.
-        assertRegex(".*54").normalizesTo("\\+[a-zA-Z]E.?\\.?.*5\\.?4|![A-Za-z]E.?\\.?.*4\\.?6")
+        assertRegex(".*54").normalizesTo("\\+[b-zA-Z]E.*5\\.?4|![A-Ya-z]E.*4\\.?6")
                         .matchesAllOf("154", "6644444444444444.54", "54", "-154", "-54", "-3566666666654", "0.00054", "-0.42222254")
                         .matchesNoneOf("111143");
         
         // Test .*?.
-        assertRegex(".*?54").normalizesTo("\\+[a-zA-Z]E.?\\.?.*?5\\.?4|![A-Za-z]E.?\\.?.*?4\\.?6")
+        assertRegex(".*?54").normalizesTo("\\+[b-zA-Z]E.*?5\\.?4|![A-Ya-z]E.*?4\\.?6")
                         .matchesAllOf("154", "6644444444444444.54", "54", "-154", "-54", "-3566666666654", "0.00054", "-0.42222254")
                         .matchesNoneOf("111143");
+    
+        // Test .* at start of regex. The .* can remain a .* after the decimal point since it is a zero or more match.
+        assertRegex(".*\\.54").normalizesTo("\\+[a-zZ]E.*5\\.?4|![A-Za]E.*4\\.?6")
+                        .matchesAllOf("0.54", "6644444444444444.54", "-1.54", "-.54", "-35666666666.54")
+                        .matchesNoneOf("111143", "0.00054");
+    
+        // Test .*?.
+        assertRegex(".*?\\.54").normalizesTo("\\+[a-zZ]E.*?5\\.?4|![A-Za]E.*?4\\.?6")
+                        .matchesAllOf("1.54", "6644444444444444.54", "-.54", "-1.54")
+                        .matchesNoneOf("111143");
+    
+        assertRegex("\\..*54").normalizesTo("\\+[A-Z]E.*5\\.?4")
+                        .matchesAllOf(".154", ".054", ".54", ".3566666666654", ".00054", ".42222254")
+                        .matchesNoneOf("111143", "6644444444444444.54", "1.54", "154", "-.154");
+    
+        // Test .*?.
+        assertRegex("\\..*?54").normalizesTo("\\+[A-Z]E.*?5\\.?4")
+                        .matchesAllOf(".154", ".054", ".54", ".3566666666654", ".00054", ".42222254")
+                        .matchesNoneOf("111143", "6644444444444444.54", "1.54", "154", "-.154");
         // @formatter:on
     }
     
@@ -383,14 +386,65 @@ class NumericRegexEncoderTest {
     void testLeadingOneOrMoreQuantifier() {
         // @formatter:off
         // Test .+ at start of regex. The .+ should become a .* after the decimal point since we have one wildcard guaranteed before the decimal point.
-        assertRegex(".+54").normalizesTo("\\+[a-zA-Z]E.\\.?.*54|![A-Za-z]E.\\.?.*46")
-                        .matchesAllOf("154", "6644444444444444.54", "-154", "-444444444444454")
-                        .matchesNoneOf("54", "5.4", "542343");
+        assertRegex(".+54").normalizesTo("\\+[b-zA-Z]E.*5\\.?4|![A-Ya-z]E.*4\\.?6")
+                        .matchesAllOf("154", "6644444444444444.54", "-154", "-444444444444454", "0.54", "054")
+                        .matchesNoneOf("5.4", "542343");
         
         // Test .+?.
-        assertRegex(".+?54").normalizesTo("\\+[a-zA-Z]E.\\.?.*?54|![A-Za-z]E.\\.?.*?46")
-                        .matchesAllOf("154", "6644444444444444.54", "-154", "-222222222222254")
-                        .matchesNoneOf("54", "5.4", "542343");
+        assertRegex(".+?54").normalizesTo("\\+[b-zA-Z]E.*?5\\.?4|![A-Ya-z]E.*?4\\.?6")
+                        .matchesAllOf("154", "6644444444444444.54", "-154", "-222222222222254", "-054")
+                        .matchesNoneOf("5.4", "542343");
+    
+        assertRegex(".+\\.54").normalizesTo("\\+[a-zZ]E.*5\\.?4|![A-Za]E.*4\\.?6")
+                        .matchesAllOf("1.54", "6644444444444444.54", "-1.54", "-4444444444444.54", "0.54")
+                        .matchesNoneOf("542343", ".544453");
+    
+        // Test .+?.
+        assertRegex(".+?\\.54").normalizesTo("\\+[a-zZ]E.*?5\\.?4|![A-Za]E.*?4\\.?6")
+                        .matchesAllOf("1.54", "6644444444444444.54", "-1.54", "-2222222222222.54")
+                        .matchesNoneOf("542343", ".0000054");
+    
+        assertRegex("\\..+54").normalizesTo("\\+[A-Z]E.*5\\.?4")
+                        .matchesAllOf(".154", ".664444444444444454", ".0000000054", ".054")
+                        .matchesNoneOf("54", "5.4", "542343", "-.154", "154", "-.000054");
+    
+        // Test .+?.
+        assertRegex("\\..+?54").normalizesTo("\\+[A-Z]E.*?5\\.?4")
+                        .matchesAllOf(".154", ".664444444444444454", ".0000000054", ".054")
+                        .matchesNoneOf("54", "5.4", "542343", "-.154", "154", "-.000054");
+        // @formatter:on
+    }
+    
+    @Test
+    void testLeadingOneOrMoreQuantifierForWildcard() {
+        // @formatter:off
+        // Test .+ at start of regex. The .+ should become a .* after the decimal point since we have one wildcard guaranteed before the decimal point.
+        assertRegex(".{3}54").normalizesTo("\\+[b-eW-Z]E.?\\.?.{0,2}5\\.?4|![V-Ya-d]E.?\\.?.{0,2}4\\.?6")
+                        .matchesAllOf("11154", "43.54", "-1154", "-4454", "00054", "-0054")
+                        .matchesNoneOf("5.4", "542343");
+        
+        // Test .+?.
+        assertRegex(".{3}?54").normalizesTo("\\+[b-eW-Z]E.?\\.?.{0,2}?5\\.?4|![V-Ya-d]E.?\\.?.{0,2}?4\\.?6")
+                        .matchesAllOf("00154", "-1054", "00054", "99954", ".0054")
+                        .matchesNoneOf("5.4", "542343", "6644444444444444.54", "-222222222222254");
+        
+        assertRegex(".{3}\\.54").normalizesTo("\\+[a-cZ]E.?\\.?.{0,2}5\\.?4|![X-Za]E.?\\.?.{0,2}4\\.?6")
+                        .matchesAllOf("111.54", "444.54", "000.54", "-00.54", "-46.54")
+                        .matchesNoneOf("542343", "343.4554", "0.000054");
+        
+        // Test .+?.
+        assertRegex(".{3}?\\.54").normalizesTo("\\+[a-cZ]E.?\\.?.{0,2}?5\\.?4|![X-Za]E.?\\.?.{0,2}?4\\.?6")
+                        .matchesAllOf("111.54", "444.54", "000.54", "-00.54", "-46.54")
+                        .matchesNoneOf("542343", "343.4554", "0.000054");
+        
+        assertRegex("\\..{3}54").normalizesTo("\\+[W-Z]E.?\\.?.{0,2}5\\.?4")
+                        .matchesAllOf(".00154", ".34354", ".99954")
+                        .matchesNoneOf("54", "5.4", "542343", "-.00154");
+        
+        // Test .+?.
+        assertRegex("\\..{3}?54").normalizesTo("\\+[W-Z]E.?\\.?.{0,2}?5\\.?4")
+                        .matchesAllOf(".00154", ".34354", ".99954")
+                        .matchesNoneOf("54", "5.4", "542343", "-.00154");
         // @formatter:on
     }
     

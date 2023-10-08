@@ -4,7 +4,7 @@ import datawave.data.normalizer.regex.AlternationNode;
 import datawave.data.normalizer.regex.ExpressionNode;
 import datawave.data.normalizer.regex.Node;
 import datawave.data.normalizer.regex.OneOrMoreNode;
-import datawave.data.normalizer.regex.OptionalNode;
+import datawave.data.normalizer.regex.QuestionMarkNode;
 import datawave.data.normalizer.regex.RegexUtils;
 import datawave.data.normalizer.regex.RepetitionNode;
 import datawave.data.normalizer.regex.ZeroOrMoreNode;
@@ -40,7 +40,7 @@ public class OptionalVariantExpander extends SubExpressionVisitor {
     
     @Override
     protected Object visitSubExpression(Node node) {
-        if (node.isAnyChildOf(OptionalNode.class)) {
+        if (node.isAnyChildOf(QuestionMarkNode.class)) {
             return expandOptionals(node);
         } else {
             return copy(node);
@@ -59,7 +59,7 @@ public class OptionalVariantExpander extends SubExpressionVisitor {
         expansions.add(new ExpressionNode());
         
         int startIndex = 0;
-        int optionalPos = node.indexOf(OptionalNode.class);
+        int optionalPos = node.indexOf(QuestionMarkNode.class);
         int posBeforeOptional = optionalPos - 1;
         int decimalPoint = RegexUtils.getDecimalPointIndex(node);
         
@@ -82,7 +82,7 @@ public class OptionalVariantExpander extends SubExpressionVisitor {
             }
             
             // Determine the position of the next optional node, and the child before it.
-            optionalPos = node.indexOf(OptionalNode.class, (optionalPos + 1));
+            optionalPos = node.indexOf(QuestionMarkNode.class, (optionalPos + 1));
             posBeforeOptional = optionalPos - 1;
             
             // If there is an escaped decimal point in the regex, and the next optional is for a character after it, there is no need to do any further

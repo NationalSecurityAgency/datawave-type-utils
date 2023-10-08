@@ -37,8 +37,7 @@ abstract class BinFinder {
     // The current upper end of the bin range.
     protected int upper;
     
-    // Whether a wildcard has been seen yet while iterating over the node's children.
-    protected boolean wildcardSeen = false;
+    protected boolean lowerLocked;
     
     protected BinFinder(Node node, int minBin, int maxBin, int initialEndpointValue) {
         this.node = node;
@@ -64,7 +63,9 @@ abstract class BinFinder {
      * Increment lower by one.
      */
     protected void incrementLower() {
-        lower++;
+        if (!lowerLocked) {
+            lower++;
+        }
     }
     
     /**
@@ -74,7 +75,30 @@ abstract class BinFinder {
      *            the value
      */
     protected void incrementLower(int value) {
-        lower += value;
+        if (!lowerLocked) {
+            lower += value;
+        }
+    }
+    
+    /**
+     * Lock modifications to the lower bound. Any subsequent calls to {@link #incrementLower()} or {@link #incrementLower(int)} will not modify the lower bound.
+     */
+    protected void lockLower() {
+        this.lowerLocked = true;
+    }
+    
+    /**
+     * Unlock modifications to the lower bound. Any subsequent calls to {@link #incrementLower()} or {@link #incrementLower(int)} will modify the lower bound.
+     */
+    protected void unlockLower() {
+        this.lowerLocked = false;
+    }
+    
+    /**
+     * Set lower to the initial endpoint value.
+     */
+    protected void setLowerToInitialEndpointValue() {
+        this.lower = initialEndpointValue;
     }
     
     /**
@@ -86,7 +110,7 @@ abstract class BinFinder {
     
     /**
      * Increment upper by the given value.
-     * 
+     *
      * @param value
      *            the value
      */
@@ -124,7 +148,7 @@ abstract class BinFinder {
     
     /**
      * Return a {@link Pair} with the lower and upper bin range endpoints, or null if no valid bin range was found.
-     * 
+     *
      * @return the bin range
      */
     protected Pair<Integer,Integer> getEndpoints() {
@@ -136,20 +160,19 @@ abstract class BinFinder {
     }
     
     /**
-     * Return whether the lower bound is considered unlocked and modifiable. The lower bound is considered unlocked if we have not traversed to a wildcard yet
-     * in the regex, or if there is a defined decimal point in the regex.
-     *
-     * @return true if the lower bound can be modified, or false otherwise
+     * Update lower and upper based on the quantities read from the next quantifier in the iterator.
      */
-    protected boolean isLowerUnlocked() {
-        return !this.wildcardSeen || this.decimalPointIndex != -1;
+    protected void updateRangeWithNextQuantifier() {
+        // Update the range.
+        updateRangeWithQuantifier(childrenIter.next());
+        // If the node after the quantifier node is an question mark, skip over it.
+        childrenIter.seekPastQuestionMarks();
     }
     
     /**
      * Update lower and upper based off the quantities read from the next quantifier.
      */
-    protected void updateRangeWithQuantifier() {
-        Node quantifier = childrenIter.next();
+    protected void updateRangeWithQuantifier(Node quantifier) {
         switch (quantifier.getType()) {
             case REPETITION:
                 // In the case of a repetition node, we may have an IntegerNode or IntegerRangeNode child.
@@ -157,18 +180,12 @@ abstract class BinFinder {
                 if (child instanceof IntegerNode) {
                     // Increment both the upper and lower bound by the repetition value.
                     int value = ((IntegerNode) child).getValue();
-                    // Only increment the lower bound if it is not locked.
-                    if (isLowerUnlocked()) {
-                        incrementLower(value);
-                    }
-                    // Increment the upper bound by the value.
+                    incrementLower(value);
                     incrementUpper(value);
                 } else {
                     IntegerRangeNode rangeNode = (IntegerRangeNode) child;
-                    // Only increment the lower bound if it is not locked.
-                    if (isLowerUnlocked()) {
-                        incrementLower(rangeNode.getStart());
-                    }
+                    // Increment the lower bound by the range start value.
+                    incrementLower(rangeNode.getStart());
                     // If the end of the range has a bound, increment the upper bound by the end bound. Otherwise, set the upper bound to the max.
                     if (rangeNode.isEndBounded()) {
                         incrementUpper(rangeNode.getEnd());
@@ -184,14 +201,9 @@ abstract class BinFinder {
             case ONE_OR_MORE:
                 // Set the upper bound to the max.
                 setUpperToMax();
-                // Only increment the lower bound if it is not locked.
-                if (isLowerUnlocked()) {
-                    incrementLower();
-                }
+                // Increment the lower bound by one.
+                incrementLower();
                 break;
         }
-        
-        // If the node after the quantifier node is an optional node, skip over it.
-        childrenIter.seekPastOptional();
     }
 }

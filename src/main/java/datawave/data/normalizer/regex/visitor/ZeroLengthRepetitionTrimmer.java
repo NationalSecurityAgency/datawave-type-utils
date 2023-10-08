@@ -5,7 +5,7 @@ import datawave.data.normalizer.regex.IntegerNode;
 import datawave.data.normalizer.regex.IntegerRangeNode;
 import datawave.data.normalizer.regex.Node;
 import datawave.data.normalizer.regex.NodeListIterator;
-import datawave.data.normalizer.regex.OptionalNode;
+import datawave.data.normalizer.regex.QuestionMarkNode;
 import datawave.data.normalizer.regex.RepetitionNode;
 
 /**
@@ -56,7 +56,7 @@ public class ZeroLengthRepetitionTrimmer extends SubExpressionVisitor {
                 // If we have a zero-length repetition, do not copy it.
                 if (isZeroLengthRepetition(repetition)) {
                     // If there is a ? after the repetition, move past it.
-                    if (iter.hasNext() && iter.isNextInstanceOf(OptionalNode.class)) {
+                    if (iter.hasNext() && iter.isNextInstanceOf(QuestionMarkNode.class)) {
                         iter.next();
                     }
                 } else {

@@ -15,7 +15,7 @@ import datawave.data.normalizer.regex.GroupNode;
 import datawave.data.normalizer.regex.IntegerNode;
 import datawave.data.normalizer.regex.IntegerRangeNode;
 import datawave.data.normalizer.regex.OneOrMoreNode;
-import datawave.data.normalizer.regex.OptionalNode;
+import datawave.data.normalizer.regex.QuestionMarkNode;
 import datawave.data.normalizer.regex.RepetitionNode;
 import datawave.data.normalizer.regex.SingleCharNode;
 import datawave.data.normalizer.regex.StartAnchorNode;
@@ -41,7 +41,7 @@ public interface Visitor {
     
     Object visitRepetition(RepetitionNode node, Object data);
     
-    Object visitOptional(OptionalNode node, Object data);
+    Object visitQuestionMark(QuestionMarkNode node, Object data);
     
     Object visitAnyChar(AnyCharNode node, Object data);
     

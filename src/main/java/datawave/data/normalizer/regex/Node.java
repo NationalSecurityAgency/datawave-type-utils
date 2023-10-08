@@ -15,6 +15,7 @@ public abstract class Node {
     
     protected Node() {}
     
+    @SuppressWarnings("CopyConstructorMissesField")
     protected Node(Node child) {
         addChild(child);
     }
@@ -253,16 +254,6 @@ public abstract class Node {
      */
     public void removeFirstChild() {
         children.remove(0);
-    }
-    
-    /**
-     * Removes the last child from this node.
-     * 
-     * @throws IndexOutOfBoundsException
-     *             if there are no children
-     */
-    public void removeLastChild() {
-        children.remove((children.size() - 1));
     }
     
     /**

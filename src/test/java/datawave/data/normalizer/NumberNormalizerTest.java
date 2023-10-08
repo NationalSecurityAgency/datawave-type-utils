@@ -143,7 +143,7 @@ public class NumberNormalizerTest {
                             }
                             candidates.add(Integer.valueOf(String.valueOf(character)));
                             pattern.append('[');
-                            candidates.stream().forEach(digit -> pattern.append(digit));
+                            candidates.forEach(pattern::append);
                             pattern.append(']');
                         } else if (random.nextBoolean()) {
                             pattern.append('.');

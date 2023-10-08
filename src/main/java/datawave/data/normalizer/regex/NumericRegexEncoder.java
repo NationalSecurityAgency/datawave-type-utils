@@ -4,13 +4,11 @@ import com.google.common.base.CharMatcher;
 import datawave.data.normalizer.regex.visitor.AnchorTrimmer;
 import datawave.data.normalizer.regex.visitor.AlternationDeduper;
 import datawave.data.normalizer.regex.visitor.DecimalPointPlacer;
+import datawave.data.normalizer.regex.visitor.DecimalPointValidator;
 import datawave.data.normalizer.regex.visitor.EmptyLeafTrimmer;
 import datawave.data.normalizer.regex.visitor.ExponentialBinAdder;
-import datawave.data.normalizer.regex.visitor.GroupAlternationsExpander;
-import datawave.data.normalizer.regex.visitor.GroupFlattener;
 import datawave.data.normalizer.regex.visitor.NegativeNumberPatternInverter;
 import datawave.data.normalizer.regex.visitor.NegativeVariantExpander;
-import datawave.data.normalizer.regex.visitor.NestedGroupValidator;
 import datawave.data.normalizer.regex.visitor.NonEncodedNumbersChecker;
 import datawave.data.normalizer.regex.visitor.NumericCharClassValidator;
 import datawave.data.normalizer.regex.visitor.OptionalVariantExpander;
@@ -42,8 +40,8 @@ import java.util.regex.PatternSyntaxException;
  * <li>Patterns must be compilable.</li>
  * <li>Patterns may not contain any letters other than {@code "\d"}.</li>
  * <li>Patterns may not contain any escaped characters other than {@code "\."}, {@code "\-"}, or {@code "\d"}.</li>
- * <li>Patterns may not contain any nested groups, i.e. {@code "(34|(45.*))"}.</li>
- * <li>Patterns may not contain any groups directly followed by {@code ?}, {@code *}, {@code +}, or {@code {x}}.</li>
+ * <li>Patterns may not contain any groups, e.g. {@code "(45.*)"}.</li>
+ * <li>Patterns may not contain any decimal points that are followed by {@code ?} {@code *} {@code +} or a repetition quantifier such as {@code {3}}.</li>
  * </ul>
  * <P>
  * <P>
@@ -54,13 +52,11 @@ import java.util.regex.PatternSyntaxException;
  * <li>Wildcards {@code "."}.</li>
  * <li>Digit character class {@code "\d"}.</li>
  * <li>Character class lists {@code "[]"}. CAVEAT: Digit characters only. Ranges are supported.</li>
- * <li>Zero or more quantifier {@code "*"}. CAVEAT: Not allowed after groups.</li>
- * <li>One or more quantifier {@code "+"}. CAVEAT: Not allowed after groups.</li>
- * <li>Repetition quantifier {@code "{x}"}, {@code "{x,}"}, and {@code "{x,y}"}. CAVEAT: Not allowed after groups. Ranges are supported.</li>
+ * <li>Zero or more quantifier {@code "*"}.</li>
+ * <li>One or more quantifier {@code "+"}.</li>
+ * <li>Repetition quantifier {@code "{x}"}, {@code "{x,}"}, and {@code "{x,y}"}.</li>
  * <li>Anchors {@code "^"} and {@code "$"}. CAVEAT: Technically not truly supported as they are ultimately removed during the pre-optimization process. However,
  * using them will not result in an error.</li>
- * <li>Groups {@code "()"}. May contain alternations. CAVEAT: Groups may not be immediately followed by {@code "*"}, {@code "+"}, {@code "?"}, or a repetition
- * quantifier.</li>
  * <li>Alternations {@code "|"}.</li>
  * </ul>
  * Additionally, in order to mark a regex pattern as intended to match negative numbers only, a minus sign should be placed at the beginning of the regex
@@ -71,14 +67,12 @@ import java.util.regex.PatternSyntaxException;
  * <P>
  * Before encoding the incoming regex, it will undergo the following modifications to optimize the ease of encoding:
  * <ol>
- * <li>Any empty groups or alternations will be removed.</li>
+ * <li>Any empty alternations will be removed.</li>
  * <li>Any occurrences of the anchors {@code ^} or {@code $} will be removed. These will need to be added back into the returned encoded regex pattern
  * afterwards if desired.</li>
  * <li>Optional variants (characters followed by {@code ?}} will be expanded into additional alternations as seen. This will not apply to any {@code ?}
  * instances that directly follow a {@code *}, {@code +}, or {@code {x}}, as the {@code ?} in this case modifies the greediness of the matching rather than
  * whether or not a character can be present.</li>
- * <li>Groups will be flattened. Any groups with alternations inside of them will see variants of top-level patterns expanded to contain a flattened version of
- * each alternation in the groups. See {@link GroupAlternationsExpander} and {@link GroupFlattener} along with their test suites for more in-depth review.</li>
  * <li>Any characters immediately followed by the repetition quantifier {@code "{0}"} or {@code "{0,0}"} will be removed as they are expected to occur zero
  * times. This does not apply to characters with the repetition quantifier {@code "{0,}"} or a variation of {@code "{0,x}"}.</li>
  * <li>Any patterns starting with {@code ".*"} or {@code ".+"} will result in the addition of an alternation of the same pattern with a minus sign in front of
@@ -97,8 +91,6 @@ import java.util.regex.PatternSyntaxException;
  * simpler regexes if possible.
  * 
  * @see datawave.data.type.util.NumericalEncoder
- * @see GroupAlternationsExpander
- * @see GroupFlattener
  */
 public class NumericRegexEncoder {
     
@@ -121,9 +113,9 @@ public class NumericRegexEncoder {
     private static final Pattern NONSENSE_PATTERN = Pattern.compile("^\\^?(\\(*(\\\\\\.)*\\)*|(\\(*\\\\?[\\-*+?|])*\\)*|(\\{.*}))*\\$?$");
     
     /**
-     * Matches any groups ending with + * ? or a repetition quantifier that will not be able to be fully flattened.
+     * Matches any decimal points with ? + * or a repetition quantifier directly following them.
      */
-    private static final Pattern NON_FLATTENABLE_GROUPS_PATTERN = Pattern.compile(".*\\)[+*?{].*");
+    private static final Pattern INVALID_DECIMAL_POINTS_PATTERN = Pattern.compile(".*\\\\\\.[?+*{].*");
     
     /**
      * Matches against any variation of {@code .*}, {@code .+}, {@code .*?}, {@code .+?} that may or may not repeat, and that may or may not contain start
@@ -146,6 +138,7 @@ public class NumericRegexEncoder {
         if (log.isDebugEnabled()) {
             log.debug("Encoding pattern " + pattern);
         }
+        
         // Check the pattern for any quick failures.
         checkPatternForQuickFailures();
         // Encode the pattern only if it requires it.
@@ -177,7 +170,8 @@ public class NumericRegexEncoder {
         checkForNonsense();
         checkForRestrictedLetters();
         checkForRestrictedEscapedCharacters();
-        checkForNonFlattenableGroups();
+        checkForGroups();
+        checkForQuantifiedDecimalPoints();
     }
     
     /**
@@ -249,11 +243,20 @@ public class NumericRegexEncoder {
     }
     
     /**
-     * Throws an exception if the regex contains any groups directly followed by * + ? or {}.
+     * Throws an exception if the regex contains any occurrences of '(' indicating the start of a group.
      */
-    private void checkForNonFlattenableGroups() {
-        if (NON_FLATTENABLE_GROUPS_PATTERN.matcher(this.pattern).matches()) {
-            throw new IllegalArgumentException("Regex pattern may not contain any groups that are directly followed by * + ? or {}");
+    private void checkForGroups() {
+        if (this.pattern.contains("(")) {
+            throw new IllegalArgumentException("Regex pattern may not contain any groups.");
+        }
+    }
+    
+    /**
+     * Throws an exception if the regex contains any decimal points directly followed by * + or {}.
+     */
+    private void checkForQuantifiedDecimalPoints() {
+        if (INVALID_DECIMAL_POINTS_PATTERN.matcher(this.pattern).matches()) {
+            throw new IllegalArgumentException("Regex pattern may not contain any decimal points that are directly followed by * ? or {}.");
         }
     }
     
@@ -278,18 +281,18 @@ public class NumericRegexEncoder {
         // Verify that the regex pattern does not contain any character classes with characters other than digits or a period.
         NumericCharClassValidator.validate(this.patternTree);
         
-        // Verify that the regex pattern does not contain any nested group nodes.
-        NestedGroupValidator.validate(this.patternTree);
+        // Verify that the regex pattern does not contain any alternated expressions that have more than one required decimal point.
+        DecimalPointValidator.validate(this.patternTree);
     }
     
     /**
      * Normalize the pattern tree.
      */
     private void normalizePatternTree() {
-        // Trim the tree of any empty nodes, empty alternations, and empty groups, and verify if we still have a pattern to encode.
+        // Trim the tree of any empty nodes and empty alternations, and verify if we still have a pattern to encode.
         this.patternTree = EmptyLeafTrimmer.trim(this.patternTree);
         if (this.patternTree == null) {
-            throw new IllegalArgumentException("Regex pattern is empty after trimming empty alternations and groups.");
+            throw new IllegalArgumentException("Regex pattern is empty after trimming empty alternations.");
         }
         
         if (log.isDebugEnabled()) {
@@ -310,22 +313,10 @@ public class NumericRegexEncoder {
             log.debug("Pattern tree after expanding optional variants: " + StringVisitor.toString(this.patternTree));
         }
         
-        // Expand alternations inside groups to separate groups.
-        this.patternTree = GroupAlternationsExpander.expand(this.patternTree);
-        
-        if (log.isDebugEnabled()) {
-            log.debug("Pattern tree after expanding group alternations: " + StringVisitor.toString(this.patternTree));
-        }
-        
-        // Flatten all groups.
-        this.patternTree = GroupFlattener.flatten(this.patternTree);
-        
-        if (log.isDebugEnabled()) {
-            log.debug("Pattern tree after flattening groups: " + StringVisitor.toString(this.patternTree));
-        }
-        
         // Remove all zero-length repetitions.
         this.patternTree = ZeroLengthRepetitionTrimmer.trim(this.patternTree);
+        
+        // If the pattern is empty afterwards, throw an exception.
         if (this.patternTree == null) {
             throw new IllegalArgumentException("Regex pattern is empty after trimming all characters followed by {0} or {0,0}.");
         }
@@ -386,18 +377,18 @@ public class NumericRegexEncoder {
             log.debug("Pattern tree after trimming leading/trailing zeros: " + StringVisitor.toString(this.patternTree));
         }
         
-        // Invert any patterns that are meant to match negative numbers.
-        this.patternTree = NegativeNumberPatternInverter.invert(this.patternTree);
-        
-        if (log.isDebugEnabled()) {
-            log.debug("Pattern tree after inverting patterns for negative numbers: " + StringVisitor.toString(this.patternTree));
-        }
-        
         // Add decimal points where required.
         this.patternTree = DecimalPointPlacer.addDecimalPoints(this.patternTree);
         
         if (log.isDebugEnabled()) {
             log.debug("Pattern tree after adding decimal points: " + StringVisitor.toString(this.patternTree));
+        }
+        
+        // Invert any patterns that are meant to match negative numbers.
+        this.patternTree = NegativeNumberPatternInverter.invert(this.patternTree);
+        
+        if (log.isDebugEnabled()) {
+            log.debug("Pattern tree after inverting patterns for negative numbers: " + StringVisitor.toString(this.patternTree));
         }
         
         // Finally, remove any duplicate alternations that resulted during the encoding process.

@@ -29,10 +29,10 @@ class NegativeNumberPatternInverterTest {
     @Test
     void testPatternsMadeOfPositivePatterns() {
         // Single positive number pattern.
-        assertInverted(".*345", "\\+[a-zA-Z]E.*345");
+        assertInverted(".*345", "\\+[c-zA-Z]E.*345");
         
         // Alternated positive number patterns.
-        assertInverted("45.*|0.045[3-5]", "\\+[b-z]E45.*|\\+[a-eY-Z]E.?0?45[3-5]");
+        assertInverted("45.*|0.045[3-5]", "\\+[b-z]E45.*|\\+[c-eY]E.?0?45[3-5]");
     }
     
     /**
@@ -44,23 +44,23 @@ class NegativeNumberPatternInverterTest {
         assertInverted("345.*|456", "\\+[c-z]E345.*|\\+cE4\\.56");
         
         // Alternated with negative simple number.
-        assertInverted(".*345|-456", "\\+[a-zA-Z]E.*345|!XE5\\.44");
+        assertInverted(".*345|-456", "\\+[c-zA-Z]E.*345|!XE5\\.44");
         
         // Alternated with positive and negative simple number.
-        assertInverted("45.*|0.045[3-5]|456|-456", "\\+[b-z]E45.*|\\+[a-eY-Z]E.?0?45[3-5]|\\+cE4\\.56|!XE5\\.44");
+        assertInverted("45.*|0.045[3-5]|456|-456", "\\+[b-z]E45.*|\\+[c-eY]E.?0?45[3-5]|\\+cE4\\.56|!XE5\\.44");
     }
     
     @Test
     void testWildcard() {
-        assertInverted("-.234", "![W-Za]E.?766");
+        assertInverted("-.234", "![W-Xa]E.?766");
         assertInverted("-34.454", "![U-Y]E65.546");
         assertInverted("-34454.", "![U-V]E6554[65].?");
     }
     
     @Test
     void testMultiWildcards() {
-        assertInverted("-.*234", "![A-Za-z]E.*766");
-        assertInverted("-.+234", "![A-Za-z]E.+766");
+        assertInverted("-.*234", "![A-Xa-z]E.*766");
+        assertInverted("-.+234", "![A-Xa-z]E.*766");
     }
     
     @Test

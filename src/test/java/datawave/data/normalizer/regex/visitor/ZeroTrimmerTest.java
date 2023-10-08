@@ -58,6 +58,24 @@ class ZeroTrimmerTest {
             
             // Test that zeros with repetitions.
             assertTrimmedTo("00{3}0{2}34", "\\+bE34");
+            
+            // Test that a + after a possible zero is changed to a *.
+            assertTrimmedTo("[06]+\\.[01789]*[124678]", "\\+[a-zA-Z]E[06]*[01789]*[124678]");
+            
+            // Test that a +? after a possible zero is changed to a *?.
+            assertTrimmedTo("[06]+?\\.[01789]*[124678]", "\\+[a-zA-Z]E[06]*?[01789]*[124678]");
+            
+            // Test that {x} quantifiers after a possible zero will include a possible length of zero.
+            assertTrimmedTo("[06]{3}\\.[01789]{5}[124678]", "\\+[a-cU-Z]E[06]{0,3}[01789]{0,5}[124678]");
+            
+            // Test that {x}? quantifiers after a possible zero will include a possible length of zero.
+            assertTrimmedTo("[06]{3}?\\.[01789]{5}[124678]", "\\+[a-cU-Z]E[06]{0,3}?[01789]{0,5}[124678]");
+            
+            // Test that {x,y} quantifiers after a possible zero will be made optional.
+            assertTrimmedTo("[06]{4,7}\\.[01789]{3,9}[124678]", "\\+[a-gQ-Z]E([06]{4,7})?([01789]{3,9})?[124678]");
+            
+            // Test that {x,y}? quantifiers after a possible zero will be made optional.
+            assertTrimmedTo("[06]{4,7}?\\.[01789]{3,9}?[124678]", "\\+[a-gQ-Z]E([06]{4,7}?)?([01789]{3,9}?)?[124678]");
         }
         
         @Test
@@ -66,38 +84,38 @@ class ZeroTrimmerTest {
             assertTrimmedTo(".0000\\.34.*", "\\+[eZ]E.?(0{4})?34.*");
             
             // Test trimming explicit zeros after .*.
-            assertTrimmedTo(".*0000\\.34.*", "\\+[d-zZ]E.*(0{4})?34.*");
+            assertTrimmedTo(".*0000\\.34.*", "\\+[e-zZ]E.*(0{4})?34.*");
             
             // Test trimming explicit zeros after .+.
-            assertTrimmedTo(".+0000\\.34.*", "\\+[e-zZ]E.+(0{4})?34.*");
+            assertTrimmedTo(".+0000\\.34.*", "\\+[e-zZ]E.*(0{4})?34.*");
         }
         
         @Test
         void testZerosAfterMultipleWildcards() {
             // Test trimming explicit zeros after a single wildcard.
-            assertTrimmedTo(".000.0\\.34.*", "\\+[fZ]E.?(0{3})?.?0?34.*");
+            assertTrimmedTo(".000.0\\.34.*", "\\+[b-fZ]E.?(0{3})?.?0?34.*");
             
             // Test trimming explicit zeros after .*.
-            assertTrimmedTo(".*000.*0\\.34.*", "\\+[d-zZ]E.*(0{3})?.*0?34.*");
+            assertTrimmedTo(".*000.*0\\.34.*", "\\+[b-zZ]E.*(0{3})?.*0?34.*");
             
             // Test trimming explicit zeros after .+.
-            assertTrimmedTo(".+000.+0\\.34.*", "\\+[f-zZ]E.+(0{3})?.+0?34.*");
+            assertTrimmedTo(".+000.+0\\.34.*", "\\+[b-zZ]E.*(0{3})?.*0?34.*");
         }
         
         @Test
         void testZerosAfterDecimalPointWithPossibleAllLeadingZeros() {
             assertTrimmedTo(".\\.000034.*", "\\+[aV]E.?(0{4})?34.*");
             assertTrimmedTo(".*\\.000034.*", "\\+[a-zV]E.*(0{4})?34.*");
-            assertTrimmedTo(".+\\.000034.*", "\\+[a-zV]E.+(0{4})?34.*");
+            assertTrimmedTo(".+\\.000034.*", "\\+[a-zV]E.*(0{4})?34.*");
             assertTrimmedTo(".0{3}\\.000034.*", "\\+[dV]E.?(0{7})?34.*");
             assertTrimmedTo("[034]0\\.000034.*", "\\+[bV]E[034]?(0{5})?34.*");
         }
         
         @Test
         void testZerosAfterPossibleZeroCharacter() {
-            assertTrimmedTo(".000000343", "\\+[a-jT-Z]E.?(0{6})?343");
-            assertTrimmedTo(".*000000343", "\\+[a-zA-Z]E.*(0{6})?343");
-            assertTrimmedTo(".+000000343", "\\+[a-zA-Z]E.+(0{6})?343");
+            assertTrimmedTo(".000000343", "\\+[c-jT]E.?(0{6})?343");
+            assertTrimmedTo(".*000000343", "\\+[c-zA-Z]E.*(0{6})?343");
+            assertTrimmedTo(".+000000343", "\\+[c-zA-Z]E.*(0{6})?343");
             assertTrimmedTo("[0-9]000000343", "\\+[c-j]E[0-9]?(0{6})?343");
         }
         
@@ -172,6 +190,18 @@ class ZeroTrimmerTest {
             
             // Test that zeros with repetitions.
             assertTrimmedTo("3400{3}0{2}", "\\+hE34");
+            
+            // Test that {x} quantifiers after a possible trailing zero will include a possible length of zero.
+            assertTrimmedTo("[123678]3\\.[01789]{5}", "\\+bE[123678]3[01789]{0,5}");
+            
+            // Test that {x}? quantifiers after a possible trailing zero will include a possible length of zero.
+            assertTrimmedTo("[124678]3\\.[01789]{5}?", "\\+bE[124678]3[01789]{0,5}?");
+            
+            // Test that {x,y} quantifiers after a possible trailing zero will be made optional.
+            assertTrimmedTo("[124678]3\\.[01789]{3,9}", "\\+bE[124678]3([01789]{3,9})?");
+            
+            // Test that {x,y}? quantifiers after a possible trailing zero will be made optional.
+            assertTrimmedTo("[124678]3\\.[01789]{3,9}?", "\\+bE[124678]3([01789]{3,9}?)?");
         }
         
         @Test
@@ -184,7 +214,7 @@ class ZeroTrimmerTest {
             
             // Test trimming explicit zeros before .+. Because .+ could be a number of zeros, we need to change it to .* to allow for the fact that trailing
             // zeros would be trimmed in encoded numbers.
-            assertTrimmedTo("23000.+00.*", "\\+[e-z]E23(0{3})?.+(0{2})?.*");
+            assertTrimmedTo("23000.+00.*", "\\+[e-z]E23(0{3})?.*(0{2})?.*");
         }
         
         @Test
@@ -196,7 +226,7 @@ class ZeroTrimmerTest {
             assertTrimmedTo("23.*00.*0.*", "\\+[b-z]E23.*(0{2})?.*0?.*");
             
             // Test trimming explicit zeros after .+.
-            assertTrimmedTo("23.+00.+0.+", "\\+[b-z]E23.+(0{2})?.+0?.*");
+            assertTrimmedTo("23.+00.+0.+", "\\+[b-z]E23.*(0{2})?.*0?.*");
         }
         
         @Test
@@ -249,7 +279,7 @@ class ZeroTrimmerTest {
     
     @Test
     void testNoLeadingOrTrailingZeros() {
-        assertTrimmedTo(".*344", "\\+[a-zA-Z]E.*344");
+        assertTrimmedTo(".*344", "\\+[c-zA-Z]E.*344");
         assertTrimmedTo("45.*", "\\+[b-z]E45.*");
         assertTrimmedTo("300454.*", "\\+[f-z]E300454.*");
         assertTrimmedTo("300.*0003", "\\+[c-z]E300.*0003");
@@ -265,17 +295,17 @@ class ZeroTrimmerTest {
         assertTrimmedTo("[14]", "\\+aE[14]");
         assertTrimmedTo("[14]{3}", "\\+cE[14]{3}");
         assertTrimmedTo("\\d", "\\+aE\\d");
-        assertTrimmedTo("\\d{3}", "\\+cE\\d{3}");
+        assertTrimmedTo("\\d{3}", "\\+[a-c]E\\d{3}");
     }
     
     @Test
     void testTrailingZerosWithoutQuantifiers() {
-        assertTrimmedTo(".*34300", "\\+[a-zA-Z]E.*343");
+        assertTrimmedTo(".*34300", "\\+[e-zA-Z]E.*343");
     }
     
     @Test
     void testNegativeNumber() {
-        assertTrimmedTo("-0.00454.*", "-![A-Za-c]E.?(0{2})?454.*");
+        assertTrimmedTo("-0.00454.*", "![A-Xc]E.?(0{2})?454.*");
     }
     
     @Test

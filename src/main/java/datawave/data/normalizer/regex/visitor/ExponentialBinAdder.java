@@ -57,9 +57,13 @@ public class ExponentialBinAdder extends SubExpressionVisitor {
         // Return an EncodedPatternNode copy rather than an ExpressionNode.
         EncodedPatternNode encodedPattern = new EncodedPatternNode(copy(node).getChildren());
         
-        // Insert the bin information at the beginning of the pattern. If the pattern starts with a minus sign, insert the bin information directly after the
-        // minus sign.
-        int insertIndex = negative ? 1 : 0;
+        // If we had a negative sign, remove it. We will have ! (negative) and \+ (positive) going forward.
+        if (negative) {
+            encodedPattern.removeFirstChild();
+        }
+        
+        // Insert the bin information at the beginning of the pattern.
+        int insertIndex = 0;
         for (Node binNode : binNodes) {
             encodedPattern.addChild(binNode, insertIndex);
             insertIndex++;

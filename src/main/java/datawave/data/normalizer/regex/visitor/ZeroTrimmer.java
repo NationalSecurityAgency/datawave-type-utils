@@ -1,8 +1,6 @@
 package datawave.data.normalizer.regex.visitor;
 
 import datawave.data.normalizer.regex.AnyCharNode;
-import datawave.data.normalizer.regex.CharClassNode;
-import datawave.data.normalizer.regex.CharRangeNode;
 import datawave.data.normalizer.regex.EncodedPatternNode;
 import datawave.data.normalizer.regex.GroupNode;
 import datawave.data.normalizer.regex.IntegerNode;
@@ -11,7 +9,7 @@ import datawave.data.normalizer.regex.Node;
 import datawave.data.normalizer.regex.NodeListIterator;
 import datawave.data.normalizer.regex.NodeType;
 import datawave.data.normalizer.regex.OneOrMoreNode;
-import datawave.data.normalizer.regex.OptionalNode;
+import datawave.data.normalizer.regex.QuestionMarkNode;
 import datawave.data.normalizer.regex.RegexConstants;
 import datawave.data.normalizer.regex.RegexUtils;
 import datawave.data.normalizer.regex.RepetitionNode;
@@ -112,7 +110,7 @@ public class ZeroTrimmer extends CopyVisitor {
     }
     
     /**
-     * Return true if the given list consists only of one regex element that may or may not be followed by a quantifier or optional.
+     * Return true if the given list consists only of one regex element that may or may not be followed by a quantifier or question mark.
      * 
      * @param nodes
      *            the nodes
@@ -121,8 +119,8 @@ public class ZeroTrimmer extends CopyVisitor {
     private boolean isSingleElementPattern(List<Node> nodes) {
         NodeListIterator iter = new NodeListIterator(nodes);
         iter.next();
-        iter.seekPastQuantifier();
-        iter.seekPastOptional();
+        iter.seekPastQuantifiers();
+        iter.seekPastQuestionMarks();
         return !iter.hasNext();
     }
     
@@ -137,11 +135,11 @@ public class ZeroTrimmer extends CopyVisitor {
         NodeListIterator iter = new NodeListIterator(nodes);
         while (iter.hasNext()) {
             Node next = iter.peekNext();
-            // If the next element matches zero only, skip past it, and any quantifiers and/or optionals after it.
+            // If the next element matches zero only, skip past it, and any quantifiers and/or question marks after it.
             if (RegexUtils.matchesZeroOnly(next)) {
                 iter.next();
-                iter.seekPastQuantifier();
-                iter.seekPastOptional();
+                iter.seekPastQuantifiers();
+                iter.seekPastQuestionMarks();
             } else {
                 break;
             }
@@ -205,17 +203,64 @@ public class ZeroTrimmer extends CopyVisitor {
             // The next node can match zero. The first call to next should always return an element that can match zero, but not only zero.
             if (RegexUtils.matchesZero(next)) {
                 iter.next();
-                // If the node is followed by a quantifier and/or optional, add them too.
-                if (iter.hasNext() && iter.isNextQuantifier()) {
-                    nodes.add(next);
-                    nodes.add(iter.next());
-                    if (iter.hasNext() && iter.isNextOptional()) {
-                        nodes.add(iter.next());
+                // If the node is followed by a quantifier and/or optional, evaluate the quantifier.
+                if (iter.isNextQuantifier()) {
+                    Node quantifier = iter.next();
+                    switch (quantifier.getType()) {
+                        case ZERO_OR_MORE:
+                        case ONE_OR_MORE:
+                            // In both the case of * or + for a leading zero, we must ensure that * is used in the final regex to allow for zero occurrences of
+                            // the leading zero when matching.
+                            nodes.add(next);
+                            nodes.add(new ZeroOrMoreNode());
+                            // If the quantifier was followed by ?, append the ?.
+                            if (iter.isNextQuestionMark()) {
+                                nodes.add(iter.next());
+                            }
+                            break;
+                        case REPETITION:
+                            RepetitionNode repetition = (RepetitionNode) quantifier;
+                            // If the repetition does not already allow for zero occurrences, we must create a new repetition quantifier that does so.
+                            if (!RegexUtils.canOccurZeroTimes(repetition)) {
+                                if (RegexUtils.isNotRange(repetition)) {
+                                    // If the repetition is has the form {x}, replace it with {0,x}. For example, "[012]{3}" will become "[012]{0,3}".
+                                    nodes.add(next);
+                                    nodes.add(RegexUtils.createRangeStartingFromZero(repetition));
+                                    // If the original quantifier was followed by ?, append it.
+                                    if (iter.isNextQuestionMark()) {
+                                        nodes.add(iter.next());
+                                    }
+                                } else {
+                                    // If the repetition has the form {x,y}, where x is a value greater than zero, we must wrap the element and the repetition
+                                    // in an optional group to allow for it to occur either zero times, or x-y times. For example, "[012]{3,5}" will become
+                                    // "([012]{3,5})?". Create a group node with the element and repetition as its children.
+                                    GroupNode groupNode = new GroupNode();
+                                    groupNode.addChild(next);
+                                    groupNode.addChild(repetition);
+                                    // If the original quantifier was followed by ?, include it in the group.
+                                    if (iter.isNextQuestionMark()) {
+                                        groupNode.addChild(iter.next());
+                                    }
+                                    // Add the group node and make it optional.
+                                    nodes.add(groupNode);
+                                    nodes.add(new QuestionMarkNode());
+                                }
+                            } else {
+                                // The repetition allows for zero occurrences. No modifications need to be made.
+                                nodes.add(next);
+                                nodes.add(repetition);
+                                if (iter.isNextQuestionMark()) {
+                                    nodes.add(iter.next());
+                                }
+                            }
+                            break;
+                        default:
+                            throw new IllegalArgumentException("Unsupported quantifier type: " + quantifier.getType());
                     }
                 } else {
                     // Add the node and make it optional since it can possibly be a leading zero, and thus must be optional.
                     nodes.add(next);
-                    nodes.add(new OptionalNode());
+                    nodes.add(new QuestionMarkNode());
                 }
                 
                 // If there are any elements directly after the current element that only match zero, consolidate then and add the result.
@@ -271,8 +316,8 @@ public class ZeroTrimmer extends CopyVisitor {
                         maxZeroCount++;
                     }
                 }
-                // Skip any optional if present.
-                iter.seekPastOptional();
+                // Skip any question marks if present.
+                iter.seekPastQuestionMarks();
             } else {
                 // If the next node does not only match zero, stop iterating.
                 break;
@@ -283,7 +328,7 @@ public class ZeroTrimmer extends CopyVisitor {
         // If the min and max are both 1, return 0?
         if (minZeroCount == 1 && maxZeroCount == 1) {
             nodes.add(new SingleCharNode(RegexConstants.ZERO));
-            nodes.add(new OptionalNode());
+            nodes.add(new QuestionMarkNode());
         } else {
             // Otherwise we need return 0 followed by a quantifier inside an optional group.
             GroupNode groupNode = new GroupNode();
@@ -317,7 +362,7 @@ public class ZeroTrimmer extends CopyVisitor {
             }
             nodes.add(groupNode);
             // Ensure the group is optional.
-            nodes.add(new OptionalNode());
+            nodes.add(new QuestionMarkNode());
         }
         
         return nodes;
@@ -336,9 +381,9 @@ public class ZeroTrimmer extends CopyVisitor {
         while (iter.hasNext()) {
             // Keep a record of the current index so that we can reset it once we find an element that cannot match zero.
             int lastIndex = iter.index();
-            // Skip past any optionals or quantifiers that are before the element. Remember, we're iterating over the list in reverse order.
-            iter.seekPastOptional();
-            iter.seekPastQuantifier();
+            // Skip past any question marks or quantifiers that are before the element. Remember, the node list is in reverse order.
+            iter.seekPastQuestionMarks();
+            iter.seekPastQuantifiers();
             Node next = iter.peekNext();
             // If the next element matches zero only, skip past it.
             if (RegexUtils.matchesZeroOnly(next)) {
@@ -370,13 +415,13 @@ public class ZeroTrimmer extends CopyVisitor {
         // that were subsequently trimmed when encoded.
         if (iter.hasNext()) {
             int lastIndex = iter.index();
-            Node optional = iter.isNextOptional() ? iter.next() : null;
+            Node questionMark = iter.isNextQuestionMark() ? iter.next() : null;
             Node quantifier = iter.isNextQuantifier() ? iter.next() : null;
             Node next = iter.next();
             // if the last element of the pattern is .+, convert it to .*.
             if (next.getType() == NodeType.ANY_CHAR && quantifier != null && quantifier.getType() == NodeType.ONE_OR_MORE) {
-                if (optional != null) {
-                    consolidated.add(optional);
+                if (questionMark != null) {
+                    consolidated.add(questionMark);
                 }
                 consolidated.add(new ZeroOrMoreNode());
                 consolidated.add(new AnyCharNode());
@@ -389,8 +434,8 @@ public class ZeroTrimmer extends CopyVisitor {
         // Iterate through each child.
         while (iter.hasNext()) {
             int lastIndex = iter.index();
-            iter.seekPastOptional();
-            iter.seekPastQuantifier();
+            iter.seekPastQuestionMarks();
+            iter.seekPastQuantifiers();
             
             // Do not call next until we know the next node can match zero.
             Node next = iter.peekNext();
@@ -431,33 +476,75 @@ public class ZeroTrimmer extends CopyVisitor {
             int lastIndex = iter.index();
             
             // Skip past and capture the optional and quantifier for the node if present.
-            Node optional = iter.isNextOptional() ? iter.next() : null;
+            Node questionMark = iter.isNextQuestionMark() ? iter.next() : null;
             Node quantifier = iter.isNextQuantifier() ? iter.next() : null;
-            
-            // Do not call next until we know the next node can match zero.
-            Node next = iter.peekNext();
+            Node next = iter.next();
             // The next node can match zero. The first call to next should always return an element that can match zero, but not only zero.
             if (RegexUtils.matchesZero(next)) {
-                iter.next();
-                
+                // If the next node had a quantifier, evaluate the quantifier.
                 if (quantifier != null) {
-                    // If the next node had a quantifier, retain them, and any optionals that were present.
-                    if (optional != null) {
-                        nodes.add(optional);
+                    switch (quantifier.getType()) {
+                        case ZERO_OR_MORE:
+                        case ONE_OR_MORE:
+                            // In both the case of * or + for a leading zero, we must ensure that * is used in the final regex to allow for zero occurrences of
+                            // the leading zero when matching.
+                            // If the quantifier was followed by ?, append the ?.
+                            if (questionMark != null) {
+                                nodes.add(questionMark);
+                            }
+                            nodes.add(new ZeroOrMoreNode());
+                            nodes.add(next);
+                            break;
+                        case REPETITION:
+                            RepetitionNode repetition = (RepetitionNode) quantifier;
+                            // If the repetition does not already allow for zero occurrences, we must create a new repetition quantifier that does so.
+                            if (!RegexUtils.canOccurZeroTimes(repetition)) {
+                                if (RegexUtils.isNotRange(repetition)) {
+                                    // If the repetition is has the form {x}, replace it with {0,x}. For example, "[012]{3}" will become "[012]{0,3}".
+                                    // If the original quantifier was followed by ?, append it.
+                                    if (questionMark != null) {
+                                        nodes.add(questionMark);
+                                    }
+                                    nodes.add(RegexUtils.createRangeStartingFromZero(repetition));
+                                    nodes.add(next);
+                                } else {
+                                    // If the repetition has the form {x,y}, where x is a value greater than zero, we must wrap the element and the repetition
+                                    // in an optional group to allow for it to occur either zero times, or x-y times. For example, "[012]{3,5}" will become
+                                    // "([012]{3,5})?". Create a group node with the element and repetition as its children.
+                                    GroupNode groupNode = new GroupNode();
+                                    groupNode.addChild(next);
+                                    groupNode.addChild(repetition);
+                                    // If the original quantifier was followed by ?, include it in the group.
+                                    if (questionMark != null) {
+                                        groupNode.addChild(questionMark);
+                                    }
+                                    // Add the group node and make it optional.
+                                    nodes.add(new QuestionMarkNode());
+                                    nodes.add(groupNode);
+                                }
+                            } else {
+                                // The repetition allows for zero occurrences. No modifications need to be made.
+                                if (questionMark != null) {
+                                    nodes.add(questionMark);
+                                }
+                                nodes.add(repetition);
+                                nodes.add(next);
+                            }
+                            break;
+                        default:
+                            throw new IllegalArgumentException("Unsupported quantifier type: " + quantifier.getType());
                     }
-                    nodes.add(quantifier);
-                    nodes.add(next);
                 } else {
                     // This is a single element. Make it optional.
-                    nodes.add(new OptionalNode());
+                    nodes.add(new QuestionMarkNode());
                     nodes.add(next);
                 }
                 
                 // If there are any elements after the current element that only match zero, consolidate then and add the result.
                 if (iter.hasNext()) {
                     lastIndex = iter.index();
-                    iter.seekPastOptional();
-                    iter.seekPastQuantifier();
+                    iter.seekPastQuestionMarks();
+                    iter.seekPastQuantifiers();
                     if (RegexUtils.matchesZeroOnly(iter.peekNext())) {
                         iter.setIndex(lastIndex);
                         nodes.addAll(consolidateTrailingMatchesZeroOnly(iter));
@@ -466,7 +553,7 @@ public class ZeroTrimmer extends CopyVisitor {
                     }
                 }
             } else {
-                // The next element cannot match zero. Nothing more to do.
+                // The next element cannot match zero. Nothing more to do. Reset the index to right before the non-zero element.
                 iter.setIndex(lastIndex);
                 break;
             }
@@ -488,8 +575,8 @@ public class ZeroTrimmer extends CopyVisitor {
         
         while (iter.hasNext()) {
             int lastIndex = iter.index();
-            // Skip any optional if present.
-            iter.seekPastOptional();
+            // Skip any question mark if present.
+            iter.seekPastQuestionMarks();
             // Grab the quantifier if present.
             Node quantifier = iter.isNextQuantifier() ? iter.next() : null;
             
@@ -530,7 +617,7 @@ public class ZeroTrimmer extends CopyVisitor {
         
         List<Node> nodes = new ArrayList<>();
         // The new element must be optional. Since the nodes are in reverse order, add the optional first.
-        nodes.add(new OptionalNode());
+        nodes.add(new QuestionMarkNode());
         
         // If the min and max are both 1, return 0?
         if (minZeroCount == 1 && maxZeroCount == 1) {

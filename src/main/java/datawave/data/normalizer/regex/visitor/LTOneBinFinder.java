@@ -2,7 +2,6 @@ package datawave.data.normalizer.regex.visitor;
 
 import datawave.data.normalizer.regex.AnyCharNode;
 import datawave.data.normalizer.regex.Node;
-import datawave.data.normalizer.regex.NodeType;
 import datawave.data.normalizer.regex.RegexUtils;
 import org.apache.commons.lang3.tuple.Pair;
 
@@ -44,6 +43,7 @@ public class LTOneBinFinder extends BinFinder {
      * Calculate the bin range for a pattern that has no decimal point specified in it.
      */
     private void calculateRangeWithoutDecimalPoint() {
+        // Get the index of the first wildcard in the regex, if present.
         int firstWildcardIndex = node.indexOf(AnyCharNode.class);
         
         // If there is no wildcard present in the regex, the regex does not need a bin range for numbers less than one.
@@ -51,64 +51,43 @@ public class LTOneBinFinder extends BinFinder {
             return;
         }
         
-        // If the wildcard is not the first element in the pattern, see if it's possible to have leading zeros up to the first wildcard. If not, the pattern
-        // will not match against numbers less than one and does not need a bin range for numbers less than one.
-        if (childrenIter.index() != firstWildcardIndex) {
-            while (childrenIter.index() != firstWildcardIndex) {
-                Node next = childrenIter.peekNext();
-                // We found an element that cannot match zero before the wildcard. Return early.
-                if (!RegexUtils.matchesZero(next)) {
-                    return;
-                } else {
-                    // We found an element that can match zero. Move the iterator forward, and skip any quantifiers or optional characters.
-                    childrenIter.next();
-                    childrenIter.seekPastQuantifier();
-                    childrenIter.seekPastQuantifier();
-                }
+        // If there are any elements before the wildcard, they must all be able to possibly be a leading zero up to the wildcard. If not, the pattern will not
+        // match against numbers less than one and does not need a bin range for numbers less than one.
+        while (childrenIter.index() != firstWildcardIndex) {
+            Node next = childrenIter.peekNext();
+            // We found an element that cannot match zero before the wildcard. Return early.
+            if (!RegexUtils.matchesZero(next)) {
+                return;
+            } else {
+                // We found an element that can match zero. Move the iterator forward, and skip any quantifiers or question marks.
+                childrenIter.next();
+                childrenIter.seekPastQuantifiers();
+                childrenIter.seekPastQuestionMarks();
             }
         }
         
-        while (childrenIter.hasNext()) {
-            int nextIndex = childrenIter.index();
-            Node next = childrenIter.next();
-            switch (next.getType()) {
-                case ANY_CHAR:
-                    // Mark that we've seen a wildcard, and fall through to the operations below the SINGLE_CHAR case.
-                    // Do not add a break after this statement.
-                    this.wildcardSeen = true;
-                case CHAR_CLASS:
-                case DIGIT_CHAR_CLASS:
-                case SINGLE_CHAR:
-                    // If the current character could be a leading zero, update the bin range.
-                    if (RegexUtils.matchesZero(next)) {
-                        if (childrenIter.hasNext() && childrenIter.isNextQuantifier()) {
-                            updateRangeWithQuantifier();
-                        } else {
-                            if (wildcardSeen) {
-                                // Check if this is the first time we've seen the wildcard. If there is nothing else after it, then we do not need a bin range
-                                // for
-                                // numbers less than one. Otherwise, we should increment the lower bound.
-                                if (nextIndex == firstWildcardIndex) {
-                                    if (childrenIter.hasNext()) {
-                                        incrementLower();
-                                    } else {
-                                        return;
-                                    }
-                                }
-                            } else {
-                                // If no wildcard has been seen, increment the lower bound.
-                                incrementLower();
-                            }
-                            
-                            // If no quantifier was specified, increment the upper bound.
-                            incrementUpper();
-                        }
-                    } else {
-                        // There are no more leading zeroes, and nothing more to do.
-                        return;
-                    }
-            }
+        // Skip over the first wildcard, capture any quantifier if present, and skip past any question marks.
+        childrenIter.next();
+        Node quantifier = childrenIter.isNextQuantifier() ? childrenIter.next() : null;
+        childrenIter.seekPastQuestionMarks();
+        
+        // If there are no elements after the wildcard, and the wildcard did not have a quantifier, there is nothing more to do.
+        if (!childrenIter.hasNext() && quantifier == null) {
+            return;
         }
+        
+        // Otherwise we will at least have the minimum bin range possible.
+        incrementLower();
+        incrementUpper();
+        
+        // If the first wildcard had a quantifier, lock the lower bound and update the upper bound based on the quantifier.
+        if (quantifier != null) {
+            lockLower();
+            updateRangeWithQuantifier(quantifier);
+        }
+        
+        // Process the remaining children.
+        processRemainingChildren();
     }
     
     /**
@@ -128,25 +107,35 @@ public class LTOneBinFinder extends BinFinder {
         incrementUpper();
         incrementLower();
         
+        // Process the remaining children.
+        processRemainingChildren();
+    }
+    
+    /**
+     * Iterate over the remaining children in the children iterator and update the bin range.
+     */
+    private void processRemainingChildren() {
         // For each possible leading zero after the decimal point, update the bin range.
         while (childrenIter.hasNext()) {
             Node next = childrenIter.next();
-            // If next can be a leading zero, update the bin range/
+            // If next can be a leading zero, update the range.
             if (RegexUtils.matchesZero(next)) {
-                if (next.getType() == NodeType.ANY_CHAR) {
-                    this.wildcardSeen = true;
+                // If next can possible be not a zero, lock the lower bound.
+                if (!RegexUtils.matchesZeroOnly(next)) {
+                    lockLower();
                 }
+                
+                // If the element has a quantifier, increment the upper and lower bound based on the quantifier.
                 if (childrenIter.isNextQuantifier()) {
-                    updateRangeWithQuantifier();
+                    updateRangeWithNextQuantifier();
                 } else {
-                    if (!wildcardSeen) {
-                        incrementLower();
-                    }
+                    // Otherwise increment the upper and lower bound by one.
+                    incrementLower();
                     incrementUpper();
                 }
             } else {
                 // If next cannot possibly be a leading zero, there is nothing more to do.
-                break;
+                return;
             }
         }
     }

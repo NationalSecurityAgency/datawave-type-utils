@@ -154,8 +154,8 @@ public class RegexParser {
                 return new ZeroOrMoreNode();
             case ONE_OR_MORE:
                 return new OneOrMoreNode();
-            case OPTIONAL:
-                return new OptionalNode();
+            case QUESTION_MARK:
+                return new QuestionMarkNode();
             case SINGLE_CHAR:
                 return new SingleCharNode(content.charAt(0));
             case REPETITION:

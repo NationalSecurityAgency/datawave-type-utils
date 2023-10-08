@@ -27,5 +27,4 @@ public class RepetitionNode extends Node {
     public RepetitionNode shallowCopy() {
         return new RepetitionNode();
     }
-    
 }

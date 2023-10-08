@@ -5,12 +5,12 @@ import com.google.common.base.Preconditions;
 import java.util.Arrays;
 
 /**
- * A reader that traverses over a regex pattern both identifies and steps through individual regex operations.
+ * A reader that traverses over a regex pattern and both identifies and steps through individual regex elements.
  */
 class RegexReader {
     
     public enum ExpressionType {
-        GROUP, ALTERNATION, REPETITION, CHAR_CLASS, SINGLE_CHAR, ESCAPED_CHAR, ANY_CHAR, ZERO_OR_MORE, ONE_OR_MORE, OPTIONAL, ANCHOR_START, ANCHOR_END
+        GROUP, ALTERNATION, REPETITION, CHAR_CLASS, SINGLE_CHAR, ESCAPED_CHAR, ANY_CHAR, ZERO_OR_MORE, ONE_OR_MORE, QUESTION_MARK, ANCHOR_START, ANCHOR_END
     }
     
     /**
@@ -124,7 +124,7 @@ class RegexReader {
                 this.capturedType = ExpressionType.ONE_OR_MORE;
                 break;
             case RegexConstants.QUESTION_MARK:
-                this.capturedType = ExpressionType.OPTIONAL;
+                this.capturedType = ExpressionType.QUESTION_MARK;
                 break;
             case RegexConstants.BACKSLASH:
                 this.capturedType = ExpressionType.ESCAPED_CHAR;
@@ -141,15 +141,6 @@ class RegexReader {
      */
     private char current() {
         return pattern[cursor];
-    }
-    
-    /**
-     * Returns the next character in the chars array after the current cursor index without incrementing the cursor.
-     *
-     * @return the next character
-     */
-    private char peek() {
-        return pattern[(cursor + 1)];
     }
     
     /**
@@ -188,7 +179,7 @@ class RegexReader {
             case ANY_CHAR:
             case ZERO_OR_MORE:
             case ONE_OR_MORE:
-            case OPTIONAL:
+            case QUESTION_MARK:
             case ANCHOR_START:
             case ANCHOR_END:
                 skip(1);

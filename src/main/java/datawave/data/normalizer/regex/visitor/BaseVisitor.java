@@ -15,7 +15,7 @@ import datawave.data.normalizer.regex.GroupNode;
 import datawave.data.normalizer.regex.IntegerNode;
 import datawave.data.normalizer.regex.IntegerRangeNode;
 import datawave.data.normalizer.regex.OneOrMoreNode;
-import datawave.data.normalizer.regex.OptionalNode;
+import datawave.data.normalizer.regex.QuestionMarkNode;
 import datawave.data.normalizer.regex.RepetitionNode;
 import datawave.data.normalizer.regex.SingleCharNode;
 import datawave.data.normalizer.regex.StartAnchorNode;
@@ -81,7 +81,7 @@ public class BaseVisitor implements Visitor {
     }
     
     @Override
-    public Object visitOptional(OptionalNode node, Object data) {
+    public Object visitQuestionMark(QuestionMarkNode node, Object data) {
         node.childrenAccept(this, data);
         return data;
     }

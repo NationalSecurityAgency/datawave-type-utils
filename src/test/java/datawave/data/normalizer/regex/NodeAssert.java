@@ -138,7 +138,7 @@ public class NodeAssert<SELF extends AbstractAssert<SELF,ACTUAL>,ACTUAL extends 
     }
     
     public NodeAssert<SELF,ACTUAL> isOptionalNode() {
-        isInstanceOf(OptionalNode.class);
+        isInstanceOf(QuestionMarkNode.class);
         return this;
     }
     
