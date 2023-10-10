@@ -1,6 +1,7 @@
 package datawave.data.normalizer.regex;
 
 import com.google.common.base.CharMatcher;
+import com.google.common.base.Stopwatch;
 import datawave.data.normalizer.regex.visitor.AnchorTrimmer;
 import datawave.data.normalizer.regex.visitor.AlternationDeduper;
 import datawave.data.normalizer.regex.visitor.DecimalPointPlacer;
@@ -19,9 +20,9 @@ import datawave.data.normalizer.regex.visitor.ZeroLengthRepetitionTrimmer;
 import datawave.data.normalizer.regex.visitor.ZeroTrimmer;
 import datawave.data.normalizer.regex.visitor.ZeroValueNormalizer;
 import org.apache.commons.lang.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.log4j.Logger;
 
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
@@ -94,7 +95,7 @@ import java.util.regex.PatternSyntaxException;
  */
 public class NumericRegexEncoder {
     
-    private static final Logger log = LoggerFactory.getLogger(NumericRegexEncoder.class);
+    private static final Logger log = Logger.getLogger(NumericRegexEncoder.class);
     
     /**
      * Matches against any unescaped d characters, and any other letters. If \d is present, that indicates a digit and is allowed.
@@ -122,6 +123,9 @@ public class NumericRegexEncoder {
      * and/or end anchors.
      */
     private static final Pattern NORMALIZATION_NOT_REQUIRED_PATTERN = Pattern.compile("^\\^?(\\.[*+]\\??)+\\$?$");
+    
+    private static final TimeUnit TIME_UNIT = TimeUnit.MILLISECONDS;
+    private static final String TIME_UNIT_ABBR = "ms";
     
     public static String encode(String regex) {
         return new NumericRegexEncoder(regex).encode();
@@ -262,7 +266,7 @@ public class NumericRegexEncoder {
     
     /**
      * Returns whether the regex requires normalization.
-     * 
+     *
      * @return true if the regex requires normalization, or false otherwise.
      */
     private boolean isEncodingRequired() {
@@ -273,48 +277,76 @@ public class NumericRegexEncoder {
      * Parse the regex to a node tree.
      */
     private void parsePatternTree() {
+        Stopwatch stopwatch = Stopwatch.createStarted();
         this.patternTree = RegexParser.parse(this.pattern);
+        stopwatch.stop();
+        
         if (log.isDebugEnabled()) {
-            log.debug("Parsed pattern to tree structure: \n" + PrintVisitor.printToString(this.patternTree));
+            log.debug("Parsed pattern to tree structure (" + stopwatch.elapsed(TIME_UNIT) + TIME_UNIT_ABBR + "): \n"
+                            + PrintVisitor.printToString(this.patternTree));
         }
         
         // Verify that the regex pattern does not contain any character classes with characters other than digits or a period.
+        stopwatch.start();
         NumericCharClassValidator.validate(this.patternTree);
+        stopwatch.stop();
+        
+        if (log.isDebugEnabled()) {
+            log.debug("Validated character classes in regex (" + stopwatch.elapsed(TIME_UNIT) + TIME_UNIT_ABBR + ")");
+        }
         
         // Verify that the regex pattern does not contain any alternated expressions that have more than one required decimal point.
+        stopwatch.start();
         DecimalPointValidator.validate(this.patternTree);
+        stopwatch.stop();
+        
+        if (log.isDebugEnabled()) {
+            log.debug("Validated decimal points classes in regex (" + stopwatch.elapsed(TIME_UNIT) + TIME_UNIT_ABBR + ")");
+        }
     }
     
     /**
      * Normalize the pattern tree.
      */
     private void normalizePatternTree() {
+        Stopwatch stopwatch = Stopwatch.createUnstarted();
+        
         // Trim the tree of any empty nodes and empty alternations, and verify if we still have a pattern to encode.
+        stopwatch.start();
         this.patternTree = EmptyLeafTrimmer.trim(this.patternTree);
+        stopwatch.stop();
+        
         if (this.patternTree == null) {
             throw new IllegalArgumentException("Regex pattern is empty after trimming empty alternations.");
         }
         
         if (log.isDebugEnabled()) {
-            log.debug("Pattern tree after trimming empty leafs: " + StringVisitor.toString(this.patternTree));
+            log.debug("Regex after trimming empty leafs (" + stopwatch.elapsed(TIME_UNIT) + TIME_UNIT_ABBR + "):" + StringVisitor.toString(this.patternTree));
         }
         
         // Trim all anchors.
+        stopwatch.start();
         this.patternTree = AnchorTrimmer.trim(this.patternTree);
+        stopwatch.stop();
         
         if (log.isDebugEnabled()) {
-            log.debug("Pattern tree after trimming anchors: " + StringVisitor.toString(this.patternTree));
+            log.debug("Regex after trimming anchors (" + stopwatch.elapsed(TIME_UNIT) + TIME_UNIT_ABBR + "):" + StringVisitor.toString(this.patternTree));
         }
         
         // Expand optional variants.
+        stopwatch.start();
         this.patternTree = OptionalVariantExpander.expand(this.patternTree);
+        stopwatch.stop();
         
         if (log.isDebugEnabled()) {
-            log.debug("Pattern tree after expanding optional variants: " + StringVisitor.toString(this.patternTree));
+            log.debug("Regex after expanding optional variants (" + stopwatch.elapsed(TIME_UNIT) + TIME_UNIT_ABBR + "):"
+                            + StringVisitor.toString(this.patternTree));
         }
         
         // Remove all zero-length repetitions.
+        stopwatch.start();
         this.patternTree = ZeroLengthRepetitionTrimmer.trim(this.patternTree);
+        stopwatch.stop();
         
         // If the pattern is empty afterwards, throw an exception.
         if (this.patternTree == null) {
@@ -322,21 +354,28 @@ public class NumericRegexEncoder {
         }
         
         if (log.isDebugEnabled()) {
-            log.debug("Pattern tree after trimming zero-length repetition characters: " + StringVisitor.toString(this.patternTree));
+            log.debug("Regex after trimming zero-length repetition characters (" + stopwatch.elapsed(TIME_UNIT) + TIME_UNIT_ABBR + "):"
+                            + StringVisitor.toString(this.patternTree));
         }
         
         // Expand leading wildcards to include negative variants.
+        stopwatch.start();
         this.patternTree = NegativeVariantExpander.expand(this.patternTree);
+        stopwatch.stop();
         
         if (log.isDebugEnabled()) {
-            log.debug("Pattern tree after expanding negative variants: " + StringVisitor.toString(this.patternTree));
+            log.debug("Regex after expanding negative variants (" + stopwatch.elapsed(TIME_UNIT) + TIME_UNIT_ABBR + "):"
+                            + StringVisitor.toString(this.patternTree));
         }
         
         // Normalize any patterns that either only match or can match zero.
+        stopwatch.start();
         this.patternTree = ZeroValueNormalizer.normalize(this.patternTree);
+        stopwatch.stop();
         
         if (log.isDebugEnabled()) {
-            log.debug("Pattern tree after normalizing zero-value characters: " + StringVisitor.toString(this.patternTree));
+            log.debug("Regex after normalizing zero-value characters (" + stopwatch.elapsed(TIME_UNIT) + TIME_UNIT_ABBR + "):"
+                            + StringVisitor.toString(this.patternTree));
         }
     }
     
@@ -344,58 +383,87 @@ public class NumericRegexEncoder {
      * Encode the pattern tree.
      */
     private void encodePatternTree() {
+        Stopwatch stopwatch = Stopwatch.createUnstarted();
+        
         // Before encoding, remove any duplicate alternations.
+        stopwatch.start();
         this.patternTree = AlternationDeduper.dedupe(this.patternTree);
+        stopwatch.stop();
         
         if (log.isDebugEnabled()) {
-            log.debug("Pattern tree after de-duping: " + StringVisitor.toString(this.patternTree));
+            log.debug("Regex after de-duping (" + stopwatch.elapsed(TIME_UNIT) + TIME_UNIT_ABBR + "):" + StringVisitor.toString(this.patternTree));
         }
         
         // Encode any and all simple numbers present in the pattern.
+        stopwatch.start();
         this.patternTree = SimpleNumberEncoder.encode(this.patternTree);
+        stopwatch.stop();
         
         if (log.isDebugEnabled()) {
-            log.debug("Pattern tree after encoding simple numbers: " + StringVisitor.toString(this.patternTree));
+            log.debug("Regex after encoding simple numbers (" + stopwatch.elapsed(TIME_UNIT) + TIME_UNIT_ABBR + "):"
+                            + StringVisitor.toString(this.patternTree));
+        }
+        
+        // Check if there are unencoded sub-patterns in the tree after encoding simple numbers.
+        stopwatch.start();
+        boolean nonEncodedExpressionsRemaining = NonEncodedNumbersChecker.check(this.patternTree);
+        stopwatch.stop();
+        
+        if (log.isDebugEnabled()) {
+            log.debug("Regex checked for remaining non-encoded expressions (" + stopwatch.elapsed(TIME_UNIT) + TIME_UNIT_ABBR + ")");
         }
         
         // If there are no more unencoded sub-patterns in the tree after encoding simple numbers, no further work needs to be done.
-        if (!NonEncodedNumbersChecker.check(this.patternTree)) {
+        if (!nonEncodedExpressionsRemaining) {
             return;
         }
         
         // Add exponential bin range information, e.g. \+[a-z], ![A-Z], etc.
+        stopwatch.start();
         this.patternTree = ExponentialBinAdder.addBins(this.patternTree);
+        stopwatch.stop();
         
         if (log.isDebugEnabled()) {
-            log.debug("Pattern tree after adding exponential bin information: " + StringVisitor.toString(this.patternTree));
+            log.debug("Regex after adding exponential bin information (" + stopwatch.elapsed(TIME_UNIT) + TIME_UNIT_ABBR + "):"
+                            + StringVisitor.toString(this.patternTree));
         }
         
         // Trim/consolidate any leading zeros in partially-encoded patterns.
+        stopwatch.start();
         this.patternTree = ZeroTrimmer.trim(this.patternTree);
+        stopwatch.stop();
         
         if (log.isDebugEnabled()) {
-            log.debug("Pattern tree after trimming leading/trailing zeros: " + StringVisitor.toString(this.patternTree));
+            log.debug("Regex after trimming leading/trailing zeros (" + stopwatch.elapsed(TIME_UNIT) + TIME_UNIT_ABBR + "):"
+                            + StringVisitor.toString(this.patternTree));
         }
         
         // Add decimal points where required.
+        stopwatch.start();
         this.patternTree = DecimalPointPlacer.addDecimalPoints(this.patternTree);
+        stopwatch.stop();
         
         if (log.isDebugEnabled()) {
-            log.debug("Pattern tree after adding decimal points: " + StringVisitor.toString(this.patternTree));
+            log.debug("Regex after adding decimal points (" + stopwatch.elapsed(TIME_UNIT) + TIME_UNIT_ABBR + "):" + StringVisitor.toString(this.patternTree));
         }
         
         // Invert any patterns that are meant to match negative numbers.
+        stopwatch.start();
         this.patternTree = NegativeNumberPatternInverter.invert(this.patternTree);
+        stopwatch.stop();
         
         if (log.isDebugEnabled()) {
-            log.debug("Pattern tree after inverting patterns for negative numbers: " + StringVisitor.toString(this.patternTree));
+            log.debug("Regex after inverting patterns for negative numbers (" + stopwatch.elapsed(TIME_UNIT) + TIME_UNIT_ABBR + "):"
+                            + StringVisitor.toString(this.patternTree));
         }
         
         // Finally, remove any duplicate alternations that resulted during the encoding process.
+        stopwatch.start();
         this.patternTree = AlternationDeduper.dedupe(this.patternTree);
+        stopwatch.stop();
         
         if (log.isDebugEnabled()) {
-            log.debug("Pattern tree after de-duping: " + StringVisitor.toString(this.patternTree));
+            log.debug("Regex after de-duping (" + stopwatch.elapsed(TIME_UNIT) + TIME_UNIT_ABBR + "):" + StringVisitor.toString(this.patternTree));
         }
     }
 }
