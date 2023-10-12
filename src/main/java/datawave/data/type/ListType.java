@@ -43,4 +43,9 @@ public abstract class ListType extends BaseType implements OneToManyNormalizerTy
     public List<String> getNormalizedValues() {
         return normalizedValues;
     }
+    
+    @Override
+    public boolean expandAtQueryTime() {
+        return false;
+    }
 }

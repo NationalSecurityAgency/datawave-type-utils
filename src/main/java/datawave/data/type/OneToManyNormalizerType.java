@@ -7,4 +7,6 @@ public interface OneToManyNormalizerType<T extends Comparable<T>> extends Type<T
     List<String> normalizeToMany(String in);
     
     List<String> getNormalizedValues();
+    
+    boolean expandAtQueryTime();
 }
