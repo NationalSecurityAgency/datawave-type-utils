@@ -1,11 +1,10 @@
 package datawave.data.type;
 
-import datawave.data.normalizer.Normalizer;
-
-import datawave.util.StringUtils;
-
 import java.util.ArrayList;
 import java.util.List;
+
+import datawave.data.normalizer.Normalizer;
+import datawave.util.StringUtils;
 
 public abstract class ListType extends BaseType implements OneToManyNormalizerType {
     protected static final String delimiter = ",|;";
@@ -43,5 +42,10 @@ public abstract class ListType extends BaseType implements OneToManyNormalizerTy
     @Override
     public List<String> getNormalizedValues() {
         return normalizedValues;
+    }
+    
+    @Override
+    public boolean expandAtQueryTime() {
+        return false;
     }
 }

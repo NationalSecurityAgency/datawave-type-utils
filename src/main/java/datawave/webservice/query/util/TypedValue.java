@@ -8,6 +8,8 @@ import java.nio.charset.Charset;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 import javax.xml.bind.DatatypeConverter;
 import javax.xml.bind.Unmarshaller;
@@ -26,7 +28,6 @@ import datawave.data.type.IpAddressType;
 import datawave.data.type.NoOpType;
 import datawave.data.type.NumberType;
 import datawave.data.type.Type;
-
 import datawave.webservice.query.data.ObjectSizeOf;
 import io.protostuff.Input;
 import io.protostuff.Message;
@@ -124,7 +125,7 @@ public class TypedValue implements Serializable, Message<TypedValue> {
             if (string.contains(MAX_UNICODE_STRING)) {
                 string = string.replaceAll(MAX_UNICODE_STRING, " ");
             }
-            setMarhsalledStringValue(string);
+            setMarshalledStringValue(string);
         } else if (byte[].class.equals(clazz)) {
             this.marshalledValue = DatatypeConverter.printBase64Binary((byte[]) value);
             this.type = XSD_BASE64BINARY;
@@ -191,18 +192,21 @@ public class TypedValue implements Serializable, Message<TypedValue> {
         } else if (NoOpType.class.equals(clazz)) {
             Type<?> type = (Type<?>) value;
             String valueToDisplay = type.getDelegate().toString();
-            setMarhsalledStringValue(valueToDisplay);
+            setMarshalledStringValue(valueToDisplay);
         } else if (Type.class.isAssignableFrom(clazz)) {
             Type<?> type = (Type<?>) value;
             String valueToDisplay = type.getDelegate().toString();
             valueToDisplay = valueToDisplay.replaceAll(MAX_UNICODE_STRING, "");
-            setMarhsalledStringValue(valueToDisplay);
+            setMarshalledStringValue(valueToDisplay);
+        } else if (LinkedHashMap.class.equals(clazz)) {
+            // this is a special case when Json serialization is used. The Type objects end up being a map.
+            setMarshalledStringValue(String.valueOf(((LinkedHashMap) value).get("delegate")));
         } else {
             throw new IllegalArgumentException("Unhandled class type: " + clazz.getName());
         }
     }
     
-    private void setMarhsalledStringValue(String string) {
+    private void setMarshalledStringValue(String string) {
         if (XMLUtil.isValidXML(string)) {
             this.marshalledValue = DatatypeConverter.printString(string);
         } else {

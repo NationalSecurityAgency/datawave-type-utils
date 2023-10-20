@@ -1,15 +1,16 @@
 package datawave.data.type;
 
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
+
+import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.Polygon;
+
 import datawave.data.normalizer.DiscreteIndexNormalizer;
 import datawave.data.normalizer.Normalizer;
 import datawave.data.normalizer.OneToManyNormalizer;
 import datawave.data.type.util.AbstractGeometry;
-import org.locationtech.jts.geom.Geometry;
-import org.locationtech.jts.geom.Polygon;
-
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
 
 /**
  * The base GeoWave geometry type, which provides an implementation for the discrete index type interface.

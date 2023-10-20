@@ -1,5 +1,7 @@
 package datawave.data.normalizer;
 
+import org.apache.commons.lang3.StringUtils;
+
 import com.google.common.base.Splitter;
 import com.google.common.collect.Iterables;
 
@@ -15,7 +17,7 @@ public class MacAddressNormalizer extends AbstractNormalizer<String> {
         if (parts.length == 6) {
             // Verify it is padded ie.e 11:01:00:11:11:11
             // Return 11-01-00-11-11-11
-            return org.apache.commons.lang.StringUtils.join(padWithZeros(parts), "-");
+            return StringUtils.join(padWithZeros(parts), "-");
         }
         
         parts = Iterables.toArray(Splitter.on('-').split(fieldValue), String.class);
@@ -23,7 +25,7 @@ public class MacAddressNormalizer extends AbstractNormalizer<String> {
             
             // Verify it is padded ie.e 11-01-00-11-11-11
             // Return 11-01-00-11-11-11
-            return org.apache.commons.lang.StringUtils.join(padWithZeros(parts), "-");
+            return StringUtils.join(padWithZeros(parts), "-");
         }
         
         // 6 bytes for a macaddr

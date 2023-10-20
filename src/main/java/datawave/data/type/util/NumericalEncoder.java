@@ -50,7 +50,7 @@ public class NumericalEncoder {
     private static final String zero = "+AE0";
     private static final List<String> uppercaseLetters = createLetterList('A', 'Z');
     private static final List<String> lowercaseLetters = createLetterList('a', 'z');
-    private static final String encodedRegex = "(\\!|\\+)[a-zA-Z]E[0-9].?[0-9]*";
+    private static final String encodedRegex = "(\\!|\\+)[a-zA-Z][E|e][0-9].?[0-9]*";
     private static final Pattern encodedPattern = Pattern.compile(encodedRegex);
     
     static {

@@ -1,15 +1,14 @@
 package datawave.webservice.query.util;
 
-import com.sun.org.apache.xml.internal.utils.XMLChar;
-import org.junit.jupiter.api.Test;
-
 import static org.junit.jupiter.api.Assertions.*;
+
+import org.apache.xerces.util.XMLChar;
+import org.junit.jupiter.api.Test;
 
 public class XMLUtilTest {
     @Test
     public void testAllCharacters() {
         for (int i = 0; i < 0x300000; ++i) {
-            // Uses an internal class, but only for testing.
             boolean expectedResult = XMLChar.isValid(i);
             assertEquals(expectedResult, XMLUtil.isValidXMLChar(i), "Mismatch for 0x" + Integer.toHexString(i));
         }

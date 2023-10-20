@@ -1,10 +1,10 @@
 package datawave.data.type;
 
+import java.util.List;
+
 import datawave.data.normalizer.Normalizer;
 import datawave.data.normalizer.OneToManyNormalizer;
 import datawave.data.type.util.Geometry;
-
-import java.util.List;
 
 /**
  * Provides inclusive support for all geometry types. OneToManyNormalizer support is needed as lines and polygons are likely to produce multiple normalized
@@ -34,5 +34,10 @@ public class GeometryType extends AbstractGeometryType<Geometry> implements OneT
     
     public List<String> getNormalizedValues() {
         return normalizedValues;
+    }
+    
+    @Override
+    public boolean expandAtQueryTime() {
+        return false;
     }
 }

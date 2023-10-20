@@ -1,13 +1,16 @@
 package datawave.data.type;
 
-import datawave.data.type.util.Geometry;
-import datawave.data.type.util.Point;
-import datawave.webservice.query.data.ObjectSizeOf;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.util.List;
+
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.locationtech.jts.io.WKTReader;
 
-import java.util.List;
+import datawave.data.type.util.Geometry;
+import datawave.data.type.util.Point;
+import datawave.webservice.query.data.ObjectSizeOf;
 
 public class GeometryObjectSizeTest {
     
@@ -21,7 +24,7 @@ public class GeometryObjectSizeTest {
         long estimatedSizeInBytes = pointType.sizeInBytes();
         long actualSizeInBytes = sizeInBytes(pointType);
         
-        Assertions.assertTrue(Math.abs(actualSizeInBytes - estimatedSizeInBytes) / (double) actualSizeInBytes <= THRESHOLD);
+        assertTrue(Math.abs(actualSizeInBytes - estimatedSizeInBytes) / (double) actualSizeInBytes <= THRESHOLD);
     }
     
     @Test
@@ -32,7 +35,7 @@ public class GeometryObjectSizeTest {
         long estimatedSizeInBytes = geometryType.sizeInBytes();
         long actualSizeInBytes = sizeInBytes(geometryType);
         
-        Assertions.assertTrue(Math.abs(actualSizeInBytes - estimatedSizeInBytes) / (double) actualSizeInBytes <= THRESHOLD);
+        assertTrue(Math.abs(actualSizeInBytes - estimatedSizeInBytes) / (double) actualSizeInBytes <= THRESHOLD);
     }
     
     @Test
@@ -44,7 +47,7 @@ public class GeometryObjectSizeTest {
         long estimatedSizeInBytes = geometryType.sizeInBytes();
         long actualSizeInBytes = sizeInBytes(geometryType);
         
-        Assertions.assertTrue(Math.abs(actualSizeInBytes - estimatedSizeInBytes) / (double) actualSizeInBytes <= THRESHOLD);
+        assertTrue(Math.abs(actualSizeInBytes - estimatedSizeInBytes) / (double) actualSizeInBytes <= THRESHOLD);
     }
     
     @Test
@@ -56,7 +59,7 @@ public class GeometryObjectSizeTest {
         long estimatedSizeInBytes = geometryType.sizeInBytes();
         long actualSizeInBytes = sizeInBytes(geometryType);
         
-        Assertions.assertTrue(Math.abs(actualSizeInBytes - estimatedSizeInBytes) / (double) actualSizeInBytes <= THRESHOLD);
+        assertTrue(Math.abs(actualSizeInBytes - estimatedSizeInBytes) / (double) actualSizeInBytes <= THRESHOLD);
     }
     
     @Test
@@ -67,7 +70,7 @@ public class GeometryObjectSizeTest {
         long estimatedSizeInBytes = geometryType.sizeInBytes();
         long actualSizeInBytes = sizeInBytes(geometryType);
         
-        Assertions.assertTrue(Math.abs(actualSizeInBytes - estimatedSizeInBytes) / (double) actualSizeInBytes <= THRESHOLD);
+        assertTrue(Math.abs(actualSizeInBytes - estimatedSizeInBytes) / (double) actualSizeInBytes <= THRESHOLD);
     }
     
     @Test
@@ -79,7 +82,7 @@ public class GeometryObjectSizeTest {
         long estimatedSizeInBytes = geometryType.sizeInBytes();
         long actualSizeInBytes = sizeInBytes(geometryType);
         
-        Assertions.assertTrue(Math.abs(actualSizeInBytes - estimatedSizeInBytes) / (double) actualSizeInBytes <= THRESHOLD);
+        assertTrue(Math.abs(actualSizeInBytes - estimatedSizeInBytes) / (double) actualSizeInBytes <= THRESHOLD);
     }
     
     @Test
@@ -91,7 +94,7 @@ public class GeometryObjectSizeTest {
         long estimatedSizeInBytes = geometryType.sizeInBytes();
         long actualSizeInBytes = sizeInBytes(geometryType);
         
-        Assertions.assertTrue(Math.abs(actualSizeInBytes - estimatedSizeInBytes) / (double) actualSizeInBytes <= THRESHOLD);
+        assertTrue(Math.abs(actualSizeInBytes - estimatedSizeInBytes) / (double) actualSizeInBytes <= THRESHOLD);
     }
     
     private static long sizeInBytes(BaseType baseType) {

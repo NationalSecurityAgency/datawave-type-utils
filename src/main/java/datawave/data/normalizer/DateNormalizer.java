@@ -1,6 +1,5 @@
 package datawave.data.normalizer;
 
-import com.google.common.collect.Maps;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.ParsePosition;
@@ -11,9 +10,11 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
-import com.google.common.collect.Lists;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 
 public class DateNormalizer extends AbstractNormalizer<Date> {
     

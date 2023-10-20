@@ -1,7 +1,7 @@
 package datawave.data.normalizer;
 
-import com.google.common.collect.Lists;
-import datawave.data.type.util.Geometry;
+import java.util.List;
+
 import org.locationtech.geowave.core.geotime.index.dimension.LatitudeDefinition;
 import org.locationtech.geowave.core.geotime.index.dimension.LongitudeDefinition;
 import org.locationtech.geowave.core.index.NumericIndexStrategy;
@@ -11,7 +11,9 @@ import org.locationtech.geowave.core.index.sfc.tiered.TieredSFCIndexFactory;
 import org.locationtech.geowave.core.store.api.Index;
 import org.locationtech.geowave.core.store.index.CustomNameIndex;
 
-import java.util.List;
+import com.google.common.collect.Lists;
+
+import datawave.data.type.util.Geometry;
 
 /**
  * A normalizer that, given a parseable geometry string representing an arbitrary geometry, will perform GeoWave indexing with a multi-tiered spatial geowave
