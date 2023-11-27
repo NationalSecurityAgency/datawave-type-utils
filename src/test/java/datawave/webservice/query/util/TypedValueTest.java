@@ -10,13 +10,13 @@ import java.io.InputStreamReader;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.text.MessageFormat;
+import java.util.Base64;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
 
 import javax.xml.bind.JAXBContext;
 
-import org.apache.commons.codec.binary.Base64;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -61,7 +61,7 @@ public class TypedValueTest {
     public void testEncodedStringString() throws Exception {
         TypedValue value = new TypedValue("encoded\0String");
         String actual = serialize(value);
-        assertEquals(expected64("xs:string", new String(Base64.encodeBase64("encoded\0String".getBytes()))), actual);
+        assertEquals(expected64("xs:string", new String(Base64.getEncoder().encode("encoded\0String".getBytes()))), actual);
         assertTrue(value.isBase64Encoded());
         assertEquals("xs:string", value.getType());
     }
@@ -71,7 +71,7 @@ public class TypedValueTest {
         BaseType<String> type = new NoOpType("encoded\0String");
         TypedValue value = new TypedValue(type);
         String actual = serialize(value);
-        assertEquals(expected64("xs:string", new String(Base64.encodeBase64("encoded\0String".getBytes()))), actual);
+        assertEquals(expected64("xs:string", new String(Base64.getEncoder().encode("encoded\0String".getBytes()))), actual);
         assertTrue(value.isBase64Encoded());
         assertEquals("xs:string", value.getType());
     }
@@ -81,7 +81,7 @@ public class TypedValueTest {
         BaseType<String> type = new LcNoDiacriticsType("encoded\0String");
         TypedValue value = new TypedValue(type);
         String actual = serialize(value);
-        assertEquals(expected64("xs:string", new String(Base64.encodeBase64("encoded\0String".getBytes()))), actual);
+        assertEquals(expected64("xs:string", new String(Base64.getEncoder().encode("encoded\0String".getBytes()))), actual);
         assertTrue(value.isBase64Encoded());
         assertEquals("xs:string", value.getType());
     }
@@ -171,7 +171,7 @@ public class TypedValueTest {
     public void testByteArray() throws Exception {
         TypedValue value = new TypedValue(new byte[] {(byte) 1, (byte) 2, (byte) 3, (byte) 42});
         String actual = serialize(value);
-        assertEquals(expected("xs:base64Binary", new String(Base64.encodeBase64((byte[]) value.getValue()))), actual);
+        assertEquals(expected("xs:base64Binary", new String(Base64.getEncoder().encode((byte[]) value.getValue()))), actual);
         assertFalse(value.isBase64Encoded());
         assertEquals("xs:base64Binary", value.getType());
     }
