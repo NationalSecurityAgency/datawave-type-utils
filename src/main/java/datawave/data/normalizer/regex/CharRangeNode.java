@@ -2,6 +2,7 @@ package datawave.data.normalizer.regex;
 
 import datawave.data.normalizer.regex.visitor.Visitor;
 
+import java.util.Map;
 import java.util.Objects;
 import java.util.StringJoiner;
 
@@ -10,28 +11,34 @@ import java.util.StringJoiner;
  */
 public class CharRangeNode extends Node {
     
-    private char start;
-    private char end;
+    public static final String PROPERTY_START = "start";
+    public static final String PROPERTY_END = "end";
+    
+    public CharRangeNode() {}
+    
+    public CharRangeNode(Map<String,String> properties) {
+        super(properties);
+    }
     
     public CharRangeNode(char start, char end) {
-        this.start = start;
-        this.end = end;
+        setStart(start);
+        setEnd(end);
     }
     
     public char getStart() {
-        return start;
+        return getProperty(PROPERTY_START).charAt(0);
     }
     
     public void setStart(char start) {
-        this.start = start;
+        setProperty(PROPERTY_START, String.valueOf(start));
     }
     
     public char getEnd() {
-        return end;
+        return getProperty(PROPERTY_END).charAt(0);
     }
     
     public void setEnd(char end) {
-        this.end = end;
+        setProperty(PROPERTY_END, String.valueOf(end));
     }
     
     @Override
@@ -46,28 +53,7 @@ public class CharRangeNode extends Node {
     
     @Override
     public CharRangeNode shallowCopy() {
-        return new CharRangeNode(this.start, this.end);
+        return new CharRangeNode(this.properties);
     }
     
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-        CharRangeNode that = (CharRangeNode) o;
-        return start == that.start && end == that.end;
-    }
-    
-    @Override
-    public int hashCode() {
-        return Objects.hash(start, end);
-    }
-    
-    @Override
-    public String toString() {
-        return new StringJoiner(", ", CharRangeNode.class.getSimpleName() + "[", "]").add("start=" + start).add("end=" + end).toString();
-    }
 }

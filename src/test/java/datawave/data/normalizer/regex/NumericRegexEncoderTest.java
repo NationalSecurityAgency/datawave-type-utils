@@ -312,13 +312,13 @@ class NumericRegexEncoderTest {
         
         // Test .* and .*? at end of regex for negative number.
         // @formatter:off
-        assertRegex("-111.*").normalizesTo("![A-X]E8\\.8[98].*")
+        assertRegex("-111.*").normalizesTo("![A-X]E8\\.8(9|8.+)")
                         .matchesAllOf("-111", "-111.0", "-111.1", "-111.2", "-111.3", "-111.4", "-111.5", "-111.6", "-111.7", "-111.8", "-111.9")
                         .matchesAllOf("-1110", "-1111", "-1112", "-1113", "-1114", "-1115", "-1116", "-1117", "-1118", "-1119")
                         .matchesAllOf("-1114353454", "-1110.09203498", "-111090820394802933.234")
                         .matchesNoneOf("-110", "-1.11", "-11.1", "-121");
     
-        assertRegex("-111.*?").normalizesTo("![A-X]E8\\.8[98].*?")
+        assertRegex("-111.*?").normalizesTo("![A-X]E8\\.8(9|8.+?)")
                         .matchesAllOf("-1112", "-111.454", "-111111232", "-111")
                         .matchesNoneOf("-11", "-113544");
         // @formatter:on
@@ -337,14 +337,17 @@ class NumericRegexEncoderTest {
                         .matchesNoneOf("1.11", "11.1", "0.43111");
         
         // Test .+ and .+? at end of regex for negative number.
-        assertRegex("-111.+").normalizesTo("![A-X]E8\\.8[98].*")
+        assertRegex("-111.+").normalizesTo("![A-X]E8\\.8(9|8.+)")
                         .matchesAllOf("-111.0", "-111.1", "-111.2", "-111.3", "-111.4", "-111.5", "-111.6", "-111.7", "-111.8", "-111.9")
                         .matchesAllOf("-1110", "-1111", "-1112", "-1113", "-1114", "-1115", "-1116", "-1117", "-1118", "-1119")
                         .matchesAllOf("-1114353454", "-1110.09203498", "-111090820394802933.234")
                         .matchesNoneOf("-110", "-1.11", "-11.1", "-121");
     
-        assertRegex("-111.+?").normalizesTo("![A-X]E8\\.8[98].*?")
-                        .matchesAllOf();
+        assertRegex("-111.+?").normalizesTo("![A-X]E8\\.8(9|8.+?)")
+                        .matchesAllOf("-111.0", "-111.1", "-111.2", "-111.3", "-111.4", "-111.5", "-111.6", "-111.7", "-111.8", "-111.9")
+                        .matchesAllOf("-1110", "-1111", "-1112", "-1113", "-1114", "-1115", "-1116", "-1117", "-1118", "-1119")
+                        .matchesAllOf("-1114353454", "-1110.09203498", "-111090820394802933.234")
+                        .matchesNoneOf("-110", "-1.11", "-11.1", "-121");
         // @formatter:on
     }
     
@@ -534,6 +537,18 @@ class NumericRegexEncoderTest {
         assertRegex("0\\.5.*").normalizesTo("\\+ZE5\\.?.*")
                         .matchesAllOf("0.5", "0.545984")
                         .matchesNoneOf("0.6", "0.05");
+        // @formatter:on
+    }
+    
+    @Test
+    void testComplexNegativePattern() {
+        // @formatter:off
+        assertRegex("-34\\d.{0,4}4*").normalizesTo("![A-X]E6\\.(6|5\\d|5\\d.{0,4}|5\\d.{0,4}5*6)")
+                        .matchesAllOf("-340", "-341", "-342", "-343", "-344", "-345", "-346", "-347", "-348", "-349") // Test matching -34\d portion
+                        .matchesNoneOf("340", "341", "342", "343", "344", "345", "346", "347", "348", "349") // Ensure does not match positive variant
+                        .matchesAllOf("-3411", "-34112", "-341123", "-3411234", "-3419876") // Test matching -34\d.{0,4} portion
+                        .matchesAllOf("-3419586444444", "-34195864444444444444") // Test matching -34\d.{0,4}4* portion
+                        .matchesNoneOf("-3414321999999"); // Ensure does not match numbers not ending with 4*
         // @formatter:on
     }
     

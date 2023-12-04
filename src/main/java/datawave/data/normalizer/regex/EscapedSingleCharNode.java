@@ -2,26 +2,31 @@ package datawave.data.normalizer.regex;
 
 import datawave.data.normalizer.regex.visitor.Visitor;
 
-import java.util.Objects;
-import java.util.StringJoiner;
+import java.util.Map;
 
 /**
  * Represents an escaped character in a regex pattern, e.g. {@code \-}.
  */
 public class EscapedSingleCharNode extends Node {
     
-    private char character;
+    public static final String PROPERTY_CHAR = "char";
+    
+    public EscapedSingleCharNode() {}
     
     public EscapedSingleCharNode(char character) {
-        this.character = character;
+        setCharacter(character);
+    }
+    
+    public EscapedSingleCharNode(Map<String,String> properties) {
+        super(properties);
     }
     
     public char getCharacter() {
-        return character;
+        return getProperty(PROPERTY_CHAR).charAt(0);
     }
     
     public void setCharacter(char character) {
-        this.character = character;
+        setProperty(PROPERTY_CHAR, String.valueOf(character));
     }
     
     @Override
@@ -36,28 +41,6 @@ public class EscapedSingleCharNode extends Node {
     
     @Override
     public EscapedSingleCharNode shallowCopy() {
-        return new EscapedSingleCharNode(this.character);
-    }
-    
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-        EscapedSingleCharNode that = (EscapedSingleCharNode) o;
-        return character == that.character;
-    }
-    
-    @Override
-    public int hashCode() {
-        return Objects.hash(character);
-    }
-    
-    @Override
-    public String toString() {
-        return new StringJoiner(", ", EscapedSingleCharNode.class.getSimpleName() + "[", "]").add("character=" + character).toString();
+        return new EscapedSingleCharNode(this.properties);
     }
 }

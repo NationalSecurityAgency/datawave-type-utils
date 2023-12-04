@@ -1,9 +1,8 @@
 package datawave.data.normalizer.regex;
 
 import com.google.common.base.CharMatcher;
-import com.google.common.base.Stopwatch;
-import datawave.data.normalizer.regex.visitor.AnchorTrimmer;
 import datawave.data.normalizer.regex.visitor.AlternationDeduper;
+import datawave.data.normalizer.regex.visitor.AnchorTrimmer;
 import datawave.data.normalizer.regex.visitor.DecimalPointPlacer;
 import datawave.data.normalizer.regex.visitor.DecimalPointValidator;
 import datawave.data.normalizer.regex.visitor.EmptyLeafTrimmer;
@@ -19,17 +18,18 @@ import datawave.data.normalizer.regex.visitor.StringVisitor;
 import datawave.data.normalizer.regex.visitor.ZeroLengthRepetitionTrimmer;
 import datawave.data.normalizer.regex.visitor.ZeroTrimmer;
 import datawave.data.normalizer.regex.visitor.ZeroValueNormalizer;
+import datawave.data.type.util.NumericalEncoder;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
-import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
 /**
  * This class handles provides functionality for encoding numeric regexes that are meant to match against numbers that were previously encoded via
- * {@link datawave.data.type.util.NumericalEncoder#encode(String)}. It is expected that incoming regexes are initially written to match against base ten
- * numbers. Due to the complex nature of how numbers are encoded and trimmed, accuracy is NOT guaranteed when using this class to encode numeric regexes.
+ * {@link NumericalEncoder#encode(String)}. It is expected that incoming regexes are initially written to match against base ten numbers. Due to the complex
+ * nature of how numbers are encoded and trimmed, accuracy is NOT guaranteed when using this class to encode numeric regexes.
  * <P>
  * <P>
  * <strong>Requirements</strong>
@@ -91,7 +91,7 @@ import java.util.regex.PatternSyntaxException;
  * them. If you find that the resulting encoded regex is not matching the desired encoding numbers, try to simplify it into a higher number of alternations with
  * simpler regexes if possible.
  * 
- * @see datawave.data.type.util.NumericalEncoder
+ * @see NumericalEncoder
  */
 public class NumericRegexEncoder {
     
@@ -124,9 +124,13 @@ public class NumericRegexEncoder {
      */
     private static final Pattern NORMALIZATION_NOT_REQUIRED_PATTERN = Pattern.compile("^\\^?(\\.[*+]\\??)+\\$?$");
     
-    private static final TimeUnit TIME_UNIT = TimeUnit.MILLISECONDS;
-    private static final String TIME_UNIT_ABBR = "ms";
-    
+    /**
+     * Encode the given numeric regex pattern such that it will match against encoded numbers.
+     * 
+     * @param regex
+     *            the regex pattern
+     * @return the encoded regex pattern
+     */
     public static String encode(String regex) {
         return new NumericRegexEncoder(regex).encode();
     }
@@ -152,13 +156,13 @@ public class NumericRegexEncoder {
             encodePatternTree();
             
             if (log.isDebugEnabled()) {
-                log.debug("Encoded pattern: " + StringVisitor.toString(this.patternTree));
+                log.debug("Encoded pattern '" + pattern + "' to '" + StringVisitor.toString(this.patternTree) + "'");
             }
             
             return StringVisitor.toString(this.patternTree);
         } else {
             if (log.isDebugEnabled()) {
-                log.debug("Encoding not required for " + pattern);
+                log.debug("Encoding not required for pattern '" + pattern + "'");
             }
             return this.pattern;
         }
@@ -277,193 +281,176 @@ public class NumericRegexEncoder {
      * Parse the regex to a node tree.
      */
     private void parsePatternTree() {
-        Stopwatch stopwatch = Stopwatch.createStarted();
-        this.patternTree = RegexParser.parse(this.pattern);
-        stopwatch.stop();
-        
-        if (log.isDebugEnabled()) {
-            log.debug("Parsed pattern to tree structure (" + stopwatch.elapsed(TIME_UNIT) + TIME_UNIT_ABBR + "): \n"
-                            + PrintVisitor.printToString(this.patternTree));
-        }
-        
-        // Verify that the regex pattern does not contain any character classes with characters other than digits or a period.
-        stopwatch.start();
-        NumericCharClassValidator.validate(this.patternTree);
-        stopwatch.stop();
-        
-        if (log.isDebugEnabled()) {
-            log.debug("Validated character classes in regex (" + stopwatch.elapsed(TIME_UNIT) + TIME_UNIT_ABBR + ")");
-        }
-        
-        // Verify that the regex pattern does not contain any alternated expressions that have more than one required decimal point.
-        stopwatch.start();
-        DecimalPointValidator.validate(this.patternTree);
-        stopwatch.stop();
-        
-        if (log.isDebugEnabled()) {
-            log.debug("Validated decimal points classes in regex (" + stopwatch.elapsed(TIME_UNIT) + TIME_UNIT_ABBR + ")");
-        }
+        parsePatternToTree();
+        validateCharClasses();
+        validateDecimalPoints();
     }
     
     /**
      * Normalize the pattern tree.
      */
     private void normalizePatternTree() {
-        Stopwatch stopwatch = Stopwatch.createUnstarted();
-        
-        // Trim the tree of any empty nodes and empty alternations, and verify if we still have a pattern to encode.
-        stopwatch.start();
-        this.patternTree = EmptyLeafTrimmer.trim(this.patternTree);
-        stopwatch.stop();
-        
-        if (this.patternTree == null) {
-            throw new IllegalArgumentException("Regex pattern is empty after trimming empty alternations.");
-        }
-        
-        if (log.isDebugEnabled()) {
-            log.debug("Regex after trimming empty leafs (" + stopwatch.elapsed(TIME_UNIT) + TIME_UNIT_ABBR + "):" + StringVisitor.toString(this.patternTree));
-        }
-        
-        // Trim all anchors.
-        stopwatch.start();
-        this.patternTree = AnchorTrimmer.trim(this.patternTree);
-        stopwatch.stop();
-        
-        if (log.isDebugEnabled()) {
-            log.debug("Regex after trimming anchors (" + stopwatch.elapsed(TIME_UNIT) + TIME_UNIT_ABBR + "):" + StringVisitor.toString(this.patternTree));
-        }
-        
-        // Expand optional variants.
-        stopwatch.start();
-        this.patternTree = OptionalVariantExpander.expand(this.patternTree);
-        stopwatch.stop();
-        
-        if (log.isDebugEnabled()) {
-            log.debug("Regex after expanding optional variants (" + stopwatch.elapsed(TIME_UNIT) + TIME_UNIT_ABBR + "):"
-                            + StringVisitor.toString(this.patternTree));
-        }
-        
-        // Remove all zero-length repetitions.
-        stopwatch.start();
-        this.patternTree = ZeroLengthRepetitionTrimmer.trim(this.patternTree);
-        stopwatch.stop();
-        
-        // If the pattern is empty afterwards, throw an exception.
-        if (this.patternTree == null) {
-            throw new IllegalArgumentException("Regex pattern is empty after trimming all characters followed by {0} or {0,0}.");
-        }
-        
-        if (log.isDebugEnabled()) {
-            log.debug("Regex after trimming zero-length repetition characters (" + stopwatch.elapsed(TIME_UNIT) + TIME_UNIT_ABBR + "):"
-                            + StringVisitor.toString(this.patternTree));
-        }
-        
-        // Expand leading wildcards to include negative variants.
-        stopwatch.start();
-        this.patternTree = NegativeVariantExpander.expand(this.patternTree);
-        stopwatch.stop();
-        
-        if (log.isDebugEnabled()) {
-            log.debug("Regex after expanding negative variants (" + stopwatch.elapsed(TIME_UNIT) + TIME_UNIT_ABBR + "):"
-                            + StringVisitor.toString(this.patternTree));
-        }
-        
-        // Normalize any patterns that either only match or can match zero.
-        stopwatch.start();
-        this.patternTree = ZeroValueNormalizer.normalize(this.patternTree);
-        stopwatch.stop();
-        
-        if (log.isDebugEnabled()) {
-            log.debug("Regex after normalizing zero-value characters (" + stopwatch.elapsed(TIME_UNIT) + TIME_UNIT_ABBR + "):"
-                            + StringVisitor.toString(this.patternTree));
-        }
+        trimAnchors();
+        trimZeroLengthRepetitions();
+        trimEmptyLeafs();
+        expandOptionalVariants();
+        expandNegativeVariants();
+        expandZeroValues();
     }
     
     /**
      * Encode the pattern tree.
      */
     private void encodePatternTree() {
-        Stopwatch stopwatch = Stopwatch.createUnstarted();
-        
-        // Before encoding, remove any duplicate alternations.
-        stopwatch.start();
-        this.patternTree = AlternationDeduper.dedupe(this.patternTree);
-        stopwatch.stop();
-        
-        if (log.isDebugEnabled()) {
-            log.debug("Regex after de-duping (" + stopwatch.elapsed(TIME_UNIT) + TIME_UNIT_ABBR + "):" + StringVisitor.toString(this.patternTree));
-        }
-        
-        // Encode any and all simple numbers present in the pattern.
-        stopwatch.start();
-        this.patternTree = SimpleNumberEncoder.encode(this.patternTree);
-        stopwatch.stop();
-        
-        if (log.isDebugEnabled()) {
-            log.debug("Regex after encoding simple numbers (" + stopwatch.elapsed(TIME_UNIT) + TIME_UNIT_ABBR + "):"
-                            + StringVisitor.toString(this.patternTree));
-        }
-        
-        // Check if there are unencoded sub-patterns in the tree after encoding simple numbers.
-        stopwatch.start();
-        boolean nonEncodedExpressionsRemaining = NonEncodedNumbersChecker.check(this.patternTree);
-        stopwatch.stop();
-        
-        if (log.isDebugEnabled()) {
-            log.debug("Regex checked for remaining non-encoded expressions (" + stopwatch.elapsed(TIME_UNIT) + TIME_UNIT_ABBR + ")");
-        }
-        
+        dedupe();
+        encodeSimpleNumbers();
         // If there are no more unencoded sub-patterns in the tree after encoding simple numbers, no further work needs to be done.
-        if (!nonEncodedExpressionsRemaining) {
+        if (!moreToEncode()) {
             return;
         }
-        
-        // Add exponential bin range information, e.g. \+[a-z], ![A-Z], etc.
-        stopwatch.start();
-        this.patternTree = ExponentialBinAdder.addBins(this.patternTree);
-        stopwatch.stop();
+        addExponentialBins();
+        trimZeros();
+        invertNegativePatterns();
+        addDecimalPoints();
+        dedupe();
+    }
+    
+    /**
+     * Parse the pattern to a node tree.
+     */
+    private void parsePatternToTree() {
+        this.patternTree = RegexParser.parse(this.pattern);
         
         if (log.isDebugEnabled()) {
-            log.debug("Regex after adding exponential bin information (" + stopwatch.elapsed(TIME_UNIT) + TIME_UNIT_ABBR + "):"
-                            + StringVisitor.toString(this.patternTree));
+            log.debug("Parsed pattern to tree structure:\n" + PrintVisitor.printToString(this.patternTree));
         }
-        
-        // Trim/consolidate any leading zeros in partially-encoded patterns.
-        stopwatch.start();
-        this.patternTree = ZeroTrimmer.trim(this.patternTree);
-        stopwatch.stop();
+    }
+    
+    /**
+     * Verify that the regex pattern does not contain any character classes with characters other than digits or a period.
+     */
+    private void validateCharClasses() {
+        NumericCharClassValidator.validate(this.patternTree);
         
         if (log.isDebugEnabled()) {
-            log.debug("Regex after trimming leading/trailing zeros (" + stopwatch.elapsed(TIME_UNIT) + TIME_UNIT_ABBR + "):"
-                            + StringVisitor.toString(this.patternTree));
+            log.debug("Validated character classes in regex");
         }
-        
-        // Add decimal points where required.
-        stopwatch.start();
-        this.patternTree = DecimalPointPlacer.addDecimalPoints(this.patternTree);
-        stopwatch.stop();
+    }
+    
+    /**
+     * Verify that the regex pattern does not contain any alternated expressions that have more than one required decimal point.
+     */
+    private void validateDecimalPoints() {
+        DecimalPointValidator.validate(this.patternTree);
         
         if (log.isDebugEnabled()) {
-            log.debug("Regex after adding decimal points (" + stopwatch.elapsed(TIME_UNIT) + TIME_UNIT_ABBR + "):" + StringVisitor.toString(this.patternTree));
+            log.debug("Validated decimal points classes in regex");
         }
+    }
+    
+    /**
+     * Trim all anchors.
+     */
+    private void trimAnchors() {
+        updatePatternTree(AnchorTrimmer::trim, "trimming anchors");
+    }
+    
+    /**
+     * Trim all elements that occur exactly zero times.
+     */
+    private void trimZeroLengthRepetitions() {
+        updatePatternTree(ZeroLengthRepetitionTrimmer::trim, "trimming zero-length repetition characters");
         
-        // Invert any patterns that are meant to match negative numbers.
-        stopwatch.start();
-        this.patternTree = NegativeNumberPatternInverter.invert(this.patternTree);
-        stopwatch.stop();
-        
-        if (log.isDebugEnabled()) {
-            log.debug("Regex after inverting patterns for negative numbers (" + stopwatch.elapsed(TIME_UNIT) + TIME_UNIT_ABBR + "):"
-                            + StringVisitor.toString(this.patternTree));
+        // If the pattern is empty afterwards, throw an exception.
+        if (this.patternTree == null) {
+            throw new IllegalArgumentException("Regex pattern is empty after trimming all characters followed by {0} or {0,0}.");
         }
-        
-        // Finally, remove any duplicate alternations that resulted during the encoding process.
-        stopwatch.start();
-        this.patternTree = AlternationDeduper.dedupe(this.patternTree);
-        stopwatch.stop();
+    }
+    
+    /**
+     * Trim the tree of any empty nodes and empty alternations, and verify if we still have a pattern to encode.
+     */
+    private void trimEmptyLeafs() {
+        updatePatternTree(EmptyLeafTrimmer::trim, "trimming empty leafs");
+    }
+    
+    /**
+     * Expand optional variants.
+     */
+    private void expandOptionalVariants() {
+        updatePatternTree(OptionalVariantExpander::expand, "expanding optional variants");
+    }
+    
+    /**
+     * Expand any patterns beginning with {@code .} to include a version with a minus sign in front of it.
+     */
+    private void expandNegativeVariants() {
+        updatePatternTree(NegativeVariantExpander::expand, "expanding negative variants");
+    }
+    
+    /**
+     * If any patterns can match the number '0', add an alternation with '0'.
+     */
+    private void expandZeroValues() {
+        updatePatternTree(ZeroValueNormalizer::expand, "normalizing zero-value characters");
+    }
+    
+    /**
+     * Remove any duplicate alternations.
+     */
+    private void dedupe() {
+        updatePatternTree(AlternationDeduper::dedupe, "de-duping");
+    }
+    
+    /**
+     * Encode any and all simple numbers present in the pattern.
+     */
+    private void encodeSimpleNumbers() {
+        updatePatternTree(SimpleNumberEncoder::encode, "encoding simple numbers");
+    }
+    
+    /**
+     * Return whether there are unencoded sub-patterns in the tree after encoding simple numbers.
+     * 
+     * @return true if there are more patterns to encode, or false otherwise
+     */
+    private boolean moreToEncode() {
+        return NonEncodedNumbersChecker.check(this.patternTree);
+    }
+    
+    /**
+     * Add exponential bin range information, e.g. \+[a-z], ![A-Z], etc.
+     */
+    private void addExponentialBins() {
+        updatePatternTree(ExponentialBinAdder::addBins, "adding exponential bin information");
+    }
+    
+    /**
+     * Trim/consolidate any leading zeros in partially-encoded patterns.
+     */
+    private void trimZeros() {
+        updatePatternTree(ZeroTrimmer::trim, "trimming leading/trailing zeros");
+    }
+    
+    /**
+     * Invert any patterns that are meant to match negative numbers.
+     */
+    private void invertNegativePatterns() {
+        updatePatternTree(NegativeNumberPatternInverter::invert, "inverting patterns for negative numbers");
+    }
+    
+    /**
+     * Add decimal points where required.
+     */
+    private void addDecimalPoints() {
+        updatePatternTree(DecimalPointPlacer::addDecimalPoints, "adding decimal points");
+    }
+    
+    private void updatePatternTree(Function<Node,Node> function, String operationDescription) {
+        this.patternTree = function.apply(this.patternTree);
         
         if (log.isDebugEnabled()) {
-            log.debug("Regex after de-duping (" + stopwatch.elapsed(TIME_UNIT) + TIME_UNIT_ABBR + "):" + StringVisitor.toString(this.patternTree));
+            log.debug("Regex after " + operationDescription + ": " + StringVisitor.toString(this.patternTree));
         }
     }
 }

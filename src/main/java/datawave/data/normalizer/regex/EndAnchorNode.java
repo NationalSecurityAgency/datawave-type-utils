@@ -2,10 +2,18 @@ package datawave.data.normalizer.regex;
 
 import datawave.data.normalizer.regex.visitor.Visitor;
 
+import java.util.Map;
+
 /**
  * Represents a regex end anchor, i.e. {@code $}.
  */
 public class EndAnchorNode extends Node {
+    
+    public EndAnchorNode() {}
+    
+    public EndAnchorNode(Map<String,String> properties) {
+        super(properties);
+    }
     
     @Override
     public NodeType getType() {
@@ -19,6 +27,6 @@ public class EndAnchorNode extends Node {
     
     @Override
     public Node shallowCopy() {
-        return new EndAnchorNode();
+        return new EndAnchorNode(this.properties);
     }
 }

@@ -1,6 +1,7 @@
 package datawave.data.normalizer.regex.visitor;
 
 import datawave.data.normalizer.regex.Node;
+import datawave.data.type.util.NumericalEncoder;
 import org.junit.jupiter.api.Test;
 
 import static datawave.data.normalizer.regex.NodeAssert.assertThat;
@@ -54,13 +55,14 @@ class NegativeNumberPatternInverterTest {
     void testWildcard() {
         assertInverted("-.234", "![W-Xa]E.?766");
         assertInverted("-34.454", "![U-Y]E65.546");
-        assertInverted("-34454.", "![U-V]E6554[65].?");
+        assertInverted("-34454.", "![U-V]E6554(6|5.)");
     }
     
     @Test
     void testMultiWildcards() {
         assertInverted("-.*234", "![A-Xa-z]E.*766");
         assertInverted("-.+234", "![A-Xa-z]E.*766");
+        assertInverted("-0.00454.*", "![A-Xc]E.?(9{2})?54(6|5.+)");
     }
     
     @Test
@@ -73,28 +75,7 @@ class NegativeNumberPatternInverterTest {
     @Test
     void testDigitCharacterClass() {
         assertInverted("-\\d", "!ZE\\d");
-    }
-    
-    @Test
-    void testQuantifiersWithMinuendsOfNineOrTen() {
-        // 4{3} needs to be subtracted from a minuend of either 9 or 10. Because it has a quantifier, the minuend variants need to be captured in a grouped
-        // alternation.
-        assertInverted("-454{3}.*", "![A-V]E54(6{3}|5{3}).*");
-        
-        // Same thing for 4*.
-        assertInverted("-454*.*", "![A-Y]E5[54](6*|5*).*");
-        
-        // Same thing for 4+.
-        assertInverted("-454+.+", "![A-X]E54(6+|5+).*");
-        
-        // Test [46]{3}.
-        assertInverted("-45[46]{3}.*", "![A-V]E54([64]{3}|[53]{3}).*");
-        
-        // Test [46]*.
-        assertInverted("-45[46]*.*", "![A-Y]E5[54]([64]*|[53]*).*");
-        
-        // Test [46]+.
-        assertInverted("-45[46]+.*", "![A-X]E54([64]+|[53]+).*");
+        assertInverted("-\\d*", "![A-Z]E\\d+");
     }
     
     @Test
@@ -106,7 +87,29 @@ class NegativeNumberPatternInverterTest {
         assertInverted("-.*000.*3", "![A-Za-z]E.*(9{3})?.*7");
         
         // Even if there could possibly be no elements after the consolidated zeros, they should get negated to a value of 9.
-        assertInverted("-3.*000.*", "![A-Z]E[76].*(9{3})?.*");
+        assertInverted("-3.*000.*", "![A-Z]E(7|6.+|6.*9{3}.+)");
+    }
+    
+    @Test
+    void testTrailingZeros() {
+        assertInverted("-22[0-4]", "!XE7(8|7[6-9])");
+        assertInverted("-22[0157]", "!XE7(8|7[953])");
+        assertInverted("-22[0157]*", "![A-Y]E7(8|7[9842]*[953])");
+        assertInverted("-22[0157]+", "![A-X]E7(8|7[9842]*[953])");
+        assertInverted("-22[0157]{3}", "!VE7(8|7[9842]{0,2}[953])");
+        assertInverted("-22[0157]{1,3}", "![V-X]E7(8|7[9842]{0,2}[953])");
+        assertInverted("-[1369]*2[0157]{1,3}0{1,3}", "![A-X]E[8630]*(8|7[9842]{0,2}[953])");
+        assertInverted("-22[^03]{1,3}[06]{3,4}", "![R-U]E77([^96]{0,2}[^7]|[^96]{1,3}[93]{2,3}4)");
+    }
+    
+    @Test
+    void testRepetitions() {
+        assertInverted("-4{3}", "!XE5{2}6");
+        assertInverted("-4{3,6}", "![U-X]E5{2,5}6");
+        assertInverted("-4{0,6}", "![U-Z]E5{0,5}6");
+        assertInverted("-4{1,4}", "![W-Z]E5{0,3}6");
+        assertInverted("-4{1,}", "![A-Z]E5{0,}6");
+        assertInverted("-4{2,}", "![A-Y]E5{1,}6");
     }
     
     public void assertInverted(String pattern, String expectedPattern) {
@@ -114,6 +117,7 @@ class NegativeNumberPatternInverterTest {
         actual = ExponentialBinAdder.addBins(actual);
         actual = ZeroTrimmer.trim(actual);
         actual = NegativeNumberPatternInverter.invert(actual);
+        
         assertThat(actual).asTreeString().isEqualTo(expectedPattern);
     }
     

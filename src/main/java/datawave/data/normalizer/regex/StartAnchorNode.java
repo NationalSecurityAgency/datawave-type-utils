@@ -2,10 +2,20 @@ package datawave.data.normalizer.regex;
 
 import datawave.data.normalizer.regex.visitor.Visitor;
 
+import java.util.Map;
+
 /**
  * Represents a regex start anchor, i.e. {@code ^}.
  */
 public class StartAnchorNode extends Node {
+    
+    protected StartAnchorNode() {
+        super();
+    }
+    
+    public StartAnchorNode(Map<String,String> properties) {
+        super(properties);
+    }
     
     @Override
     public NodeType getType() {
@@ -19,6 +29,6 @@ public class StartAnchorNode extends Node {
     
     @Override
     public Node shallowCopy() {
-        return new StartAnchorNode();
+        return new StartAnchorNode(this.properties);
     }
 }

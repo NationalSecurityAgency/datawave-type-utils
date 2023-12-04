@@ -328,7 +328,7 @@ public class NodeAssert<SELF extends AbstractAssert<SELF,ACTUAL>,ACTUAL extends 
         public IntegerRangeNodeAssert hasUnboundedEnd() {
             isNotNull();
             if (actual.isEndBounded()) {
-                failWithMessage("Expected end to be unbounded but was %d", actual.getStart());
+                failWithMessage("Expected end to be unbounded but was %d", actual.getEnd());
             }
             return this;
         }

@@ -2,10 +2,18 @@ package datawave.data.normalizer.regex;
 
 import datawave.data.normalizer.regex.visitor.Visitor;
 
+import java.util.Map;
+
 /**
  * Represents a dot in a regex pattern.
  */
 public class AnyCharNode extends Node {
+    
+    public AnyCharNode() {}
+    
+    public AnyCharNode(Map<String,String> properties) {
+        super(properties);
+    }
     
     @Override
     public NodeType getType() {
@@ -19,6 +27,6 @@ public class AnyCharNode extends Node {
     
     @Override
     public AnyCharNode shallowCopy() {
-        return new AnyCharNode();
+        return new AnyCharNode(this.properties);
     }
 }

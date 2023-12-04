@@ -2,10 +2,18 @@ package datawave.data.normalizer.regex;
 
 import datawave.data.normalizer.regex.visitor.Visitor;
 
+import java.util.Map;
+
 /**
  * Placeholder empty node for empty groups or empty alternation branches.
  */
 public class EmptyNode extends Node {
+    
+    public EmptyNode() {}
+    
+    public EmptyNode(Map<String,String> properties) {
+        super(properties);
+    }
     
     @Override
     public NodeType getType() {
@@ -19,6 +27,6 @@ public class EmptyNode extends Node {
     
     @Override
     public Node shallowCopy() {
-        return new EmptyNode();
+        return new EmptyNode(this.properties);
     }
 }

@@ -3,6 +3,7 @@ package datawave.data.normalizer.regex;
 import datawave.data.normalizer.regex.visitor.Visitor;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * Represents some subset or the full part of a regex pattern.
@@ -19,6 +20,10 @@ public class ExpressionNode extends Node {
         super(children);
     }
     
+    public ExpressionNode(Map<String,String> properties) {
+        super(properties);
+    }
+    
     @Override
     public NodeType getType() {
         return NodeType.EXPRESSION;
@@ -31,6 +36,6 @@ public class ExpressionNode extends Node {
     
     @Override
     public ExpressionNode shallowCopy() {
-        return new ExpressionNode();
+        return new ExpressionNode(this.properties);
     }
 }

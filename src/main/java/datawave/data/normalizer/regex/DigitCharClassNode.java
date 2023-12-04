@@ -2,10 +2,20 @@ package datawave.data.normalizer.regex;
 
 import datawave.data.normalizer.regex.visitor.Visitor;
 
+import java.util.Map;
+
 /**
  * Represents the digit character class {@code \d} in a regex pattern.
  */
 public class DigitCharClassNode extends Node {
+    
+    protected DigitCharClassNode() {
+        super();
+    }
+    
+    public DigitCharClassNode(Map<String,String> properties) {
+        super(properties);
+    }
     
     @Override
     public NodeType getType() {
@@ -19,6 +29,6 @@ public class DigitCharClassNode extends Node {
     
     @Override
     public DigitCharClassNode shallowCopy() {
-        return new DigitCharClassNode();
+        return new DigitCharClassNode(this.properties);
     }
 }

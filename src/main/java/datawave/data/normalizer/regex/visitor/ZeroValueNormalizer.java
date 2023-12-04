@@ -20,7 +20,7 @@ import java.util.function.Consumer;
  */
 public class ZeroValueNormalizer extends SubExpressionVisitor {
     
-    public static Node normalize(Node node) {
+    public static Node expand(Node node) {
         if (node == null) {
             return null;
         }

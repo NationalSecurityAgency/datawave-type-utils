@@ -2,6 +2,7 @@ package datawave.data.normalizer.regex;
 
 import datawave.data.normalizer.regex.visitor.Visitor;
 
+import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -9,20 +10,25 @@ import java.util.Objects;
  */
 public class CharClassNode extends Node {
     
-    private boolean negated;
+    public static final String PROPERTY_NEGATED = "negated";
+    private static final String TRUE = String.valueOf(true);
     
     public CharClassNode() {}
     
     public CharClassNode(boolean negated) {
-        this.negated = negated;
+        setProperty(PROPERTY_NEGATED, String.valueOf(negated));
+    }
+    
+    public CharClassNode(Map<String,String> properties) {
+        super(properties);
     }
     
     public boolean isNegated() {
-        return negated;
+        return hasProperty(PROPERTY_NEGATED) && getProperty(PROPERTY_NEGATED).equals(TRUE);
     }
     
     public void negate() {
-        this.negated = true;
+        setProperty(PROPERTY_NEGATED, TRUE);
     }
     
     @Override
@@ -37,23 +43,6 @@ public class CharClassNode extends Node {
     
     @Override
     public CharClassNode shallowCopy() {
-        return new CharClassNode(this.negated);
-    }
-    
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-        CharClassNode that = (CharClassNode) o;
-        return negated == that.negated;
-    }
-    
-    @Override
-    public int hashCode() {
-        return Objects.hash(negated);
+        return new CharClassNode(this.properties);
     }
 }

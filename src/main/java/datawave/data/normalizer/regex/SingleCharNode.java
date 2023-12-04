@@ -2,6 +2,7 @@ package datawave.data.normalizer.regex;
 
 import datawave.data.normalizer.regex.visitor.Visitor;
 
+import java.util.Map;
 import java.util.Objects;
 import java.util.StringJoiner;
 
@@ -10,18 +11,24 @@ import java.util.StringJoiner;
  */
 public class SingleCharNode extends Node {
     
-    private char character;
+    public static final String PROPERTY_CHAR = "char";
     
     public SingleCharNode(char character) {
-        this.character = character;
+        setCharacter(character);
     }
     
     public char getCharacter() {
-        return character;
+        return getProperty(PROPERTY_CHAR).charAt(0);
     }
     
     public void setCharacter(char character) {
-        this.character = character;
+        setProperty(PROPERTY_CHAR, String.valueOf(character));
+    }
+    
+    public SingleCharNode() {}
+    
+    public SingleCharNode(Map<String,String> properties) {
+        super(properties);
     }
     
     @Override
@@ -36,28 +43,6 @@ public class SingleCharNode extends Node {
     
     @Override
     public SingleCharNode shallowCopy() {
-        return new SingleCharNode(this.character);
-    }
-    
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-        SingleCharNode that = (SingleCharNode) o;
-        return character == that.character;
-    }
-    
-    @Override
-    public int hashCode() {
-        return Objects.hash(character);
-    }
-    
-    @Override
-    public String toString() {
-        return new StringJoiner(", ", SingleCharNode.class.getSimpleName() + "[", "]").add("character=" + character).toString();
+        return new SingleCharNode(this.properties);
     }
 }

@@ -3,6 +3,7 @@ package datawave.data.normalizer.regex;
 import datawave.data.normalizer.regex.visitor.Visitor;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * Represents a regex group in a regex pattern encapsulated by {@code (...)}.
@@ -19,6 +20,10 @@ public class GroupNode extends Node {
         super(children);
     }
     
+    public GroupNode(Map<String,String> properties) {
+        super(properties);
+    }
+    
     @Override
     public NodeType getType() {
         return NodeType.GROUP;
@@ -31,6 +36,6 @@ public class GroupNode extends Node {
     
     @Override
     public GroupNode shallowCopy() {
-        return new GroupNode();
+        return new GroupNode(this.properties);
     }
 }

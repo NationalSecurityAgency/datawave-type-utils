@@ -2,6 +2,7 @@ package datawave.data.normalizer.regex;
 
 import datawave.data.normalizer.regex.visitor.Visitor;
 
+import java.util.Map;
 import java.util.Objects;
 import java.util.StringJoiner;
 
@@ -10,36 +11,43 @@ import java.util.StringJoiner;
  */
 public class IntegerRangeNode extends Node {
     
-    private int start;
-    private Integer end;
+    public static final String PROPERTY_START = "start";
+    public static final String PROPERTY_END = "end";
     
-    public IntegerRangeNode() {
-        
-    }
+    public IntegerRangeNode() {}
     
     public IntegerRangeNode(int start, Integer end) {
-        this.start = start;
-        this.end = end;
+        setStart(start);
+        setEnd(end);
     }
     
-    public Integer getStart() {
-        return start;
+    public IntegerRangeNode(Map<String,String> properties) {
+        super(properties);
+    }
+    
+    public int getStart() {
+        return Integer.parseInt(getProperty(PROPERTY_START));
     }
     
     public void setStart(int start) {
-        this.start = start;
+        setProperty(PROPERTY_START, String.valueOf(start));
     }
     
     public Integer getEnd() {
-        return end;
+        if (hasProperty(PROPERTY_END)) {
+            return Integer.valueOf(getProperty(PROPERTY_END));
+        }
+        return null;
     }
     
     public void setEnd(Integer end) {
-        this.end = end;
+        if (end != null) {
+            setProperty(PROPERTY_END, String.valueOf(end));
+        }
     }
     
     public boolean isEndBounded() {
-        return end != null;
+        return hasProperty(PROPERTY_END);
     }
     
     @Override
@@ -54,28 +62,6 @@ public class IntegerRangeNode extends Node {
     
     @Override
     public IntegerRangeNode shallowCopy() {
-        return new IntegerRangeNode(this.start, this.end);
-    }
-    
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-        IntegerRangeNode that = (IntegerRangeNode) o;
-        return Objects.equals(start, that.start) && Objects.equals(end, that.end);
-    }
-    
-    @Override
-    public int hashCode() {
-        return Objects.hash(start, end);
-    }
-    
-    @Override
-    public String toString() {
-        return new StringJoiner(", ", IntegerRangeNode.class.getSimpleName() + "[", "]").add("start=" + start).add("end=" + end).toString();
+        return new IntegerRangeNode(this.properties);
     }
 }

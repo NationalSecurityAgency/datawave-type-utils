@@ -4,13 +4,16 @@ import datawave.data.normalizer.regex.visitor.Visitor;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
 public abstract class Node {
     
     protected Node parent;
+    protected Map<String,String> properties;
     protected ArrayList<Node> children = new ArrayList<>();
     
     protected Node() {}
@@ -18,6 +21,13 @@ public abstract class Node {
     @SuppressWarnings("CopyConstructorMissesField")
     protected Node(Node child) {
         addChild(child);
+    }
+    
+    protected Node(Map<String,String> properties) {
+        if (properties != null) {
+            this.properties = new HashMap<>();
+            this.properties.putAll(properties);
+        }
     }
     
     protected Node(Collection<? extends Node> children) {
@@ -48,6 +58,34 @@ public abstract class Node {
      */
     public void setParent(Node parent) {
         this.parent = parent;
+    }
+    
+    public boolean hasProperties() {
+        return properties != null;
+    }
+    
+    public boolean hasProperty(String key) {
+        return hasProperties() && properties.containsKey(key);
+    }
+    
+    public String getProperty(String key) {
+        return properties.get(key);
+    }
+    
+    public void setProperty(String key, String value) {
+        if (properties == null) {
+            properties = new HashMap<>();
+        }
+        properties.put(key, value);
+    }
+    
+    public void setProperties(Map<String,String> properties) {
+        if (properties != null) {
+            if (this.properties == null) {
+                this.properties = new HashMap<>();
+            }
+            this.properties.putAll(properties);
+        }
     }
     
     /**
@@ -270,16 +308,26 @@ public abstract class Node {
         if (this == o) {
             return true;
         }
-        return o != null && getClass() == o.getClass();
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        Node node = (Node) o;
+        return Objects.equals(properties, node.properties);
     }
     
     @Override
     public int hashCode() {
-        return Objects.hash(getClass());
+        return Objects.hash(properties);
     }
     
     @Override
     public String toString() {
-        return getClass().getSimpleName();
+        StringBuilder sb = new StringBuilder();
+        sb.append(getClass().getSimpleName());
+        if (properties != null) {
+            sb.append("(").append(properties).append(")");
+        }
+        return sb.toString();
     }
+    
 }

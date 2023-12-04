@@ -2,10 +2,18 @@ package datawave.data.normalizer.regex;
 
 import datawave.data.normalizer.regex.visitor.Visitor;
 
+import java.util.Map;
+
 /**
  * Represents the question mark in a regex pattern.
  */
 public class QuestionMarkNode extends Node {
+    
+    public QuestionMarkNode() {}
+    
+    public QuestionMarkNode(Map<String,String> properties) {
+        super(properties);
+    }
     
     @Override
     public NodeType getType() {
@@ -19,6 +27,6 @@ public class QuestionMarkNode extends Node {
     
     @Override
     public QuestionMarkNode shallowCopy() {
-        return new QuestionMarkNode();
+        return new QuestionMarkNode(this.properties);
     }
 }

@@ -6,6 +6,7 @@ import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class RegexUtils {
     
@@ -245,7 +246,7 @@ public class RegexUtils {
      * @throws IllegalArgumentException
      *             if the given node is not a {@link CharClassNode}
      */
-    public static boolean matchesChar(Node node, char character) {
+    public static boolean charClassMatches(Node node, char character) {
         if (node instanceof CharClassNode) {
             CharClassNode charClass = (CharClassNode) node;
             boolean matchFound = false;
@@ -276,24 +277,100 @@ public class RegexUtils {
     }
     
     /**
-     * Return whether the given node is a regex element that can match against the character '0'.
-     * 
+     * Return whether the given node is a character class that would only match against the given character.
+     *
      * @param node
      *            the node
-     * @return true if the node can match against '0' or false otherwise.
+     * @param character
+     *            the character
+     * @return true if the given character class would only match against the given character, or false otherwise
+     * @throws IllegalArgumentException
+     *             if the given node is not a {@link CharClassNode}
      */
-    public static boolean matchesZero(Node node) {
+    public static boolean charClassMatchesOnly(Node node, char character) {
+        if (node instanceof CharClassNode) {
+            CharClassNode charClass = (CharClassNode) node;
+            boolean matchFound = false;
+            for (Node child : charClass.getChildren()) {
+                // If the current child is a single character, see if it is a match for the character.
+                if (child instanceof SingleCharNode) {
+                    if (isChar(child, character)) {
+                        matchFound = true;
+                    } else {
+                        // A character other than the target was found.
+                        return false;
+                    }
+                } else {
+                    // If the current child is a character range, see the range only encompasses the target character, e.g. [1-1].
+                    CharRangeNode charRange = (CharRangeNode) child;
+                    int charDigit = Character.digit(character, RegexConstants.DECIMAL_RADIX);
+                    int startDigit = Character.digit(charRange.getStart(), RegexConstants.DECIMAL_RADIX);
+                    int endDigit = Character.digit(charRange.getEnd(), RegexConstants.DECIMAL_RADIX);
+                    if (startDigit == charDigit && charDigit == endDigit) {
+                        matchFound = true;
+                    } else {
+                        // A range encompassing characters other than the target was found.
+                        return false;
+                    }
+                }
+            }
+            // If the character class was negated, e.g. [^1], it matches against the character if no direct match was found.
+            return charClass.isNegated() != matchFound;
+        } else {
+            throw new IllegalArgumentException("Node must be a " + CharClassNode.class.getSimpleName());
+        }
+    }
+    
+    /**
+     * Return whether the given node is a regex element that would match against the given character.
+     * 
+     * @param node
+     *            the regex element
+     * @param character
+     *            the character
+     * @return true if the given node would match against the given character, or false otherwise
+     */
+    public static boolean matchesChar(Node node, char character) {
         switch (node.getType()) {
             case DIGIT_CHAR_CLASS:
             case ANY_CHAR:
                 return true;
             case SINGLE_CHAR:
-                return isChar(node, RegexConstants.ZERO);
+                return isChar(node, character);
             case CHAR_CLASS:
-                return matchesChar(node, RegexConstants.ZERO);
+                return charClassMatches(node, character);
             default:
                 return false;
         }
+    }
+    
+    /**
+     * Return whether the given node is a regex element that can only match against the given character.
+     *
+     * @param node
+     *            the node
+     * @return true if the node can match only against the given character or false otherwise.
+     */
+    public static boolean matchesCharOnly(Node node, char character) {
+        switch (node.getType()) {
+            case SINGLE_CHAR:
+                return isChar(node, character);
+            case CHAR_CLASS:
+                return charClassMatchesOnly(node, character);
+            default:
+                return false;
+        }
+    }
+    
+    /**
+     * Return whether the given node is a regex element that can match against the character '0'.
+     *
+     * @param node
+     *            the node
+     * @return true if the node can match against '0' or false otherwise.
+     */
+    public static boolean matchesZero(Node node) {
+        return matchesChar(node, RegexConstants.ZERO);
     }
     
     /**
@@ -304,26 +381,7 @@ public class RegexUtils {
      * @return true if the node can match only against '0' or false otherwise.
      */
     public static boolean matchesZeroOnly(Node node) {
-        switch (node.getType()) {
-            case SINGLE_CHAR:
-                return isChar(node, RegexConstants.ZERO);
-            case CHAR_CLASS:
-                for (Node child : node.getChildren()) {
-                    if (child instanceof SingleCharNode) {
-                        if (!isChar(child, RegexConstants.ZERO)) {
-                            return false;
-                        }
-                    } else {
-                        CharRangeNode rangeNode = (CharRangeNode) child;
-                        if (rangeNode.getStart() != RegexConstants.ZERO || rangeNode.getEnd() != RegexConstants.ZERO) {
-                            return false;
-                        }
-                    }
-                }
-                return true;
-            default:
-                return false;
-        }
+        return matchesCharOnly(node, RegexConstants.ZERO);
     }
     
     /**
@@ -351,7 +409,7 @@ public class RegexUtils {
         if (!isQuantifier(node)) {
             throw new IllegalArgumentException("Node must be one of the following quantifier types: " + RegexConstants.QUANTIFIER_TYPES);
         }
-        Integer min;
+        int min;
         Integer max = null;
         switch (node.getType()) {
             case ZERO_OR_MORE:
@@ -421,18 +479,91 @@ public class RegexUtils {
     }
     
     /**
+     * Return whether the given quantifier node allows for zero occurrences.
+     * 
+     * @param node
+     *            the node
+     * @return true if the quantifier allows for zero occurrences, or false otherwise
+     */
+    public static boolean canOccurZeroTimes(Node node) {
+        if (!isQuantifier(node)) {
+            throw new IllegalArgumentException("Node must be one of the following quantifier types: " + RegexConstants.QUANTIFIER_TYPES);
+        }
+        switch (node.getType()) {
+            case ZERO_OR_MORE:
+                return true;
+            case ONE_OR_MORE:
+                return false;
+            case REPETITION:
+                return repetitionCanOccurZeroTimes((RepetitionNode) node);
+            default:
+                throw new IllegalArgumentException("Unhandled quantifier type: " + RegexConstants.QUANTIFIER_TYPES);
+        }
+    }
+    
+    /**
      * Return whether the given repetition quantifier node allows for zero occurrences.
      * 
      * @param node
      *            the node
      * @return true if the quantifier allows for zero occurrences, or false otherwise
      */
-    public static boolean canOccurZeroTimes(RepetitionNode node) {
+    public static boolean repetitionCanOccurZeroTimes(RepetitionNode node) {
         Node child = node.getFirstChild();
         if (child instanceof IntegerNode) {
             return ((IntegerNode) child).getValue() == 0;
         } else {
             return ((IntegerRangeNode) child).getStart() == 0;
+        }
+    }
+    
+    /**
+     * Return the given repetition as an occurrence range.
+     * 
+     * @param node
+     *            the node
+     * @return the range
+     */
+    public static Pair<Integer,Integer> getRepetitionAsRange(RepetitionNode node) {
+        Node child = node.getFirstChild();
+        if (child instanceof IntegerNode) {
+            int value = ((IntegerNode) child).getValue();
+            return Pair.of(value, value);
+        } else {
+            IntegerRangeNode integerRange = (IntegerRangeNode) child;
+            if (integerRange.isEndBounded()) {
+                return Pair.of(integerRange.getStart(), integerRange.getEnd());
+            } else {
+                return Pair.of(integerRange.getStart(), null);
+            }
+        }
+    }
+    
+    /**
+     * Subtract one from the given range endpoints and return it.
+     * 
+     * @param range
+     *            the range
+     * @return the updated range
+     */
+    public static Pair<Integer,Integer> subtractOneFrom(Pair<Integer,Integer> range) {
+        int left = range.getLeft() > 0 ? (range.getLeft() - 1) : 0;
+        Integer right = range.getRight() == null ? null : (range.getRight() - 1);
+        return Pair.of(left, right);
+    }
+    
+    /**
+     * Return a new repetition node created from the given range.
+     * 
+     * @param range
+     *            the range
+     * @return the new repetition node
+     */
+    public static RepetitionNode createRepetition(Pair<Integer,Integer> range) {
+        if (Objects.equals(range.getLeft(), range.getRight())) {
+            return new RepetitionNode(new IntegerNode(range.getLeft()));
+        } else {
+            return new RepetitionNode(new IntegerRangeNode(range.getLeft(), range.getRight()));
         }
     }
     

@@ -3,6 +3,7 @@ package datawave.data.normalizer.regex;
 import datawave.data.normalizer.regex.visitor.Visitor;
 
 import java.util.Collection;
+import java.util.Map;
 
 /**
  * Represents an encoded simple number in a regex tree.
@@ -13,6 +14,10 @@ public class EncodedNumberNode extends Node {
     
     public EncodedNumberNode(Collection<Node> children) {
         addChildren(children);
+    }
+    
+    public EncodedNumberNode(Map<String,String> properties) {
+        super(properties);
     }
     
     @Override
@@ -27,6 +32,6 @@ public class EncodedNumberNode extends Node {
     
     @Override
     public Node shallowCopy() {
-        return new EncodedNumberNode();
+        return new EncodedNumberNode(this.properties);
     }
 }

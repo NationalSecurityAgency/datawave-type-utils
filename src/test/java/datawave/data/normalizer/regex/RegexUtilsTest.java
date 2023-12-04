@@ -70,56 +70,56 @@ class RegexUtilsTest {
     
     @Test
     void testContainsChar() {
-        assertThat(RegexUtils.matchesChar(parse("[3-7]").getFirstChild(), '0')).isFalse();
-        assertThat(RegexUtils.matchesChar(parse("[3-7]").getFirstChild(), '1')).isFalse();
-        assertThat(RegexUtils.matchesChar(parse("[3-7]").getFirstChild(), '2')).isFalse();
-        assertThat(RegexUtils.matchesChar(parse("[3-7]").getFirstChild(), '8')).isFalse();
-        assertThat(RegexUtils.matchesChar(parse("[3-7]").getFirstChild(), '9')).isFalse();
+        assertThat(RegexUtils.charClassMatches(parse("[3-7]").getFirstChild(), '0')).isFalse();
+        assertThat(RegexUtils.charClassMatches(parse("[3-7]").getFirstChild(), '1')).isFalse();
+        assertThat(RegexUtils.charClassMatches(parse("[3-7]").getFirstChild(), '2')).isFalse();
+        assertThat(RegexUtils.charClassMatches(parse("[3-7]").getFirstChild(), '8')).isFalse();
+        assertThat(RegexUtils.charClassMatches(parse("[3-7]").getFirstChild(), '9')).isFalse();
         
-        assertThat(RegexUtils.matchesChar(parse("[3-7]").getFirstChild(), '3')).isTrue();
-        assertThat(RegexUtils.matchesChar(parse("[3-7]").getFirstChild(), '4')).isTrue();
-        assertThat(RegexUtils.matchesChar(parse("[3-7]").getFirstChild(), '5')).isTrue();
-        assertThat(RegexUtils.matchesChar(parse("[3-7]").getFirstChild(), '6')).isTrue();
-        assertThat(RegexUtils.matchesChar(parse("[3-7]").getFirstChild(), '7')).isTrue();
+        assertThat(RegexUtils.charClassMatches(parse("[3-7]").getFirstChild(), '3')).isTrue();
+        assertThat(RegexUtils.charClassMatches(parse("[3-7]").getFirstChild(), '4')).isTrue();
+        assertThat(RegexUtils.charClassMatches(parse("[3-7]").getFirstChild(), '5')).isTrue();
+        assertThat(RegexUtils.charClassMatches(parse("[3-7]").getFirstChild(), '6')).isTrue();
+        assertThat(RegexUtils.charClassMatches(parse("[3-7]").getFirstChild(), '7')).isTrue();
         
-        assertThat(RegexUtils.matchesChar(parse("[059]").getFirstChild(), '1')).isFalse();
-        assertThat(RegexUtils.matchesChar(parse("[059]").getFirstChild(), '2')).isFalse();
-        assertThat(RegexUtils.matchesChar(parse("[059]").getFirstChild(), '3')).isFalse();
-        assertThat(RegexUtils.matchesChar(parse("[059]").getFirstChild(), '4')).isFalse();
-        assertThat(RegexUtils.matchesChar(parse("[059]").getFirstChild(), '6')).isFalse();
-        assertThat(RegexUtils.matchesChar(parse("[059]").getFirstChild(), '7')).isFalse();
-        assertThat(RegexUtils.matchesChar(parse("[059]").getFirstChild(), '8')).isFalse();
+        assertThat(RegexUtils.charClassMatches(parse("[059]").getFirstChild(), '1')).isFalse();
+        assertThat(RegexUtils.charClassMatches(parse("[059]").getFirstChild(), '2')).isFalse();
+        assertThat(RegexUtils.charClassMatches(parse("[059]").getFirstChild(), '3')).isFalse();
+        assertThat(RegexUtils.charClassMatches(parse("[059]").getFirstChild(), '4')).isFalse();
+        assertThat(RegexUtils.charClassMatches(parse("[059]").getFirstChild(), '6')).isFalse();
+        assertThat(RegexUtils.charClassMatches(parse("[059]").getFirstChild(), '7')).isFalse();
+        assertThat(RegexUtils.charClassMatches(parse("[059]").getFirstChild(), '8')).isFalse();
         
-        assertThat(RegexUtils.matchesChar(parse("[059]").getFirstChild(), '0')).isTrue();
-        assertThat(RegexUtils.matchesChar(parse("[059]").getFirstChild(), '5')).isTrue();
-        assertThat(RegexUtils.matchesChar(parse("[059]").getFirstChild(), '9')).isTrue();
+        assertThat(RegexUtils.charClassMatches(parse("[059]").getFirstChild(), '0')).isTrue();
+        assertThat(RegexUtils.charClassMatches(parse("[059]").getFirstChild(), '5')).isTrue();
+        assertThat(RegexUtils.charClassMatches(parse("[059]").getFirstChild(), '9')).isTrue();
     }
     
     @Test
     void testContainsCharNegated() {
-        assertThat(RegexUtils.matchesChar(parse("[^3-7]").getFirstChild(), '0')).isTrue();
-        assertThat(RegexUtils.matchesChar(parse("[^3-7]").getFirstChild(), '1')).isTrue();
-        assertThat(RegexUtils.matchesChar(parse("[^3-7]").getFirstChild(), '2')).isTrue();
-        assertThat(RegexUtils.matchesChar(parse("[^3-7]").getFirstChild(), '8')).isTrue();
-        assertThat(RegexUtils.matchesChar(parse("[^3-7]").getFirstChild(), '9')).isTrue();
+        assertThat(RegexUtils.charClassMatches(parse("[^3-7]").getFirstChild(), '0')).isTrue();
+        assertThat(RegexUtils.charClassMatches(parse("[^3-7]").getFirstChild(), '1')).isTrue();
+        assertThat(RegexUtils.charClassMatches(parse("[^3-7]").getFirstChild(), '2')).isTrue();
+        assertThat(RegexUtils.charClassMatches(parse("[^3-7]").getFirstChild(), '8')).isTrue();
+        assertThat(RegexUtils.charClassMatches(parse("[^3-7]").getFirstChild(), '9')).isTrue();
         
-        assertThat(RegexUtils.matchesChar(parse("[^3-7]").getFirstChild(), '3')).isFalse();
-        assertThat(RegexUtils.matchesChar(parse("[^3-7]").getFirstChild(), '4')).isFalse();
-        assertThat(RegexUtils.matchesChar(parse("[^3-7]").getFirstChild(), '5')).isFalse();
-        assertThat(RegexUtils.matchesChar(parse("[^3-7]").getFirstChild(), '6')).isFalse();
-        assertThat(RegexUtils.matchesChar(parse("[^3-7]").getFirstChild(), '7')).isFalse();
+        assertThat(RegexUtils.charClassMatches(parse("[^3-7]").getFirstChild(), '3')).isFalse();
+        assertThat(RegexUtils.charClassMatches(parse("[^3-7]").getFirstChild(), '4')).isFalse();
+        assertThat(RegexUtils.charClassMatches(parse("[^3-7]").getFirstChild(), '5')).isFalse();
+        assertThat(RegexUtils.charClassMatches(parse("[^3-7]").getFirstChild(), '6')).isFalse();
+        assertThat(RegexUtils.charClassMatches(parse("[^3-7]").getFirstChild(), '7')).isFalse();
         
-        assertThat(RegexUtils.matchesChar(parse("[^059]").getFirstChild(), '1')).isTrue();
-        assertThat(RegexUtils.matchesChar(parse("[^059]").getFirstChild(), '2')).isTrue();
-        assertThat(RegexUtils.matchesChar(parse("[^059]").getFirstChild(), '3')).isTrue();
-        assertThat(RegexUtils.matchesChar(parse("[^059]").getFirstChild(), '4')).isTrue();
-        assertThat(RegexUtils.matchesChar(parse("[^059]").getFirstChild(), '6')).isTrue();
-        assertThat(RegexUtils.matchesChar(parse("[^059]").getFirstChild(), '7')).isTrue();
-        assertThat(RegexUtils.matchesChar(parse("[^059]").getFirstChild(), '8')).isTrue();
+        assertThat(RegexUtils.charClassMatches(parse("[^059]").getFirstChild(), '1')).isTrue();
+        assertThat(RegexUtils.charClassMatches(parse("[^059]").getFirstChild(), '2')).isTrue();
+        assertThat(RegexUtils.charClassMatches(parse("[^059]").getFirstChild(), '3')).isTrue();
+        assertThat(RegexUtils.charClassMatches(parse("[^059]").getFirstChild(), '4')).isTrue();
+        assertThat(RegexUtils.charClassMatches(parse("[^059]").getFirstChild(), '6')).isTrue();
+        assertThat(RegexUtils.charClassMatches(parse("[^059]").getFirstChild(), '7')).isTrue();
+        assertThat(RegexUtils.charClassMatches(parse("[^059]").getFirstChild(), '8')).isTrue();
         
-        assertThat(RegexUtils.matchesChar(parse("[^059]").getFirstChild(), '0')).isFalse();
-        assertThat(RegexUtils.matchesChar(parse("[^059]").getFirstChild(), '5')).isFalse();
-        assertThat(RegexUtils.matchesChar(parse("[^059]").getFirstChild(), '9')).isFalse();
+        assertThat(RegexUtils.charClassMatches(parse("[^059]").getFirstChild(), '0')).isFalse();
+        assertThat(RegexUtils.charClassMatches(parse("[^059]").getFirstChild(), '5')).isFalse();
+        assertThat(RegexUtils.charClassMatches(parse("[^059]").getFirstChild(), '9')).isFalse();
     }
     
     @Test

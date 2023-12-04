@@ -44,6 +44,7 @@ public class ZeroTrimmer extends CopyVisitor {
     @Override
     public Object visitEncodedPattern(EncodedPatternNode node, Object data) {
         EncodedPatternNode trimmed = new EncodedPatternNode();
+        
         // Create a new node and add each child up to (inclusively) the 'E' character.
         int startOfRemainingNodes = 0;
         for (int i = 0; i < node.getChildCount(); i++) {
@@ -221,7 +222,7 @@ public class ZeroTrimmer extends CopyVisitor {
                         case REPETITION:
                             RepetitionNode repetition = (RepetitionNode) quantifier;
                             // If the repetition does not already allow for zero occurrences, we must create a new repetition quantifier that does so.
-                            if (!RegexUtils.canOccurZeroTimes(repetition)) {
+                            if (!RegexUtils.repetitionCanOccurZeroTimes(repetition)) {
                                 if (RegexUtils.isNotRange(repetition)) {
                                     // If the repetition is has the form {x}, replace it with {0,x}. For example, "[012]{3}" will become "[012]{0,3}".
                                     nodes.add(next);
@@ -498,7 +499,7 @@ public class ZeroTrimmer extends CopyVisitor {
                         case REPETITION:
                             RepetitionNode repetition = (RepetitionNode) quantifier;
                             // If the repetition does not already allow for zero occurrences, we must create a new repetition quantifier that does so.
-                            if (!RegexUtils.canOccurZeroTimes(repetition)) {
+                            if (!RegexUtils.repetitionCanOccurZeroTimes(repetition)) {
                                 if (RegexUtils.isNotRange(repetition)) {
                                     // If the repetition is has the form {x}, replace it with {0,x}. For example, "[012]{3}" will become "[012]{0,3}".
                                     // If the original quantifier was followed by ?, append it.
@@ -518,7 +519,7 @@ public class ZeroTrimmer extends CopyVisitor {
                                     if (questionMark != null) {
                                         groupNode.addChild(questionMark);
                                     }
-                                    // Add the group node and make it optional.
+                                    // Make the group optional.
                                     nodes.add(new QuestionMarkNode());
                                     nodes.add(groupNode);
                                 }
@@ -616,7 +617,7 @@ public class ZeroTrimmer extends CopyVisitor {
         }
         
         List<Node> nodes = new ArrayList<>();
-        // The new element must be optional. Since the nodes are in reverse order, add the optional first.
+        // Make the element optional.
         nodes.add(new QuestionMarkNode());
         
         // If the min and max are both 1, return 0?

@@ -3,6 +3,7 @@ package datawave.data.normalizer.regex;
 import datawave.data.normalizer.regex.visitor.Visitor;
 
 import java.util.Collection;
+import java.util.Map;
 
 /**
  * Represents a regex alternation, i.e. {@code |}.
@@ -13,6 +14,10 @@ public class AlternationNode extends Node {
     
     public AlternationNode(Collection<? extends Node> children) {
         super(children);
+    }
+    
+    public AlternationNode(Map<String,String> properties) {
+        super(properties);
     }
     
     @Override
@@ -27,7 +32,7 @@ public class AlternationNode extends Node {
     
     @Override
     public AlternationNode shallowCopy() {
-        return new AlternationNode();
+        return new AlternationNode(this.properties);
     }
     
 }

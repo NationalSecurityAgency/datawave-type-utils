@@ -3,6 +3,7 @@ package datawave.data.normalizer.regex;
 import datawave.data.normalizer.regex.visitor.Visitor;
 
 import java.util.Collection;
+import java.util.Map;
 
 /**
  * Represents an encoded pattern in a regex tree.
@@ -19,6 +20,10 @@ public class EncodedPatternNode extends Node {
         super(children);
     }
     
+    public EncodedPatternNode(Map<String,String> properties) {
+        super(properties);
+    }
+    
     @Override
     public NodeType getType() {
         return NodeType.ENCODED_PATTERN;
@@ -31,6 +36,6 @@ public class EncodedPatternNode extends Node {
     
     @Override
     public Node shallowCopy() {
-        return new EncodedPatternNode();
+        return new EncodedPatternNode(this.properties);
     }
 }

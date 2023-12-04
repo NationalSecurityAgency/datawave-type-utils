@@ -2,6 +2,7 @@ package datawave.data.normalizer.regex;
 
 import datawave.data.normalizer.regex.visitor.Visitor;
 
+import java.util.Map;
 import java.util.Objects;
 import java.util.StringJoiner;
 
@@ -10,18 +11,24 @@ import java.util.StringJoiner;
  */
 public class IntegerNode extends Node {
     
-    private int value;
+    public static final String PROPERTY_VALUE = "value";
+    
+    public IntegerNode() {}
     
     public IntegerNode(int value) {
-        this.value = value;
+        setValue(value);
+    }
+    
+    public IntegerNode(Map<String,String> properties) {
+        super(properties);
     }
     
     public int getValue() {
-        return value;
+        return Integer.parseInt(getProperty(PROPERTY_VALUE));
     }
     
     public void setValue(int value) {
-        this.value = value;
+        setProperty(PROPERTY_VALUE, String.valueOf(value));
     }
     
     @Override
@@ -36,28 +43,6 @@ public class IntegerNode extends Node {
     
     @Override
     public IntegerNode shallowCopy() {
-        return new IntegerNode(this.value);
-    }
-    
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-        IntegerNode that = (IntegerNode) o;
-        return value == that.value;
-    }
-    
-    @Override
-    public int hashCode() {
-        return Objects.hash(value);
-    }
-    
-    @Override
-    public String toString() {
-        return new StringJoiner(", ", IntegerNode.class.getSimpleName() + "[", "]").add("value=" + value).toString();
+        return new IntegerNode(properties);
     }
 }
