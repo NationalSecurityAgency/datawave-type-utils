@@ -1,5 +1,11 @@
 package datawave.data.normalizer.regex.visitor;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+import org.apache.commons.lang3.tuple.Pair;
+
 import datawave.data.normalizer.regex.AnyCharNode;
 import datawave.data.normalizer.regex.EncodedPatternNode;
 import datawave.data.normalizer.regex.GroupNode;
@@ -15,11 +21,6 @@ import datawave.data.normalizer.regex.RegexUtils;
 import datawave.data.normalizer.regex.RepetitionNode;
 import datawave.data.normalizer.regex.SingleCharNode;
 import datawave.data.normalizer.regex.ZeroOrMoreNode;
-import org.apache.commons.lang3.tuple.Pair;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 
 /**
  * Implementation of {@link CopyVisitor} that trims and consolidates leading zeros for partially encoded regex patterns.

@@ -1,10 +1,10 @@
 package datawave.data.normalizer.regex;
 
-import datawave.data.normalizer.regex.visitor.Visitor;
-
 import java.util.Map;
 import java.util.Objects;
 import java.util.StringJoiner;
+
+import datawave.data.normalizer.regex.visitor.Visitor;
 
 /**
  * Represents an integer range parsed from a regex repetition that specified a range, e.g. {@code {3,}} or {@code {3,10}}.

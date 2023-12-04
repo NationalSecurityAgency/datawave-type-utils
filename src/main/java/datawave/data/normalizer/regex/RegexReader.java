@@ -1,8 +1,8 @@
 package datawave.data.normalizer.regex;
 
-import com.google.common.base.Preconditions;
-
 import java.util.Arrays;
+
+import com.google.common.base.Preconditions;
 
 /**
  * A reader that traverses over a regex pattern and both identifies and steps through individual regex elements.

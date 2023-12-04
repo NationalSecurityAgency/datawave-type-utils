@@ -1,9 +1,9 @@
 package datawave.data.normalizer.regex;
 
-import org.junit.jupiter.api.Test;
-
 import static datawave.data.normalizer.regex.NodeAssert.assertThat;
 import static datawave.data.normalizer.regex.RegexParser.parse;
+
+import org.junit.jupiter.api.Test;
 
 class RegexParserTest {
     

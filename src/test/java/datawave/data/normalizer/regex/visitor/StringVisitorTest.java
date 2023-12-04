@@ -1,14 +1,15 @@
 package datawave.data.normalizer.regex.visitor;
 
+import static datawave.data.normalizer.regex.RegexParser.parse;
+import static org.assertj.core.api.Assertions.assertThat;
+
+import org.junit.jupiter.api.Test;
+
 import datawave.data.normalizer.regex.EmptyNode;
 import datawave.data.normalizer.regex.ExpressionNode;
 import datawave.data.normalizer.regex.Node;
 import datawave.data.normalizer.regex.RegexParser;
 import datawave.data.normalizer.regex.visitor.StringVisitor;
-import org.junit.jupiter.api.Test;
-
-import static datawave.data.normalizer.regex.RegexParser.parse;
-import static org.assertj.core.api.Assertions.assertThat;
 
 class StringVisitorTest {
     

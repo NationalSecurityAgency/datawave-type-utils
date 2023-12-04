@@ -1,12 +1,13 @@
 package datawave.data.normalizer.regex;
 
-import datawave.data.normalizer.regex.visitor.StringVisitor;
-import datawave.data.type.util.NumericalEncoder;
-import org.apache.commons.lang3.tuple.Pair;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+
+import org.apache.commons.lang3.tuple.Pair;
+
+import datawave.data.normalizer.regex.visitor.StringVisitor;
+import datawave.data.type.util.NumericalEncoder;
 
 public class RegexUtils {
     

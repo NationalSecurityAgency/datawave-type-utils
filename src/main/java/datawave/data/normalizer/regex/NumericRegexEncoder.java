@@ -1,6 +1,13 @@
 package datawave.data.normalizer.regex;
 
+import java.util.function.Function;
+import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
+
+import org.apache.log4j.Logger;
+
 import com.google.common.base.CharMatcher;
+
 import datawave.data.normalizer.regex.visitor.AlternationDeduper;
 import datawave.data.normalizer.regex.visitor.AnchorTrimmer;
 import datawave.data.normalizer.regex.visitor.DecimalPointPlacer;
@@ -19,12 +26,6 @@ import datawave.data.normalizer.regex.visitor.ZeroLengthRepetitionTrimmer;
 import datawave.data.normalizer.regex.visitor.ZeroTrimmer;
 import datawave.data.normalizer.regex.visitor.ZeroValueNormalizer;
 import datawave.data.type.util.NumericalEncoder;
-import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
-
-import java.util.function.Function;
-import java.util.regex.Pattern;
-import java.util.regex.PatternSyntaxException;
 
 /**
  * This class handles provides functionality for encoding numeric regexes that are meant to match against numbers that were previously encoded via
@@ -186,7 +187,7 @@ public class NumericRegexEncoder {
      * Throws an exception if the regex pattern is blank.
      */
     private void checkForBlankPattern() {
-        if (StringUtils.isBlank(this.pattern)) {
+        if (this.pattern.isEmpty()) {
             throw new IllegalArgumentException("Regex pattern may not be blank.");
         }
     }

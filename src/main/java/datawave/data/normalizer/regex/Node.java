@@ -1,7 +1,5 @@
 package datawave.data.normalizer.regex;
 
-import datawave.data.normalizer.regex.visitor.Visitor;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -9,6 +7,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+
+import datawave.data.normalizer.regex.visitor.Visitor;
 
 public abstract class Node {
     

@@ -1,12 +1,12 @@
 package datawave.data.normalizer.regex;
 
-import com.google.common.base.Joiner;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
-
 import java.util.List;
 import java.util.Set;
 import java.util.regex.Pattern;
+
+import com.google.common.base.Joiner;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 
 public class RegexConstants {
     
@@ -51,15 +51,6 @@ public class RegexConstants {
      * The set of all digits. This reflects all possible permutations for any \d found in the regex.
      */
     public static final List<Character> ALL_DIGITS = ImmutableList.of(ZERO, ONE, TWO, THREE, FOUR, FIVE, SIX, SEVEN, EIGHT, NINE);
-    
-    /**
-     * The set of all digits and the dot. This reflects all possible permutations for any . wildcards found in the regex.
-     */
-    public static final List<Character> ALL_DIGITS_AND_PERIOD = ImmutableList.of(ZERO, ONE, TWO, THREE, FOUR, FIVE, SIX, SEVEN, EIGHT, NINE, PERIOD);
-    
-    public static final Pattern ANY_DIGIT_PATTERN = Pattern.compile(".\\*[0-9].\\*");
-    
-    public static final Joiner PIPE_JOINER = Joiner.on(PIPE);
     
     public static final Set<Class<? extends Node>> QUANTIFIER_TYPES = ImmutableSet.of(ZeroOrMoreNode.class, OneOrMoreNode.class, RepetitionNode.class);
     

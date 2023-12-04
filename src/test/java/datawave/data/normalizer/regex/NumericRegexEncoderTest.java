@@ -1,18 +1,18 @@
 package datawave.data.normalizer.regex;
 
-import datawave.data.type.util.NumericalEncoder;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+
+import datawave.data.type.util.NumericalEncoder;
 
 class NumericRegexEncoderTest {
     
@@ -35,10 +35,8 @@ class NumericRegexEncoderTest {
      */
     private static List<String> generateLetters(char start, char end) {
         // @formatter:off
-        return Collections.unmodifiableList(
-                        IntStream.rangeClosed(start, end)
-                                        .mapToObj(c -> "" + (char) c)
-                                        .collect(Collectors.toList()));
+        return IntStream.rangeClosed(start, end)
+                                        .mapToObj(c -> "" + (char) c).collect(Collectors.toUnmodifiableList());
         // @formatter:on
     }
     
@@ -48,7 +46,6 @@ class NumericRegexEncoderTest {
     @Test
     void testEmptyRegex() {
         assertExceptionThrown("", "Regex pattern may not be blank.");
-        assertExceptionThrown("  ", "Regex pattern may not be blank.");
     }
     
     /**

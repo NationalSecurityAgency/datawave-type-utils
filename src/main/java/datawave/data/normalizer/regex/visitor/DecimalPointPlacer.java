@@ -1,5 +1,14 @@
 package datawave.data.normalizer.regex.visitor;
 
+import static datawave.data.normalizer.regex.RegexUtils.createRepetition;
+import static datawave.data.normalizer.regex.RegexUtils.getRepetitionAsRange;
+import static datawave.data.normalizer.regex.RegexUtils.subtractOneFrom;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import org.apache.commons.lang3.tuple.Pair;
+
 import datawave.data.normalizer.regex.AlternationNode;
 import datawave.data.normalizer.regex.EncodedPatternNode;
 import datawave.data.normalizer.regex.EscapedSingleCharNode;
@@ -14,15 +23,6 @@ import datawave.data.normalizer.regex.RegexConstants;
 import datawave.data.normalizer.regex.RegexUtils;
 import datawave.data.normalizer.regex.RepetitionNode;
 import datawave.data.normalizer.regex.ZeroOrMoreNode;
-import org.apache.commons.lang3.tuple.Pair;
-import org.checkerframework.checker.units.qual.A;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import static datawave.data.normalizer.regex.RegexUtils.createRepetition;
-import static datawave.data.normalizer.regex.RegexUtils.getRepetitionAsRange;
-import static datawave.data.normalizer.regex.RegexUtils.subtractOneFrom;
 
 /**
  * Implementation of {@link CopyVisitor} that return a copy of a regex tree with decimal places inserted where required in encoded regex patterns. Patterns

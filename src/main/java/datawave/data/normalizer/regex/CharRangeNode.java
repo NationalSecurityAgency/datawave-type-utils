@@ -1,10 +1,10 @@
 package datawave.data.normalizer.regex;
 
-import datawave.data.normalizer.regex.visitor.Visitor;
-
 import java.util.Map;
 import java.util.Objects;
 import java.util.StringJoiner;
+
+import datawave.data.normalizer.regex.visitor.Visitor;
 
 /**
  * Represents a character range defined in a character class in a regex pattern.

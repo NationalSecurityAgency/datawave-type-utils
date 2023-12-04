@@ -1,9 +1,10 @@
 package datawave.data.normalizer.regex.visitor;
 
+import org.apache.commons.lang3.tuple.Pair;
+
 import datawave.data.normalizer.regex.AnyCharNode;
 import datawave.data.normalizer.regex.Node;
 import datawave.data.normalizer.regex.RegexUtils;
-import org.apache.commons.lang3.tuple.Pair;
 
 /**
  * Implementation of {@link BinFinder} that finds the range of exponential bins that a regex pattern should match against for numbers less than one.

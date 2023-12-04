@@ -1,5 +1,11 @@
 package datawave.data.normalizer.regex.visitor;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Function;
+
+import org.apache.commons.lang3.tuple.Pair;
+
 import datawave.data.normalizer.regex.CharClassNode;
 import datawave.data.normalizer.regex.CharRangeNode;
 import datawave.data.normalizer.regex.EncodedPatternNode;
@@ -9,11 +15,6 @@ import datawave.data.normalizer.regex.RegexConstants;
 import datawave.data.normalizer.regex.RegexUtils;
 import datawave.data.normalizer.regex.SingleCharNode;
 import datawave.data.type.util.NumericalEncoder;
-import org.apache.commons.lang3.tuple.Pair;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.function.Function;
 
 /**
  * Implementation of {@link CopyVisitor} that will return a copy of the tree where all non-simple number patterns are enriched with bin information.

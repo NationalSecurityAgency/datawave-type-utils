@@ -1,5 +1,7 @@
 package datawave.data.normalizer.regex.visitor;
 
+import java.util.Iterator;
+
 import datawave.data.normalizer.regex.AlternationNode;
 import datawave.data.normalizer.regex.AnyCharNode;
 import datawave.data.normalizer.regex.CharClassNode;
@@ -21,8 +23,6 @@ import datawave.data.normalizer.regex.RepetitionNode;
 import datawave.data.normalizer.regex.SingleCharNode;
 import datawave.data.normalizer.regex.StartAnchorNode;
 import datawave.data.normalizer.regex.ZeroOrMoreNode;
-
-import java.util.Iterator;
 
 public class StringVisitor implements Visitor {
     

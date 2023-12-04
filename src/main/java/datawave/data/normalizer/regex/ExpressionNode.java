@@ -1,9 +1,9 @@
 package datawave.data.normalizer.regex;
 
-import datawave.data.normalizer.regex.visitor.Visitor;
-
 import java.util.List;
 import java.util.Map;
+
+import datawave.data.normalizer.regex.visitor.Visitor;
 
 /**
  * Represents some subset or the full part of a regex pattern.

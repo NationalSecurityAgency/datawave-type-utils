@@ -1,5 +1,7 @@
 package datawave.data.normalizer.regex.visitor;
 
+import java.util.function.Consumer;
+
 import datawave.data.normalizer.regex.AlternationNode;
 import datawave.data.normalizer.regex.ExpressionNode;
 import datawave.data.normalizer.regex.Node;
@@ -7,8 +9,6 @@ import datawave.data.normalizer.regex.NodeListIterator;
 import datawave.data.normalizer.regex.RegexConstants;
 import datawave.data.normalizer.regex.RegexUtils;
 import datawave.data.normalizer.regex.SingleCharNode;
-
-import java.util.function.Consumer;
 
 /**
  * Implementation of {@link CopyVisitor} that:

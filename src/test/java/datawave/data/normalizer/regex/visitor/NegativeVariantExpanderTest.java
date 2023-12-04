@@ -1,11 +1,12 @@
 package datawave.data.normalizer.regex.visitor;
 
-import datawave.data.normalizer.regex.Node;
-import datawave.data.normalizer.regex.visitor.NegativeVariantExpander;
-import org.junit.jupiter.api.Test;
-
 import static datawave.data.normalizer.regex.NodeAssert.assertThat;
 import static datawave.data.normalizer.regex.RegexParser.parse;
+
+import org.junit.jupiter.api.Test;
+
+import datawave.data.normalizer.regex.Node;
+import datawave.data.normalizer.regex.visitor.NegativeVariantExpander;
 
 class NegativeVariantExpanderTest {
     

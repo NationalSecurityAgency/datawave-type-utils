@@ -1,13 +1,14 @@
 package datawave.data.normalizer.regex.visitor;
 
+import static datawave.data.normalizer.regex.NodeAssert.assertThat;
+import static datawave.data.normalizer.regex.RegexParser.parse;
+
+import org.junit.jupiter.api.Test;
+
 import datawave.data.normalizer.regex.EmptyNode;
 import datawave.data.normalizer.regex.ExpressionNode;
 import datawave.data.normalizer.regex.Node;
 import datawave.data.normalizer.regex.visitor.EmptyLeafTrimmer;
-import org.junit.jupiter.api.Test;
-
-import static datawave.data.normalizer.regex.NodeAssert.assertThat;
-import static datawave.data.normalizer.regex.RegexParser.parse;
 
 class EmptyLeafTrimmerTest {
     

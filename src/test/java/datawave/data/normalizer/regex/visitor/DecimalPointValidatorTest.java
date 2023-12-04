@@ -1,9 +1,9 @@
 package datawave.data.normalizer.regex.visitor;
 
-import org.junit.jupiter.api.Test;
-
 import static datawave.data.normalizer.regex.RegexParser.parse;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+
+import org.junit.jupiter.api.Test;
 
 class DecimalPointValidatorTest {
     

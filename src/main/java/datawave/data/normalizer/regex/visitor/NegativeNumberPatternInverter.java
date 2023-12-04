@@ -1,5 +1,14 @@
 package datawave.data.normalizer.regex.visitor;
 
+import static datawave.data.normalizer.regex.RegexUtils.toChar;
+import static datawave.data.normalizer.regex.RegexUtils.toInt;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+import org.apache.commons.lang3.tuple.Pair;
+
 import datawave.data.normalizer.regex.AlternationNode;
 import datawave.data.normalizer.regex.CharClassNode;
 import datawave.data.normalizer.regex.CharRangeNode;
@@ -15,14 +24,6 @@ import datawave.data.normalizer.regex.RegexUtils;
 import datawave.data.normalizer.regex.RepetitionNode;
 import datawave.data.normalizer.regex.SingleCharNode;
 import datawave.data.normalizer.regex.ZeroOrMoreNode;
-import org.apache.commons.lang3.tuple.Pair;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
-import static datawave.data.normalizer.regex.RegexUtils.toChar;
-import static datawave.data.normalizer.regex.RegexUtils.toInt;
 
 /**
  * Implementation of {@link CopyVisitor} that will return a copy of a regex tree with all patterns that are meant to match negative numbers inverted such that

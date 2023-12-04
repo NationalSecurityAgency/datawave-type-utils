@@ -1,9 +1,9 @@
 package datawave.data.normalizer.regex;
 
-import datawave.data.normalizer.regex.visitor.Visitor;
-
 import java.util.Map;
 import java.util.Objects;
+
+import datawave.data.normalizer.regex.visitor.Visitor;
 
 /**
  * Represents a character class in a regex pattern encapsulated by {@code [...]}.

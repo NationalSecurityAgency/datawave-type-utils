@@ -1,11 +1,12 @@
 package datawave.data.normalizer.regex.visitor;
 
-import datawave.data.normalizer.regex.Node;
-import datawave.data.normalizer.regex.visitor.NumericCharClassValidator;
-import org.junit.jupiter.api.Test;
-
 import static datawave.data.normalizer.regex.RegexParser.parse;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+
+import org.junit.jupiter.api.Test;
+
+import datawave.data.normalizer.regex.Node;
+import datawave.data.normalizer.regex.visitor.NumericCharClassValidator;
 
 class NumericCharClassValidatorTest {
     

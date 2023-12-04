@@ -1,10 +1,10 @@
 package datawave.data.normalizer.regex;
 
-import org.apache.commons.lang3.tuple.Pair;
-import org.junit.jupiter.api.Test;
-
 import static datawave.data.normalizer.regex.RegexParser.parse;
 import static org.assertj.core.api.Assertions.assertThat;
+
+import org.apache.commons.lang3.tuple.Pair;
+import org.junit.jupiter.api.Test;
 
 class RegexUtilsTest {
     

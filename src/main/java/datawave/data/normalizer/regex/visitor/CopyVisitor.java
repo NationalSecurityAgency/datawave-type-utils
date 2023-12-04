@@ -1,5 +1,7 @@
 package datawave.data.normalizer.regex.visitor;
 
+import java.util.Objects;
+
 import datawave.data.normalizer.regex.AlternationNode;
 import datawave.data.normalizer.regex.AnyCharNode;
 import datawave.data.normalizer.regex.CharClassNode;
@@ -21,8 +23,6 @@ import datawave.data.normalizer.regex.RepetitionNode;
 import datawave.data.normalizer.regex.SingleCharNode;
 import datawave.data.normalizer.regex.StartAnchorNode;
 import datawave.data.normalizer.regex.ZeroOrMoreNode;
-
-import java.util.Objects;
 
 /**
  * A {@link Visitor} implementation that returns a copy of a given {@link Node} tree.

@@ -1,13 +1,14 @@
 package datawave.data.normalizer.regex;
 
-import datawave.data.normalizer.regex.visitor.EqualityVisitor;
-import datawave.data.normalizer.regex.visitor.PrintVisitor;
-import datawave.data.normalizer.regex.visitor.StringVisitor;
+import java.util.Objects;
+
 import org.assertj.core.api.AbstractAssert;
 import org.assertj.core.api.AbstractStringAssert;
 import org.assertj.core.api.Assertions;
 
-import java.util.Objects;
+import datawave.data.normalizer.regex.visitor.EqualityVisitor;
+import datawave.data.normalizer.regex.visitor.PrintVisitor;
+import datawave.data.normalizer.regex.visitor.StringVisitor;
 
 public class NodeAssert<SELF extends AbstractAssert<SELF,ACTUAL>,ACTUAL extends Node> extends AbstractAssert<SELF,ACTUAL> {
     

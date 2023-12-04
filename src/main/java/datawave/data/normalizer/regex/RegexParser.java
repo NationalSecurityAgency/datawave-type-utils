@@ -1,9 +1,9 @@
 package datawave.data.normalizer.regex;
 
-import org.apache.commons.lang3.StringUtils;
-
 import java.util.ArrayList;
 import java.util.List;
+
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * This parser will create a {@link Node} tree parsed from a regex pattern. This parser will be used for normalizing numeric regex patterns, and as such is not

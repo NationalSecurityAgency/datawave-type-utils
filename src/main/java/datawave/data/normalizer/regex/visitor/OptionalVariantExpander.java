@@ -1,5 +1,9 @@
 package datawave.data.normalizer.regex.visitor;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import datawave.data.normalizer.regex.AlternationNode;
 import datawave.data.normalizer.regex.ExpressionNode;
 import datawave.data.normalizer.regex.Node;
@@ -8,10 +12,6 @@ import datawave.data.normalizer.regex.QuestionMarkNode;
 import datawave.data.normalizer.regex.RegexUtils;
 import datawave.data.normalizer.regex.RepetitionNode;
 import datawave.data.normalizer.regex.ZeroOrMoreNode;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * Implementation of {@link CopyVisitor} that will return a copy of the tree where elements marked as optional are expanded such each optional character results

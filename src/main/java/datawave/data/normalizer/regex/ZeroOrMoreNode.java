@@ -1,8 +1,8 @@
 package datawave.data.normalizer.regex;
 
-import datawave.data.normalizer.regex.visitor.Visitor;
-
 import java.util.Map;
+
+import datawave.data.normalizer.regex.visitor.Visitor;
 
 /**
  * Represents the star in a regex pattern.

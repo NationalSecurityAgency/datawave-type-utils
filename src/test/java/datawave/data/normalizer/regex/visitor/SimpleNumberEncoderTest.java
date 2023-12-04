@@ -1,10 +1,11 @@
 package datawave.data.normalizer.regex.visitor;
 
-import datawave.data.normalizer.regex.Node;
-import datawave.data.normalizer.regex.RegexParser;
+import static datawave.data.normalizer.regex.NodeAssert.assertThat;
+
 import org.junit.jupiter.api.Test;
 
-import static datawave.data.normalizer.regex.NodeAssert.assertThat;
+import datawave.data.normalizer.regex.Node;
+import datawave.data.normalizer.regex.RegexParser;
 
 class SimpleNumberEncoderTest {
     

@@ -1,10 +1,11 @@
 package datawave.data.normalizer.regex.visitor;
 
-import datawave.data.normalizer.regex.Node;
-import datawave.data.normalizer.regex.RegexParser;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import datawave.data.normalizer.regex.Node;
+import datawave.data.normalizer.regex.RegexParser;
 
 class NonEncodedNumbersCheckerTest {
     

@@ -1,16 +1,17 @@
 package datawave.data.normalizer.regex.visitor;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+
 import com.google.common.collect.ImmutableSet;
+
 import datawave.data.normalizer.regex.AlternationNode;
 import datawave.data.normalizer.regex.EncodedNumberNode;
 import datawave.data.normalizer.regex.EncodedPatternNode;
 import datawave.data.normalizer.regex.ExpressionNode;
 import datawave.data.normalizer.regex.GroupNode;
 import datawave.data.normalizer.regex.Node;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
 
 /**
  * An implementation of {@link CopyVisitor} that allows delegation of operations to be performed on sub-expressions of a regex, specifically, each alternated

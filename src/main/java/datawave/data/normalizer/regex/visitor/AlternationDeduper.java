@@ -1,10 +1,10 @@
 package datawave.data.normalizer.regex.visitor;
 
+import java.util.LinkedHashMap;
+
 import datawave.data.normalizer.regex.AlternationNode;
 import datawave.data.normalizer.regex.ExpressionNode;
 import datawave.data.normalizer.regex.Node;
-
-import java.util.LinkedHashMap;
 
 public class AlternationDeduper extends CopyVisitor {
     
