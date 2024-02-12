@@ -22,6 +22,9 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlValue;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import datawave.data.normalizer.DateNormalizer;
 import datawave.data.type.DateType;
 import datawave.data.type.IpAddressType;
@@ -62,12 +65,16 @@ public class TypedValue implements Serializable, Message<TypedValue> {
     @XmlAttribute
     private String type;
     
+    // NOTE: Primitive type info is sometimes lost during for Object value using ObjectMapper (de)serialization (i.e. Long becomes Integer, Float becomes
+    // Double) so only use the marshalledValue
+    @JsonIgnore
     @XmlTransient
     private Object value;
     
     @XmlTransient
     private Class<?> dataType;
     
+    @JsonProperty
     @XmlValue
     private String marshalledValue;
     
@@ -109,6 +116,7 @@ public class TypedValue implements Serializable, Message<TypedValue> {
     }
     
     public Object getValue() {
+        // NOTE: Proper (de)serialization via ObjectMapper relies on this check to populate value via marshalledValue
         if (null != this.marshalledValue && null == this.value) {
             afterUnmarshal((Unmarshaller) null, null);
         }
