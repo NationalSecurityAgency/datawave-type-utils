@@ -149,6 +149,14 @@
                         <artifactId>json-lib</artifactId>
                         <groupId>net.sf.json-lib</groupId>
                     </exclusion>
+                    <exclusion>
+                        <artifactId>log4j</artifactId>
+                        <groupId>log4j</groupId>
+                    </exclusion>
+                    <exclusion>
+                        <artifactId>*</artifactId>
+                        <groupId>com.fasterxml.jackson.core</groupId>
+                    </exclusion>
                 </exclusions>
             </dependency>
             <dependency>
@@ -205,12 +213,6 @@
         <dependency>
             <groupId>org.locationtech.geowave</groupId>
             <artifactId>geowave-core-geotime</artifactId>
-            <exclusions>
-                <exclusion>
-                    <artifactId>*</artifactId>
-                    <groupId>com.fasterxml.jackson.core</groupId>
-                </exclusion>
-            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.locationtech.jts</groupId>
