@@ -94,10 +94,6 @@
                         <artifactId>log4j</artifactId>
                         <groupId>log4j</groupId>
                     </exclusion>
-                    <exclusion>
-                        <artifactId>*</artifactId>
-                        <groupId>com.fasterxml.jackson.core</groupId>
-                    </exclusion>
                 </exclusions>
             </dependency>
             <dependency>
