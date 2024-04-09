@@ -1,6 +1,5 @@
 package datawave.data.normalizer;
 
-import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.text.NumberFormat;
 import java.util.Arrays;
@@ -9,7 +8,6 @@ import java.util.Objects;
 import java.util.concurrent.ExecutionException;
 import java.util.regex.Pattern;
 
-import org.apache.hadoop.io.Text;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -337,38 +335,6 @@ public class GeoNormalizer extends AbstractNormalizer<String> {
          *
          * @return
          */
-        public static Text getZRef(GeoPoint p) {
-            double latShift = p.latitude + 90.0;
-            double lonShift = p.longitude + 180.0;
-            
-            NumberFormat formatter = NumberFormat.getInstance();
-            formatter.setMaximumIntegerDigits(3);
-            formatter.setMinimumIntegerDigits(3);
-            formatter.setMaximumFractionDigits(5);
-            formatter.setMinimumFractionDigits(5);
-            
-            String latS = formatter.format(latShift);
-            String lonS = formatter.format(lonShift);
-            
-            byte[] buf = new byte[latS.length() * 2];
-            for (int i = 0; i < latS.length(); ++i) {
-                buf[2 * i] = (byte) latS.charAt(i);
-                buf[2 * i + 1] = (byte) lonS.charAt(i);
-            }
-            
-            return new Text(buf);
-        }
-        
-        /**
-         * Returns an interlaced representation of the latitude and longitude. The latitude's normal range of -90:90 is shifted to 0:180 (+90) and the
-         * logitude's normal range of -180:180 has been shifted to 0:360.
-         * <p>
-         * For example:
-         * <p>
-         * {@code [45, -150] => [135, 30] => 103350..0000000000000000}
-         *
-         * @return
-         */
         public static String getZRefStr(GeoPoint p) {
             double latShift = p.latitude + 90.0;
             double lonShift = p.longitude + 180.0;
@@ -389,33 +355,6 @@ public class GeoNormalizer extends AbstractNormalizer<String> {
             }
             
             return sb.toString();
-        }
-        
-        /**
-         * Factory method for decoding a zReference from a Text object.
-         *
-         * @param zref
-         * @return
-         */
-        public static GeoPoint decodeZRef(Text zref) throws OutOfRangeException, ParseException {
-            StringBuilder latB = new StringBuilder();
-            StringBuilder lonB = new StringBuilder();
-            
-            ByteBuffer data = ByteBuffer.wrap(zref.getBytes(), 0, zref.getLength());
-            boolean isLat = true;
-            while (data.hasRemaining()) {
-                if (isLat) {
-                    latB.append((char) data.get());
-                } else {
-                    lonB.append((char) data.get());
-                }
-                isLat = !isLat;
-            }
-            
-            double lat = GeoNormalizer.parseDouble(latB.toString());
-            double lon = GeoNormalizer.parseDouble(lonB.toString());
-            
-            return new GeoPoint(lat - 90.0, lon - 180.0);
         }
         
         /**
@@ -465,6 +404,10 @@ public class GeoNormalizer extends AbstractNormalizer<String> {
         
         public double getLongitude() {
             return longitude;
+        }
+        
+        public double[] getLatLon() {
+            return new double[] {latitude, longitude};
         }
         
         @Override
