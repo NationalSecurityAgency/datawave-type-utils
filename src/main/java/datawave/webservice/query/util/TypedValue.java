@@ -65,7 +65,7 @@ public class TypedValue implements Serializable, Message<TypedValue> {
     @XmlAttribute
     private String type;
     
-    // NOTE: Primitive type info is sometimes lost during for Object value using ObjectMapper (de)serialization (i.e. Long becomes Integer, Float becomes
+    // NOTE: Primitive type info is sometimes lost for Object value using ObjectMapper (de)serialization (i.e. Long becomes Integer, Float becomes
     // Double) so only use the marshalledValue
     @JsonIgnore
     @XmlTransient
