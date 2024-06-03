@@ -4,11 +4,11 @@
     <parent>
         <groupId>gov.nsa.datawave.microservice</groupId>
         <artifactId>datawave-microservice-parent</artifactId>
-        <version>3.0.0</version>
+        <version>4.0.0</version>
         <relativePath>../../../microservices/microservice-parent/pom.xml</relativePath>
     </parent>
     <artifactId>type-utils</artifactId>
-    <version>2.0.1-SNAPSHOT</version>
+    <version>3.0.1-SNAPSHOT</version>
     <url>https://code.nsa.gov/datawave-type-utils</url>
     <licenses>
         <license>
@@ -26,11 +26,10 @@
         <datawave.webservice.namespace>http://webservice.datawave.nsa/v1</datawave.webservice.namespace>
         <spotbugs.excludes.file>${project.basedir}/src/main/spotbugs/excludes.xml</spotbugs.excludes.file>
         <version.assertj>3.20.2</version.assertj>
-        <version.common-utils>2.0.0</version.common-utils>
+        <version.common-utils>3.0.0</version.common-utils>
         <version.commons-lang3>3.12.0</version.commons-lang3>
         <version.commons-net>3.6</version.commons-net>
         <version.geowave>1.2.0</version.geowave>
-        <version.hadoop>3.3.4</version.hadoop>
         <version.jaxb>2.3.3</version.jaxb>
         <version.jts>1.19.0</version.jts>
         <version.protostuff>1.6.2</version.protostuff>
@@ -62,64 +61,6 @@
                 <groupId>org.apache.commons</groupId>
                 <artifactId>commons-lang3</artifactId>
                 <version>${version.commons-lang3}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.hadoop</groupId>
-                <artifactId>hadoop-auth</artifactId>
-                <version>${version.hadoop}</version>
-                <exclusions>
-                    <exclusion>
-                        <artifactId>*</artifactId>
-                        <groupId>*</groupId>
-                    </exclusion>
-                </exclusions>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.hadoop</groupId>
-                <artifactId>hadoop-common</artifactId>
-                <version>${version.hadoop}</version>
-                <exclusions>
-                    <exclusion>
-                        <artifactId>*</artifactId>
-                        <groupId>com.sun.jersey</groupId>
-                    </exclusion>
-                    <exclusion>
-                        <artifactId>*</artifactId>
-                        <groupId>commons-logging</groupId>
-                    </exclusion>
-                    <exclusion>
-                        <artifactId>jsp-api</artifactId>
-                        <groupId>javax.servlet.jsp</groupId>
-                    </exclusion>
-                    <exclusion>
-                        <artifactId>*</artifactId>
-                        <groupId>log4j</groupId>
-                    </exclusion>
-                    <exclusion>
-                        <artifactId>*</artifactId>
-                        <groupId>org.codehaus.jackson</groupId>
-                    </exclusion>
-                    <exclusion>
-                        <artifactId>*</artifactId>
-                        <groupId>org.eclipse.jetty</groupId>
-                    </exclusion>
-                    <exclusion>
-                        <artifactId>*</artifactId>
-                        <groupId>org.mortbay.jetty</groupId>
-                    </exclusion>
-                    <exclusion>
-                        <artifactId>*</artifactId>
-                        <groupId>org.slf4j</groupId>
-                    </exclusion>
-                    <exclusion>
-                        <artifactId>servlet-api</artifactId>
-                        <groupId>javax.servlet</groupId>
-                    </exclusion>
-                    <exclusion>
-                        <artifactId>*</artifactId>
-                        <groupId>com.fasterxml.jackson.core</groupId>
-                    </exclusion>
-                </exclusions>
             </dependency>
             <dependency>
                 <groupId>org.assertj</groupId>
@@ -154,6 +95,10 @@
                     <exclusion>
                         <artifactId>json-lib</artifactId>
                         <groupId>net.sf.json-lib</groupId>
+                    </exclusion>
+                    <exclusion>
+                        <artifactId>log4j</artifactId>
+                        <groupId>log4j</groupId>
                     </exclusion>
                 </exclusions>
             </dependency>
@@ -201,22 +146,8 @@
             <artifactId>commons-lang3</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.apache.hadoop</groupId>
-            <artifactId>hadoop-auth</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.hadoop</groupId>
-            <artifactId>hadoop-common</artifactId>
-        </dependency>
-        <dependency>
             <groupId>org.locationtech.geowave</groupId>
             <artifactId>geowave-core-geotime</artifactId>
-            <exclusions>
-                <exclusion>
-                    <artifactId>*</artifactId>
-                    <groupId>com.fasterxml.jackson.core</groupId>
-                </exclusion>
-            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.locationtech.jts</groupId>
@@ -245,18 +176,14 @@
     </dependencies>
     <repositories>
         <repository>
-            <!--
-                This repository is a temporary work-around until we can public artifacts to maven central.
-                This allows us to retrieve released microservice artifacts from our github repository.
-            -->
             <releases>
                 <enabled>true</enabled>
             </releases>
             <snapshots>
                 <enabled>false</enabled>
             </snapshots>
-            <id>datawave-github-mvn-repo</id>
-            <url>https://raw.githubusercontent.com/NationalSecurityAgency/datawave/mvn-repo</url>
+            <id>github-datawave</id>
+            <url>https://maven.pkg.github.com/NationalSecurityAgency/datawave</url>
         </repository>
         <repository>
             <snapshots>
