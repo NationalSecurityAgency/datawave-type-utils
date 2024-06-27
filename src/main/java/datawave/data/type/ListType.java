@@ -4,11 +4,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 import datawave.data.normalizer.Normalizer;
+import datawave.data.type.util.TypePrettyNameSupplier;
 import datawave.util.StringUtils;
 
-public abstract class ListType extends BaseType implements OneToManyNormalizerType {
+public abstract class ListType extends BaseType implements OneToManyNormalizerType, TypePrettyNameSupplier {
     protected static final String delimiter = ",|;";
     List<String> normalizedValues;
+    private static final String DATA_DICTIONARY_TYPE_NAME = "List";
     
     public ListType(Normalizer normalizer) {
         super(normalizer);
@@ -47,5 +49,10 @@ public abstract class ListType extends BaseType implements OneToManyNormalizerTy
     @Override
     public boolean expandAtQueryTime() {
         return false;
+    }
+    
+    @Override
+    public String getDataDictionaryTypeValue() {
+        return DATA_DICTIONARY_TYPE_NAME;
     }
 }
