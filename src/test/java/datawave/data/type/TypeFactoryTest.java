@@ -1,5 +1,6 @@
 package datawave.data.type;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertSame;
@@ -7,11 +8,17 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.List;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 public class TypeFactoryTest {
     
-    private final TypeFactory typeFactory = new TypeFactory();
+    private TypeFactory typeFactory;
+    
+    @BeforeEach
+    public void before() {
+        typeFactory = new TypeFactory();
+    }
     
     @Test
     public void testWithCorrectType() {
@@ -32,6 +39,24 @@ public class TypeFactoryTest {
         Type<?> typeTwo = factory.createType(LcType.class.getName());
         
         assertSame(typeOne, typeTwo);
+    }
+    
+    @Test
+    public void testTypeFactoryCustomSize() {
+        TypeFactory factory = new TypeFactory(1, 15);
+        
+        Type<?> typeOne = factory.createType(LcType.class.getName());
+        Type<?> typeTwo = factory.createType(IpAddressType.class.getName());
+        Type<?> typeThree = factory.createType(IpAddressType.class.getName());
+        Type<?> typeFour = factory.createType(LcType.class.getName());
+        
+        // same type created in a row with a cache size of one will return the same type instance
+        assertSame(typeTwo, typeThree);
+        
+        // same type created with other types between will return different instances
+        assertNotSame(typeOne, typeFour);
+        
+        assertEquals(1, factory.getCacheSize());
     }
     
     @Test
@@ -64,6 +89,8 @@ public class TypeFactoryTest {
         for (String typeClassName : typeClassNames) {
             assertTypeCreation(typeClassName);
         }
+        
+        assertEquals(20, typeFactory.getCacheSize());
     }
     
     /**
