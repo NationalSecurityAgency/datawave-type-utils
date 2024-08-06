@@ -4,11 +4,13 @@ import datawave.data.normalizer.Normalizer;
 import datawave.data.type.util.IpAddress;
 import datawave.data.type.util.IpV4Address;
 import datawave.data.type.util.IpV6Address;
+import datawave.data.type.util.TypePrettyNameSupplier;
 
-public class IpV4AddressType extends BaseType<IpAddress> {
+public class IpV4AddressType extends BaseType<IpAddress> implements TypePrettyNameSupplier {
     
     private static final long serialVersionUID = 7214683578627273557L;
     private static final long STATIC_SIZE = PrecomputedSizes.STRING_STATIC_REF + Sizer.REFERENCE;
+    private static final String DATA_DICTIONARY_TYPE_NAME = "IPv4 Address";
     
     public IpV4AddressType() {
         super(Normalizer.IP_ADDRESS_NORMALIZER);
@@ -32,5 +34,10 @@ public class IpV4AddressType extends BaseType<IpAddress> {
             ipSize = Sizer.getObjectSize(delegate) + Sizer.REFERENCE;
         }
         return base + ipSize;
+    }
+    
+    @Override
+    public String getDataDictionaryTypeValue() {
+        return DATA_DICTIONARY_TYPE_NAME;
     }
 }
