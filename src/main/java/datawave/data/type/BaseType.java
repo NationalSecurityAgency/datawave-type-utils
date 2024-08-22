@@ -63,6 +63,10 @@ public class BaseType<T extends Comparable<T> & Serializable> implements Seriali
         return normalizer.normalize(in);
     }
     
+    public String normalize(String fieldName, String fieldValue) {
+        return normalizer.normalize(fieldName, fieldValue);
+    }
+    
     public Collection<String> expand(String in) {
         return normalizer.expand(in);
     }

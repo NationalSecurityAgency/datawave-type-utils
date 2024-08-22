@@ -9,7 +9,11 @@ public class NumberNormalizer extends AbstractNormalizer<BigDecimal> {
     
     private static final long serialVersionUID = -2781476072987375820L;
     
-    public String normalize(String fv) {
+    public String normalize(String fieldValue) {
+        return normalize(null, fieldValue);
+    }
+    
+    public String normalize(String fieldName, String fv) {
         if (NumericalEncoder.isPossiblyEncoded(fv)) {
             try {
                 NumericalEncoder.decode(fv);
@@ -21,7 +25,14 @@ public class NumberNormalizer extends AbstractNormalizer<BigDecimal> {
         try {
             return NumericalEncoder.encode(fv);
         } catch (Exception e) {
-            throw new IllegalArgumentException("Failed to normalize value as a number: " + fv);
+            String msg = "Failed to normalize value as a number";
+            if (null == fieldName) {
+                msg += ": " + fv + ". Note: fieldName was null. Consider updating call to normalize(fieldName,fieldPod)";
+            } else {
+                msg += " for field " + fieldName + ": " + fv;
+            }
+            
+            throw new IllegalArgumentException(msg);
         }
     }
     

@@ -60,6 +60,10 @@ public class GeoNormalizer extends AbstractNormalizer<String> {
     
     public static final String separator = "|";
     
+    public String normalize(String fieldValue) {
+        return normalize(null, fieldValue);
+    }
+    
     /**
      * Expects to receive a concatenated string. The string should be of the form:
      *
@@ -69,7 +73,7 @@ public class GeoNormalizer extends AbstractNormalizer<String> {
      *             , if unable to parse the numbers on either side of the delimiter
      */
     @Override
-    public String normalize(String fieldValue) throws IllegalArgumentException {
+    public String normalize(String fieldName, String fieldValue) throws IllegalArgumentException {
         String normalized = fieldValue;
         if (!isNormalized(fieldValue)) {
             int split = findSplit(fieldValue);
@@ -77,7 +81,15 @@ public class GeoNormalizer extends AbstractNormalizer<String> {
                 try {
                     normalized = combineLatLon(fieldValue.substring(0, split), fieldValue.substring(split + 1));
                 } catch (Exception e) {
-                    throw new IllegalArgumentException("Failed to normalize value as a Geo: " + fieldValue);
+                    String msg = "Failed to normalize value as GeoLon";
+                    if (null == fieldName) {
+                        msg += ": " + fieldValue;
+                        msg += " Note: fieldName was null. Consider updating call to normalize(fieldName,fieldPod)";
+                    } else {
+                        msg += " for field " + fieldName + ": " + fieldValue;
+                    }
+                    
+                    throw new IllegalArgumentException(msg);
                 }
             } else {
                 throw new IllegalArgumentException("Failed to normalize value as a Geo: " + fieldValue);

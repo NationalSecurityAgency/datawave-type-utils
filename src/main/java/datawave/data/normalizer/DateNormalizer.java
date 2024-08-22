@@ -34,7 +34,11 @@ public class DateNormalizer extends AbstractNormalizer<Date> {
     };
     
     public String normalize(String fieldValue) {
-        Date fieldDate = parseToDate(fieldValue);
+        return normalize(null, fieldValue);
+    }
+    
+    public String normalize(String fieldName, String fieldValue) {
+        Date fieldDate = parseToDate(fieldName, fieldValue);
         return parseToString(fieldDate);
     }
     
@@ -99,7 +103,7 @@ public class DateNormalizer extends AbstractNormalizer<Date> {
         }
     }
     
-    private Date parseToDate(String fieldValue) {
+    private Date parseToDate(String fieldName, String fieldValue) {
         try {
             Date date = parseDate(fieldValue, FORMAT_STRINGS);
             if (sanityCheck(date.getTime())) {
@@ -107,7 +111,12 @@ public class DateNormalizer extends AbstractNormalizer<Date> {
             }
         } catch (ParseException e) {
             if (log.isTraceEnabled()) {
-                log.trace("Failed to normalize value using DateUtils: " + fieldValue);
+                if (null == fieldName) {
+                    log.trace("Failed to normalize value for field using DateUtils: " + fieldValue
+                                    + " Note: FieldName was null. Consider updating call to normalize (fieldName, fieldValue)");
+                } else {
+                    log.trace("Failed to normalize value for field " + fieldName + " using DateUtils: " + fieldValue);
+                }
             }
         }
         
@@ -172,12 +181,12 @@ public class DateNormalizer extends AbstractNormalizer<Date> {
     
     @Override
     public Date denormalize(String in) {
-        return parseToDate(in);
+        return parseToDate(null, in);
     }
     
     @Override
     public Collection<String> expand(String dateString) {
-        Date date = parseToDate(dateString);
+        Date date = parseToDate(null, dateString);
         if (date != null && this.sanityCheck(date.getTime())) {
             return formatAll(date);
         }

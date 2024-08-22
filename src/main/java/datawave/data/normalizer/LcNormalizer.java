@@ -13,6 +13,10 @@ public class LcNormalizer extends AbstractNormalizer<String> {
     private static final long serialVersionUID = 8311875506912885780L;
     
     public String normalize(String fieldValue) {
+        return normalize(null, fieldValue);
+    }
+    
+    public String normalize(String fieldName, String fieldValue) {
         return fieldValue.toLowerCase(Locale.ENGLISH);
     }
     

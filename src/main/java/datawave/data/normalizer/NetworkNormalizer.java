@@ -5,6 +5,10 @@ public class NetworkNormalizer extends AbstractNormalizer<String> {
     private static final long serialVersionUID = 8279399353763569005L;
     
     public String normalize(String fieldValue) {
+        return normalize(null, fieldValue);
+    }
+    
+    public String normalize(String fieldName, String fieldValue) {
         String normed = fieldValue;
         
         try {
