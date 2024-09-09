@@ -90,7 +90,7 @@ public class NumberNormalizerTest {
         assertNormalizeResult("0", "+AE0");
         assertNormalizeResult("0.0", "+AE0");
     }
-    
+
     private void assertNormalizeResult(String input, String expected) {
         assertEquals(normalizer.normalize(input), expected);
     }
@@ -181,6 +181,10 @@ public class NumberNormalizerTest {
                 // check the normalized match
                 assertThat(Pattern.compile(normalizedPattern).matcher(normalizedNum).matches())
                                 .as("matching \n\"" + pattern + "\" -> \n\"" + normalizedPattern + "\"\n to " + num + " -> " + normalizedNum).isTrue();
+
+                // reormalize the pattern.
+                String renormalizedPattern = normalizer.normalizeRegex(normalizedPattern);
+                assertEquals(renormalizedPattern, normalizedPattern);
             }
         }
     }
