@@ -2,9 +2,10 @@ package datawave.data.normalizer;
 
 import java.math.BigDecimal;
 
+import org.apache.log4j.Logger;
+
 import datawave.data.normalizer.regex.NumericRegexEncoder;
 import datawave.data.type.util.NumericalEncoder;
-import org.apache.log4j.Logger;
 
 public class NumberNormalizer extends AbstractNormalizer<BigDecimal> {
     
