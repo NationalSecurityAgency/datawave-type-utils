@@ -4,7 +4,11 @@ public class TrimLeadingZerosNormalizer extends AbstractNormalizer<String> {
     
     private static final long serialVersionUID = -5681890794025882300L;
     
-    public String normalize(String fv) {
+    public String normalize(String fieldValue) {
+        return normalize(null, fieldValue);
+    }
+    
+    public String normalize(String fieldName, String fv) {
         int len = fv.length();
         int index;
         for (index = 0; (index < len) && (fv.charAt(index) == '0'); index++)

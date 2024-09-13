@@ -43,6 +43,10 @@ public abstract class AbstractGeometryNormalizer<T extends datawave.data.type.ut
     
     abstract protected T createDatawaveGeometry(G geometry);
     
+    public String normalize(String fieldValue) {
+        return normalize(null, fieldValue);
+    }
+    
     /**
      * Expects to receive a parseable geometry string. The default geometry parser accepts Open Geospatial Consortium compliant Well-Known test strings An
      * example for points is of the form:
@@ -50,7 +54,7 @@ public abstract class AbstractGeometryNormalizer<T extends datawave.data.type.ut
      * POINT ([number][space][number])
      */
     @Override
-    public String normalize(String geoString) throws IllegalArgumentException {
+    public String normalize(String fieldName, String geoString) throws IllegalArgumentException {
         if (validHash(geoString)) {
             return geoString;
         }

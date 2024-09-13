@@ -12,6 +12,10 @@ public class GeoLonNormalizer extends AbstractNormalizer<String> {
     private static final Logger log = LoggerFactory.getLogger(GeoLonNormalizer.class);
     
     public String normalize(String fieldValue) {
+        return normalize(null, fieldValue);
+    }
+    
+    public String normalize(String fieldName, String fieldValue) {
         double val;
         try {
             val = GeoNormalizer.parseLatOrLon(fieldValue);
@@ -19,12 +23,28 @@ public class GeoLonNormalizer extends AbstractNormalizer<String> {
             throw new IllegalArgumentException(e);
         }
         if (val < -180.0 || val > 180.0) {
-            throw new IllegalArgumentException("Longitude is outside of valid range [-180, 180]: " + val);
+            String msg = "Longitude is outside of valid range [-180, 180] ";
+            if (null == fieldName) {
+                msg += ": " + val;
+                msg += " Note: fieldName was null. Consider updating call to normalize(fieldName,fieldPod)";
+            } else {
+                msg += "for field " + fieldName + ": " + val;
+            }
+            
+            throw new IllegalArgumentException(msg);
         }
         try {
             return NumericalEncoder.encode(Double.toString(val));
         } catch (Exception e) {
-            throw new IllegalArgumentException("Failed to normalize value as a GeoLon: " + fieldValue);
+            String msg = "Failed to normalize value as GeoLon";
+            if (null == fieldName) {
+                msg += ": " + val;
+                msg += " Note: fieldName was null. Consider updating call to normalize(fieldName,fieldPod)";
+            } else {
+                msg += " for field " + fieldName + ": " + val;
+            }
+            
+            throw new IllegalArgumentException(msg);
         }
     }
     

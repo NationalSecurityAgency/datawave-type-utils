@@ -30,6 +30,8 @@ public interface Normalizer<T> extends Serializable {
     
     String normalize(String in);
     
+    String normalize(String fieldName, String value);
+    
     String normalizeDelegateType(T delegateIn);
     
     T denormalize(String in);

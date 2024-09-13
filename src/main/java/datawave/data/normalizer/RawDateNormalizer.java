@@ -9,6 +9,11 @@ public class RawDateNormalizer extends AbstractNormalizer<String> {
     
     @Override
     public String normalize(String fieldValue) {
+        return normalize(null, fieldValue);
+    }
+    
+    @Override
+    public String normalize(String fieldName, String fieldValue) {
         return delegate.normalize(fieldValue);
     }
     

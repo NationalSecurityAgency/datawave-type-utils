@@ -10,6 +10,10 @@ public class MacAddressNormalizer extends AbstractNormalizer<String> {
     private static final long serialVersionUID = -2606365671421121859L;
     
     public String normalize(String fieldValue) {
+        return normalize(null, fieldValue);
+    }
+    
+    public String normalize(String fieldName, String fieldValue) {
         
         String mac = "";
         
@@ -34,7 +38,14 @@ public class MacAddressNormalizer extends AbstractNormalizer<String> {
             long lData = Long.parseLong(fieldValue, 16);
             
             if (!isMac(lData)) {
-                throw new IllegalArgumentException("Failed to normalize " + fieldValue + " as a MAC");
+                String msg = "\"Failed to normalize " + fieldValue + " as a MAC";
+                if (null == fieldName) {
+                    msg += ". Note: fieldName was null. Consider updating call to normalize(fieldName,fieldPod)";
+                } else {
+                    msg += " for field " + fieldName;
+                }
+                
+                throw new IllegalArgumentException(msg);
             }
             
             for (int i = 0; i < 6; i++) {
@@ -51,7 +62,14 @@ public class MacAddressNormalizer extends AbstractNormalizer<String> {
             }
             return (mac.substring(1));
         } catch (NumberFormatException e) {
-            throw new IllegalArgumentException("Failed to normalize " + fieldValue + " as a MAC");
+            String msg = "\"Failed to normalize " + fieldValue + " as a MAC";
+            if (null == fieldName) {
+                msg += ". Note: fieldName was null. Consider updating call to normalize(fieldName,fieldPod)";
+            } else {
+                msg += " for field " + fieldName;
+            }
+            
+            throw new IllegalArgumentException(msg);
         }
     }
     
