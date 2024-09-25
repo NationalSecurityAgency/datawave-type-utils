@@ -208,73 +208,73 @@ class ZeroTrimmerTest {
         @Test
         void testZerosBeforeWildcard() {
             // Test trimming explicit zeros before a single wildcard.
-            assertTrimmedTo("23000.", "\\+[e-f]E23(0{3})?.?");
+            assertTrimmedTo("23000.", "\\+[e-f]E23(0{3}).?");
             
             // Test trimming explicit zeros before .*.
-            assertTrimmedTo("23000.*", "\\+[e-z]E23(0{3})?.*");
+            assertTrimmedTo("23000.*", "\\+[e-z]E23(0{3}).*");
             
             // Test trimming explicit zeros before .+. Because .+ could be a number of zeros, we need to change it to .* to allow for the fact that trailing
             // zeros would be trimmed in encoded numbers.
-            assertTrimmedTo("23000.+00.*", "\\+[e-z]E23(0{3})?.*(0{2})?.*");
+            assertTrimmedTo("23000.+00.*", "\\+[e-z]E23(0{3}).*(0{2}).*");
         }
         
         @Test
         void testZerosBeforeMultipleWildcards() {
             // Test trimming explicit zeros before a single wildcard.
-            assertTrimmedTo("23.00.0.", "\\+[b-h]E23.?(0{2})?.?0?.?");
+            assertTrimmedTo("23.00.0.", "\\+[b-h]E23.?(0{2}).?0.?");
             
             // Test trimming explicit zeros before .*.
-            assertTrimmedTo("23.*00.*0.*", "\\+[b-z]E23.*(0{2})?.*0?.*");
+            assertTrimmedTo("23.*00.*0.*", "\\+[b-z]E23.*(0{2}).*0.*");
             
             // Test trimming explicit zeros after .+.
-            assertTrimmedTo("23.+00.+0.+", "\\+[b-z]E23.*(0{2})?.*0?.*");
+            assertTrimmedTo("23.+00.+0.+", "\\+[b-z]E23.*(0{2}).*0.*");
         }
         
         @Test
         void testZerosBeforeDecimalPointWithPossibleAllTrailingZeros() {
-            assertTrimmedTo("3400\\.0000.", "\\+dE34(0{6})?.?");
-            assertTrimmedTo("3400\\.0000.*", "\\+dE34(0{6})?.*");
-            assertTrimmedTo("3400{3}\\.0000.*", "\\+fE34(0{8})?.*");
-            assertTrimmedTo("34[012]0\\.0000.*", "\\+dE34[012]?(0{5})?.*");
+            assertTrimmedTo("3400\\.0000.", "\\+dE34(0{6}).?");
+            assertTrimmedTo("3400\\.0000.*", "\\+dE34(0{6}).*");
+            assertTrimmedTo("3400{3}\\.0000.*", "\\+fE34(0{8}).*");
+            assertTrimmedTo("34[012]0\\.0000.*", "\\+dE34[012]?(0{5}).*");
             // The trailing .+ must become .* to allow for trimmed zeros.
-            assertTrimmedTo("3400\\.0000.+", "\\+dE34(0{6})?.*");
+            assertTrimmedTo("3400\\.0000.+", "\\+dE34(0{6}).*");
         }
         
         @Test
         void testZerosBeforePossibleZeroCharacter() {
             // The trailing .+ must become .* to allow for trimmed zeros.
-            assertTrimmedTo("2300000.+", "\\+[g-z]E23(0{5})?.*");
+            assertTrimmedTo("2300000.+", "\\+[g-z]E23(0{5}).*");
             
-            assertTrimmedTo("2300000.", "\\+[g-h]E23(0{5})?.?");
-            assertTrimmedTo("2300000.*", "\\+[g-z]E23(0{5})?.*");
-            assertTrimmedTo("2300000[0-9]", "\\+hE23(0{5})?[0-9]?");
+            assertTrimmedTo("2300000.", "\\+[g-h]E23(0{5}).?");
+            assertTrimmedTo("2300000.*", "\\+[g-z]E23(0{5}).*");
+            assertTrimmedTo("2300000[0-9]", "\\+hE23(0{5})[0-9]?");
         }
         
         @Test
         void testZerosWithRepetitionRange() {
             // Test 0{0,}, equivalent to 0*
-            assertTrimmedTo("3.*0{0,}[01]", "\\+[a-z]E3.*(0*)?[01]?");
+            assertTrimmedTo("3.*0{0,}[01]", "\\+[a-z]E3.*(0*)[01]?");
             
             // Test 0{0,} with other zeros.
-            assertTrimmedTo("3.*00{0,}0[01]", "\\+[a-z]E3.*(0{2,})?[01]?");
+            assertTrimmedTo("3.*00{0,}0[01]", "\\+[a-z]E3.*(0{2,})[01]?");
             
             // Test 0{1,}, equivalent to 0+.
-            assertTrimmedTo("3.*0{1,}[01]", "\\+[a-z]E3.*(0+)?[01]?");
+            assertTrimmedTo("3.*0{1,}[01]", "\\+[a-z]E3.*(0+)[01]?");
             
             // Test 0{1,} with other zeros.
-            assertTrimmedTo("3.*00{1,}0[01]", "\\+[a-z]E3.*(0{3,})?[01]?");
+            assertTrimmedTo("3.*00{1,}0[01]", "\\+[a-z]E3.*(0{3,})[01]?");
             
             // Test 0{1,5} with defined end bound.
-            assertTrimmedTo("3.*0{1,5}[01]", "\\+[a-z]E3.*(0{1,5})?[01]?");
+            assertTrimmedTo("3.*0{1,5}[01]", "\\+[a-z]E3.*(0{1,5})[01]?");
             
             // Test 0{1,5} with other zeros.
-            assertTrimmedTo("3.*00{1,5}0[01]", "\\+[a-z]E3.*(0{3,7})?[01]?");
+            assertTrimmedTo("3.*00{1,5}0[01]", "\\+[a-z]E3.*(0{3,7})[01]?");
             
             // Test 0{3,} with undefined end bound.
-            assertTrimmedTo("3.*0{3,}[01]", "\\+[a-z]E3.*(0{3,})?[01]?");
+            assertTrimmedTo("3.*0{3,}[01]", "\\+[a-z]E3.*(0{3,})[01]?");
             
             // Test 0{3,} with other zeros.
-            assertTrimmedTo("3.*00{3,}0[01]0", "\\+[a-z]E3.*(0{5,})?[01]?");
+            assertTrimmedTo("3.*00{3,}0[01]0", "\\+[a-z]E3.*(0{5,})[01]?");
         }
     }
     

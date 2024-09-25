@@ -618,8 +618,6 @@ public class ZeroTrimmer extends CopyVisitor {
         }
         
         List<Node> nodes = new ArrayList<>();
-        // Make the element optional.
-        nodes.add(new QuestionMarkNode());
         
         // If the min and max are both 1, return 0?
         if (minZeroCount == 1 && maxZeroCount == 1) {
