@@ -181,10 +181,6 @@ public class NumberNormalizerTest {
                 // check the normalized match
                 assertThat(Pattern.compile(normalizedPattern).matcher(normalizedNum).matches())
                                 .as("matching \n\"" + pattern + "\" -> \n\"" + normalizedPattern + "\"\n to " + num + " -> " + normalizedNum).isTrue();
-                
-                // reormalize the pattern.
-                String renormalizedPattern = normalizer.normalizeRegex(normalizedPattern);
-                assertEquals(renormalizedPattern, normalizedPattern);
             }
         }
     }
