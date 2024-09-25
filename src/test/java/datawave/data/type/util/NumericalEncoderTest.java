@@ -73,6 +73,7 @@ public class NumericalEncoderTest {
             assertEquals(i, NumericalEncoder.decode(NumericalEncoder.encode(Long.valueOf(i).toString())).longValue());
             i++;
         }
+        
     }
     
     @Test

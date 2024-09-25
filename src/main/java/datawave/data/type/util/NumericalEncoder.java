@@ -1,43 +1,27 @@
 package datawave.data.type.util;
 
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
-import java.util.ListIterator;
 import java.util.Map;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 /**
- * Provides a one-to-one mapping between an input decimal number and a lexicographically sorted index for that number. The index is composed of two parts,
- * roughly derived from scientific notation: the two digit exponential bin and the mantissa, with 'E' as a separator. Thus, an index takes this format:
- * {@code 'bin'E'mantissa'}.
- * <p>
- * The bins are broken into four groups:
- * <ol>
- * <li>!A through !Z represent negative numbers with magnitude greater than one (exponents 25 through 0, respectively)</li>
- * <li>!a through !z represent negative numbers with magnitude less than 1 (exponents -1 through -26, respectively)</li>
- * <li>+A through +Z represent positive numbers with magnitude less than 1 (exponents -26 through -1, respectively)</li>
- * <li>+a through +z represent positive numbers with magnitude greater than one (exponents 0 through 25, respectively)</li>
- * </ol>
+ * Provides a one-to-one mapping between an input decimal number and a lexigraphically sorted index for that number. The index is composed of two parts, roughly
+ * derived from scientific notation: the two digit exponential bin and the mantissa, with 'E' as a seperator. Thus an index takes this format: 'bin'E'mantissa'.
+ * 
+ * The bins are broken into four groups: !A through !Z represent negative numbers with magnitude greater than one (exponents 25 through 0, respectively) !a
+ * through !z represent negative numbers with magnitude less than 1 (exponents -1 through -26, respectively) +A through +Z represent positivee numbers with
+ * magnitude less than 1 (exponents -26 through -1, respectively) +a through +z represent positive numbers with magnitude greater than one (exponents 0 through
+ * 25, respectively)
+ * 
  * For positive numbers, the mantissa exactly matches the mantissa of scientific notation. For negative numbers, the mantissa equals ten minus the mantissa of
  * scientific notation.
- * <p>
- * Some example inputs and encodings:
- * <ul>
- * <li>-12344984165 becomes !PE8.7655015835</li>
- * <li>-500 becomes !XE5</li>
- * <li>-0.501 becomes !aE4.99</li>
- * <li>0 becomes +AE0</li>
- * <li>9E-9 becomes +RE9</li>
- * <li>0.501 becomes +ZE5.01</li>
- * <li>10000 becomes +eE1</li>
- * </ul>
+ * 
+ * Some example inputs and encodings: -12344984165 !PE8.7655015835 -500 !XE5 -0.501 !aE4.99 0 +AE0 9E-9 +RE9 0.501 +ZE5.01 10000 +eE1
+ * 
  */
 public class NumericalEncoder {
     
@@ -45,11 +29,9 @@ public class NumericalEncoder {
     private static Map<String,String> positiveNumsIntToEncodeExponentsMap;
     private static Map<String,String> negativeNumEncodeToIntExponentsMap;
     private static Map<String,String> negativeNumIntToEncodeExponentsMap;
-    private static final NumberFormat plainFormatter = new DecimalFormat("0.#########################################################");
-    private static final NumberFormat scientificFormatter = new DecimalFormat("0.#########################################################E0");
+    private static NumberFormat plainFormatter = new DecimalFormat("0.#########################################################");
+    private static NumberFormat scientificFormatter = new DecimalFormat("0.#########################################################E0");
     private static final String zero = "+AE0";
-    private static final List<String> uppercaseLetters = createLetterList('A', 'Z');
-    private static final List<String> lowercaseLetters = createLetterList('a', 'z');
     private static final String encodedRegex = "(\\!|\\+)[a-zA-Z][E|e][0-9].?[0-9]*";
     private static final Pattern encodedPattern = Pattern.compile(encodedRegex);
     
@@ -58,29 +40,11 @@ public class NumericalEncoder {
         initPositiveExponents();
     }
     
-    /**
-     * Return an unmodifiable list of letters in order from the given starting letter to the given ending letter.
-     * 
-     * @param start
-     *            the starting letter
-     * @param end
-     *            the ending letter
-     * @return a list of letters
-     */
-    private static List<String> createLetterList(char start, char end) {
-        // @formatter:off
-        return Collections.unmodifiableList(
-                        IntStream.rangeClosed(start, end)
-                                        .mapToObj(c -> "" + (char) c)
-                                        .collect(Collectors.toList()));
-        // @formatter:on
-    }
-    
     public static String encode(String input) {
         try {
             BigDecimal decimal = new BigDecimal(input);
-            String encodedExponent;
-            String mantissa;
+            String encodedExponent = "";
+            String mantissa = "";
             if (decimal.compareTo(BigDecimal.ZERO) == 0) {
                 return zero;
             } else if (decimal.compareTo(BigDecimal.ZERO) > 0) {
@@ -104,12 +68,12 @@ public class NumericalEncoder {
             }
             
             if (encodedExponent == null) {
-                throw new NumberFormatException("Exponent exceeded allowed range.");
+                throw new NumberFormatException("Exponenent exceeded allowed range.");
             }
             
             return encodedExponent + "E" + mantissa;
         } catch (Exception ex) {
-            throw new IllegalArgumentException("Error formatting input: " + input + " . Error: " + ex, ex);
+            throw new NumberFormatException("Error formatting input: " + input + " . Error: " + ex);
         }
     }
     
@@ -118,8 +82,7 @@ public class NumericalEncoder {
      * the decode method to throw an exception.
      * 
      * @param input
-     *            the value to test for encoding
-     * @return true if possibly encoded, false if definitely not encoded
+     * @return true if possibly encoded, false if definitely no encoded
      */
     public static boolean isPossiblyEncoded(String input) {
         if (null == input || input.isEmpty())
@@ -129,13 +92,13 @@ public class NumericalEncoder {
     }
     
     public static BigDecimal decode(String input) {
-        BigDecimal output;
+        BigDecimal output = new BigDecimal(BigInteger.ONE);
         if (input.equals(zero)) {
             return BigDecimal.ZERO;
         } else {
             try {
                 String exp = input.substring(0, 2);
-                String mantissa = input.substring(3);
+                String mantissa = input.substring(3, input.length());
                 if (exp.contains("+")) {
                     // Positive Number
                     exp = positiveNumsEncodeToIntExponentsMap.get(exp);
@@ -149,58 +112,139 @@ public class NumericalEncoder {
                 }
                 
             } catch (Exception ex) {
-                throw new IllegalArgumentException("Error decoding output: " + input + " . Error: " + ex, ex);
+                throw new NumberFormatException("Error decoding output: " + input + " . Error: " + ex);
             }
         }
         return output;
     }
     
-    public static char getPositiveBin(int index) {
-        return positiveNumsIntToEncodeExponentsMap.get(String.valueOf(index)).charAt(1);
-    }
-    
-    public static char getNegativeBin(int index) {
-        return negativeNumIntToEncodeExponentsMap.get(String.valueOf(index)).charAt(1);
-    }
-    
-    private static void initPositiveExponents() {
-        // The order of the encoded characters here maps directly to how their corresponding exponent value is calculated, and must not be changed.
-        List<String> exponents = new ArrayList<>();
-        uppercaseLetters.stream().map(letter -> "+" + letter).forEach(exponents::add);
-        lowercaseLetters.stream().map(letter -> "+" + letter).forEach(exponents::add);
-        Map<String,String> map = createExponentMap(exponents);
-        positiveNumsEncodeToIntExponentsMap = Collections.unmodifiableMap(map);
-        positiveNumsIntToEncodeExponentsMap = Collections.unmodifiableMap(invertMap(map));
+    static void initPositiveExponents() {
+        String[] positiveExponents;
+        positiveExponents = new String[52];
+        positiveExponents[0] = "+A";
+        positiveExponents[1] = "+B";
+        positiveExponents[2] = "+C";
+        positiveExponents[3] = "+D";
+        positiveExponents[4] = "+E";
+        positiveExponents[5] = "+F";
+        positiveExponents[6] = "+G";
+        positiveExponents[7] = "+H";
+        positiveExponents[8] = "+I";
+        positiveExponents[9] = "+J";
+        positiveExponents[10] = "+K";
+        positiveExponents[11] = "+L";
+        positiveExponents[12] = "+M";
+        positiveExponents[13] = "+N";
+        positiveExponents[14] = "+O";
+        positiveExponents[15] = "+P";
+        positiveExponents[16] = "+Q";
+        positiveExponents[17] = "+R";
+        positiveExponents[18] = "+S";
+        positiveExponents[19] = "+T";
+        positiveExponents[20] = "+U";
+        positiveExponents[21] = "+V";
+        positiveExponents[22] = "+W";
+        positiveExponents[23] = "+X";
+        positiveExponents[24] = "+Y";
+        positiveExponents[25] = "+Z";
+        positiveExponents[26] = "+a";
+        positiveExponents[27] = "+b";
+        positiveExponents[28] = "+c";
+        positiveExponents[29] = "+d";
+        positiveExponents[30] = "+e";
+        positiveExponents[31] = "+f";
+        positiveExponents[32] = "+g";
+        positiveExponents[33] = "+h";
+        positiveExponents[34] = "+i";
+        positiveExponents[35] = "+j";
+        positiveExponents[36] = "+k";
+        positiveExponents[37] = "+l";
+        positiveExponents[38] = "+m";
+        positiveExponents[39] = "+n";
+        positiveExponents[40] = "+o";
+        positiveExponents[41] = "+p";
+        positiveExponents[42] = "+q";
+        positiveExponents[43] = "+r";
+        positiveExponents[44] = "+s";
+        positiveExponents[45] = "+t";
+        positiveExponents[46] = "+u";
+        positiveExponents[47] = "+v";
+        positiveExponents[48] = "+w";
+        positiveExponents[49] = "+x";
+        positiveExponents[50] = "+y";
+        positiveExponents[51] = "+z";
+        
+        positiveNumsEncodeToIntExponentsMap = new HashMap<String,String>();
+        positiveNumsIntToEncodeExponentsMap = new HashMap<String,String>();
+        for (int j = 0; j < positiveExponents.length; j++) {
+            int exponent = j - 26;
+            positiveNumsEncodeToIntExponentsMap.put(positiveExponents[j], String.valueOf(exponent));
+            positiveNumsIntToEncodeExponentsMap.put(String.valueOf(exponent), positiveExponents[j]);
+        }
     }
     
     private static void initNegativeExponents() {
-        // The order of the encoded characters here maps directly to how their corresponding exponent value is calculated, and must not be changed.
-        List<String> exponents = new ArrayList<>();
-        // Iterate in reverse.
-        ListIterator<String> iterator = lowercaseLetters.listIterator(lowercaseLetters.size());
-        while (iterator.hasPrevious()) {
-            exponents.add("!" + iterator.previous());
+        String[] negativeExponents;
+        negativeExponents = new String[52];
+        negativeExponents[51] = "!A";
+        negativeExponents[50] = "!B";
+        negativeExponents[49] = "!C";
+        negativeExponents[48] = "!D";
+        negativeExponents[47] = "!E";
+        negativeExponents[46] = "!F";
+        negativeExponents[45] = "!G";
+        negativeExponents[44] = "!H";
+        negativeExponents[43] = "!I";
+        negativeExponents[42] = "!J";
+        negativeExponents[41] = "!K";
+        negativeExponents[40] = "!L";
+        negativeExponents[39] = "!M";
+        negativeExponents[38] = "!N";
+        negativeExponents[37] = "!O";
+        negativeExponents[36] = "!P";
+        negativeExponents[35] = "!Q";
+        negativeExponents[34] = "!R";
+        negativeExponents[33] = "!S";
+        negativeExponents[32] = "!T";
+        negativeExponents[31] = "!U";
+        negativeExponents[30] = "!V";
+        negativeExponents[29] = "!W";
+        negativeExponents[28] = "!X";
+        negativeExponents[27] = "!Y";
+        negativeExponents[26] = "!Z";
+        negativeExponents[25] = "!a";
+        negativeExponents[24] = "!b";
+        negativeExponents[23] = "!c";
+        negativeExponents[22] = "!d";
+        negativeExponents[21] = "!e";
+        negativeExponents[20] = "!f";
+        negativeExponents[19] = "!g";
+        negativeExponents[18] = "!h";
+        negativeExponents[17] = "!i";
+        negativeExponents[16] = "!j";
+        negativeExponents[15] = "!k";
+        negativeExponents[14] = "!l";
+        negativeExponents[13] = "!m";
+        negativeExponents[12] = "!n";
+        negativeExponents[11] = "!o";
+        negativeExponents[10] = "!p";
+        negativeExponents[9] = "!q";
+        negativeExponents[8] = "!r";
+        negativeExponents[7] = "!s";
+        negativeExponents[6] = "!t";
+        negativeExponents[5] = "!u";
+        negativeExponents[4] = "!v";
+        negativeExponents[3] = "!w";
+        negativeExponents[2] = "!x";
+        negativeExponents[1] = "!y";
+        negativeExponents[0] = "!z";
+        
+        negativeNumEncodeToIntExponentsMap = new HashMap<String,String>();
+        negativeNumIntToEncodeExponentsMap = new HashMap<String,String>();
+        for (int j = 0; j < negativeExponents.length; j++) {
+            int exponent = j - 26;
+            negativeNumEncodeToIntExponentsMap.put(negativeExponents[j], String.valueOf(exponent));
+            negativeNumIntToEncodeExponentsMap.put(String.valueOf(exponent), negativeExponents[j]);
         }
-        // Iterate in reverse.
-        iterator = uppercaseLetters.listIterator(uppercaseLetters.size());
-        while (iterator.hasPrevious()) {
-            exponents.add("!" + iterator.previous());
-        }
-        Map<String,String> map = createExponentMap(exponents);
-        negativeNumEncodeToIntExponentsMap = Collections.unmodifiableMap(map);
-        negativeNumIntToEncodeExponentsMap = Collections.unmodifiableMap(invertMap(map));
-    }
-    
-    private static Map<String,String> createExponentMap(List<String> exponents) {
-        Map<String,String> map = new HashMap<>();
-        for (int pos = 0; pos < exponents.size(); pos++) {
-            int exponent = pos - 26;
-            map.put(exponents.get(pos), String.valueOf(exponent));
-        }
-        return map;
-    }
-    
-    private static Map<String,String> invertMap(Map<String,String> map) {
-        return map.entrySet().stream().collect(Collectors.toMap(Map.Entry::getValue, Map.Entry::getKey));
     }
 }
