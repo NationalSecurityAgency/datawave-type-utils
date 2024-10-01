@@ -29,7 +29,7 @@ public class NumberNormalizer extends AbstractNormalizer<BigDecimal> {
     }
     
     /**
-     * We cannot support regex against numbers
+     * We can support regex against numbers.
      */
     public String normalizeRegex(String fieldRegex) {
         try {
@@ -38,6 +38,10 @@ public class NumberNormalizer extends AbstractNormalizer<BigDecimal> {
             log.debug("Failed to normalize numeric field pattern '" + fieldRegex + "', returning regex as is", e);
             return fieldRegex;
         }
+    }
+    
+    public ZeroRegexStatus getZeroRegexStatus(String untrimmedRegex) {
+        return NumericRegexEncoder.getZeroRegexStatus(untrimmedRegex);
     }
     
     @Override

@@ -8,6 +8,7 @@ import org.apache.log4j.Logger;
 
 import com.google.common.base.CharMatcher;
 
+import datawave.data.normalizer.ZeroRegexStatus;
 import datawave.data.normalizer.regex.visitor.AlternationDeduper;
 import datawave.data.normalizer.regex.visitor.AnchorTrimmer;
 import datawave.data.normalizer.regex.visitor.DecimalPointPlacer;
@@ -141,6 +142,10 @@ public class NumericRegexEncoder {
     
     private NumericRegexEncoder(String pattern) {
         this.pattern = pattern;
+    }
+    
+    public static ZeroRegexStatus getZeroRegexStatus(String regex) {
+        return ZeroTrimmer.getStatus(RegexParser.parse(regex).getChildren());
     }
     
     private String encode() {
@@ -314,6 +319,16 @@ public class NumericRegexEncoder {
         invertNegativePatterns();
         addDecimalPoints();
         dedupe();
+    }
+    
+    private void encodeWithoutTrimming() {
+        dedupe();
+        encodeSimpleNumbers();
+        // If there are no more unencoded sub-patterns in the tree after encoding simple numbers, no further work needs to be done.
+        if (!moreToEncode()) {
+            return;
+        }
+        addExponentialBins();
     }
     
     /**
