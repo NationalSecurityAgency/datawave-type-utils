@@ -321,16 +321,6 @@ public class NumericRegexEncoder {
         dedupe();
     }
     
-    private void encodeWithoutTrimming() {
-        dedupe();
-        encodeSimpleNumbers();
-        // If there are no more unencoded sub-patterns in the tree after encoding simple numbers, no further work needs to be done.
-        if (!moreToEncode()) {
-            return;
-        }
-        addExponentialBins();
-    }
-    
     /**
      * Parse the pattern to a node tree.
      */
