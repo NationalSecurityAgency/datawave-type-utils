@@ -40,8 +40,10 @@ public class NumberNormalizer extends AbstractNormalizer<BigDecimal> {
         }
     }
     
-    public ZeroRegexStatus getZeroRegexStatus(String untrimmedRegex) {
-        return NumericRegexEncoder.getZeroRegexStatus(untrimmedRegex);
+    public boolean normalizedRegexIsLossy(String untrimmedRegex) {
+        ZeroRegexStatus status = NumericRegexEncoder.getZeroRegexStatus(untrimmedRegex);
+        
+        return (status.equals(ZeroRegexStatus.LEADING) || status.equals(ZeroRegexStatus.TRAILING));
     }
     
     @Override

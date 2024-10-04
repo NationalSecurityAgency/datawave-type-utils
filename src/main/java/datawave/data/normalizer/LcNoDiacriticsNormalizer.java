@@ -21,6 +21,7 @@ import datawave.query.parser.JavaRegexAnalyzer.JavaRegexParseException;
 public class LcNoDiacriticsNormalizer extends AbstractNormalizer<String> {
     private static final long serialVersionUID = -7922074256473963293L;
     private static final Pattern diacriticals = Pattern.compile("\\p{InCombiningDiacriticalMarks}");
+    private static final Pattern capitals = Pattern.compile("[A-Z]");
     
     public String normalize(String fieldValue) {
         if (null == fieldValue) {
@@ -51,6 +52,14 @@ public class LcNoDiacriticsNormalizer extends AbstractNormalizer<String> {
         } catch (JavaRegexParseException e) {
             throw new IllegalArgumentException("Unable to parse regex " + fieldRegex, e);
         }
+    }
+    
+    @Override
+    public boolean normalizedRegexIsLossy(String regex) {
+        Matcher diacriticMatcher = diacriticals.matcher(regex);
+        Matcher captialMatcher = capitals.matcher(regex);
+        
+        return (diacriticMatcher.matches() || captialMatcher.matches());
     }
     
     @Override

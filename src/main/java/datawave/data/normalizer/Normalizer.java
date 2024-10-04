@@ -36,5 +36,7 @@ public interface Normalizer<T> extends Serializable {
     
     String normalizeRegex(String in);
     
+    boolean normalizedRegexIsLossy(String in);
+    
     Collection<String> expand(String in);
 }
