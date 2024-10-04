@@ -56,10 +56,11 @@ public class LcNoDiacriticsNormalizer extends AbstractNormalizer<String> {
     
     @Override
     public boolean normalizedRegexIsLossy(String regex) {
-        Matcher diacriticMatcher = diacriticals.matcher(regex);
-        Matcher captialMatcher = capitals.matcher(regex);
-        
-        return (diacriticMatcher.matches() || captialMatcher.matches());
+        // Despite this normalizer actually being lossy, we are still
+        // returning false as users are used to overmathing when including
+        // diacritics or upper case letter. We may consider changing this
+        // down the road, but for not returning false.
+        return false;
     }
     
     @Override
