@@ -81,6 +81,11 @@ public class BaseType<T extends Comparable<T> & Serializable> implements Seriali
     }
     
     @Override
+    public boolean normalizedRegexIsLossy(String in) {
+        return normalizer.normalizedRegexIsLossy(in);
+    }
+    
+    @Override
     public void normalizeAndSetNormalizedValue(T valueToNormalize) {
         setNormalizedValue(normalizer.normalizeDelegateType(valueToNormalize));
     }
