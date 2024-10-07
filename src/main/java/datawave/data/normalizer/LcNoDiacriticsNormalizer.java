@@ -21,8 +21,7 @@ import datawave.query.parser.JavaRegexAnalyzer.JavaRegexParseException;
 public class LcNoDiacriticsNormalizer extends AbstractNormalizer<String> {
     private static final long serialVersionUID = -7922074256473963293L;
     private static final Pattern diacriticals = Pattern.compile("\\p{InCombiningDiacriticalMarks}");
-    private static final Pattern capitals = Pattern.compile("[A-Z]");
-    
+
     public String normalize(String fieldValue) {
         if (null == fieldValue) {
             return null;
@@ -57,7 +56,7 @@ public class LcNoDiacriticsNormalizer extends AbstractNormalizer<String> {
     @Override
     public boolean normalizedRegexIsLossy(String regex) {
         // Despite this normalizer actually being lossy, we are still
-        // returning false as users are used to overmathing when including
+        // returning false as users are used to overmatching when including
         // diacritics or upper case letter. We may consider changing this
         // down the road, but for not returning false.
         return false;
