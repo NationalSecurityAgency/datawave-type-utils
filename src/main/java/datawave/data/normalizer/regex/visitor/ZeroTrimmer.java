@@ -61,6 +61,7 @@ public class ZeroTrimmer extends CopyVisitor {
         NodeListIterator iter = new NodeListIterator(encodedRegexNodes);
         
         while (iter.hasNext()) {
+            iter.seekPastQuestionMarks();
             iter.seekPastQuantifiers();
             iter.seekPastQuestionMarks();
             

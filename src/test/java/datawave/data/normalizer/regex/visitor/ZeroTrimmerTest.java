@@ -306,8 +306,6 @@ class ZeroTrimmerTest {
     
     @Test
     void testStatus() {
-        // TODO: more test cases
-        
         ZeroRegexStatus status = ZeroRegexStatus.NONE;
         assertStatus("300.*0003", status);
         assertStatus("300.*000[1-9]", status);
@@ -315,6 +313,7 @@ class ZeroTrimmerTest {
         assertStatus("-45.*", status);
         
         status = ZeroRegexStatus.LEADING;
+        assertStatus(".*", status);
         assertStatus(".*?", status);
         assertStatus(".*?11", status);
         assertStatus("[04][05][06]", status);
@@ -327,8 +326,10 @@ class ZeroTrimmerTest {
         
         status = ZeroRegexStatus.TRAILING;
         assertStatus("3.*0{0,}[01]", status);
+        assertStatus("3.*?0{0,}[01]", status);
         assertStatus("3400\\.0000.", status);
         assertStatus("340.*", status);
+        assertStatus("340.*?", status);
         assertStatus("3400{3}0{2}", status);
         
     }
