@@ -58,7 +58,7 @@ public class LcNoDiacriticsNormalizer extends AbstractNormalizer<String> {
         // Despite this normalizer actually being lossy, we are still
         // returning false as users are used to overmatching when including
         // diacritics or upper case letter. We may consider changing this
-        // down the road, but for not returning false.
+        // down the road, but for now returning false.
         return false;
     }
     
