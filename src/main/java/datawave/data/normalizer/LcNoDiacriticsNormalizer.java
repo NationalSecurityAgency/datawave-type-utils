@@ -21,7 +21,7 @@ import datawave.query.parser.JavaRegexAnalyzer.JavaRegexParseException;
 public class LcNoDiacriticsNormalizer extends AbstractNormalizer<String> {
     private static final long serialVersionUID = -7922074256473963293L;
     private static final Pattern diacriticals = Pattern.compile("\\p{InCombiningDiacriticalMarks}");
-
+    
     public String normalize(String fieldValue) {
         if (null == fieldValue) {
             return null;
