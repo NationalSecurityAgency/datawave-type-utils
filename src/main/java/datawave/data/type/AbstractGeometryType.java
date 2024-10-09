@@ -9,8 +9,8 @@ import org.locationtech.jts.geom.Polygon;
 
 import datawave.data.normalizer.DiscreteIndexNormalizer;
 import datawave.data.normalizer.Normalizer;
-import datawave.data.normalizer.OneToManyNormalizer;
 import datawave.data.type.util.AbstractGeometry;
+import datawave.data.type.util.TypePrettyNameSupplier;
 
 /**
  * The base GeoWave geometry type, which provides an implementation for the discrete index type interface.
@@ -18,12 +18,14 @@ import datawave.data.type.util.AbstractGeometry;
  * @param <T>
  *            The underlying geometry type
  */
-public abstract class AbstractGeometryType<T extends AbstractGeometry & Comparable<T>> extends BaseType<T> implements DiscreteIndexType<T> {
+public abstract class AbstractGeometryType<T extends AbstractGeometry & Comparable<T>> extends BaseType<T>
+                implements DiscreteIndexType<T>, TypePrettyNameSupplier {
     
     private static final long GEOMETRY_FACTORY_SIZE = 120;
     private static final long ENVELOPE_SIZE = 45;
     private static final long GEOMETRY_BASE_SIZE = ENVELOPE_SIZE + 20;
     private static final long STATIC_SIZE = PrecomputedSizes.STRING_STATIC_REF + Sizer.REFERENCE + GEOMETRY_FACTORY_SIZE;
+    private static final String DATA_DICTIONARY_TYPE_NAME = "Abstract Geometry";
     
     public AbstractGeometryType(Normalizer<T> normalizer) {
         super(normalizer);
@@ -95,5 +97,10 @@ public abstract class AbstractGeometryType<T extends AbstractGeometry & Comparab
                             + Sizer.REFERENCE;
         }
         return size;
+    }
+    
+    @Override
+    public String getDataDictionaryTypeValue() {
+        return DATA_DICTIONARY_TYPE_NAME;
     }
 }
