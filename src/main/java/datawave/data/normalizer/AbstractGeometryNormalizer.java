@@ -72,6 +72,11 @@ public abstract class AbstractGeometryNormalizer<T extends datawave.data.type.ut
         throw new IllegalArgumentException("Cannot normalize a regex against a geometry field");
     }
     
+    @Override
+    public boolean normalizedRegexIsLossy(String in) {
+        throw new IllegalArgumentException("Cannot normalize a regex against a geometry field");
+    }
+    
     public String normalizeDelegateType(T geometry) {
         return getEncodedStringFromIndexBytes(getSingleIndexFromGeometry(geometry));
     }

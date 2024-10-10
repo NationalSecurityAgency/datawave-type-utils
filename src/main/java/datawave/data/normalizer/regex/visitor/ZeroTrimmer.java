@@ -6,8 +6,11 @@ import java.util.List;
 
 import org.apache.commons.lang3.tuple.Pair;
 
+import datawave.data.normalizer.ZeroRegexStatus;
 import datawave.data.normalizer.regex.AnyCharNode;
 import datawave.data.normalizer.regex.EncodedPatternNode;
+import datawave.data.normalizer.regex.EscapedSingleCharNode;
+import datawave.data.normalizer.regex.ExpressionNode;
 import datawave.data.normalizer.regex.GroupNode;
 import datawave.data.normalizer.regex.IntegerNode;
 import datawave.data.normalizer.regex.IntegerRangeNode;
@@ -40,6 +43,61 @@ public class ZeroTrimmer extends CopyVisitor {
         }
         ZeroTrimmer visitor = new ZeroTrimmer();
         return (Node) node.accept(visitor, null);
+    }
+    
+    public static ZeroRegexStatus getStatus(List<Node> encodedRegexNodes) {
+        if (hasPossiblyLeadingZeroes(encodedRegexNodes)) {
+            return ZeroRegexStatus.LEADING;
+        } else if (hasTrailingZeroes(encodedRegexNodes)) {
+            return ZeroRegexStatus.TRAILING;
+        } else
+            return ZeroRegexStatus.NONE;
+        
+    }
+    
+    private static boolean hasTrailingZeroes(List<Node> encodedRegexNodes) {
+        Collections.reverse(encodedRegexNodes);
+        
+        NodeListIterator iter = new NodeListIterator(encodedRegexNodes);
+        
+        while (iter.hasNext()) {
+            iter.seekPastQuestionMarks();
+            iter.seekPastQuantifiers();
+            iter.seekPastQuestionMarks();
+            
+            Node next = iter.peekNext();
+            
+            if (RegexUtils.matchesZero(next)) {
+                if (RegexUtils.matchesZeroExplicitly(next)) {
+                    return true;
+                }
+                iter.next();
+            } else {
+                return false;
+            }
+            
+        }
+        return true;
+        
+    }
+    
+    private static boolean hasPossiblyLeadingZeroes(List<Node> encodedRegexNodes) {
+        NodeListIterator iter = new NodeListIterator(encodedRegexNodes);
+        
+        while (iter.hasNext()) {
+            Node next = iter.peekNext();
+            
+            if (RegexUtils.matchesZero(next)) {
+                return true;
+            } else if (RegexUtils.isChar(next, RegexConstants.HYPHEN) || next.equals(new EscapedSingleCharNode(RegexConstants.PERIOD))) {
+                iter.next();
+            } else {
+                return false;
+            }
+        }
+        
+        return true;
+        
     }
     
     @Override

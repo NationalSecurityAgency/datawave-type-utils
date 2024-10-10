@@ -345,6 +345,24 @@ public class RegexUtils {
         }
     }
     
+    public static boolean groupNodeMatches(Node node, char character) {
+        GroupNode group = (GroupNode) node;
+        boolean matchFound = false;
+        
+        for (Node child : group.getChildren()) {
+            // If the current child is a single character, see if it is a match for the character.
+            if (child instanceof SingleCharNode) {
+                if (isChar(child, character)) {
+                    matchFound = true;
+                } else {
+                    // A character other than the target was found, but there may be more in the group
+                    continue;
+                }
+            }
+        }
+        return matchFound;
+    }
+    
     /**
      * Return whether the given node is a regex element that can only match against the given character.
      *
@@ -372,6 +390,23 @@ public class RegexUtils {
      */
     public static boolean matchesZero(Node node) {
         return matchesChar(node, RegexConstants.ZERO);
+    }
+    
+    public static boolean matchesCharExplicitly(Node node, char character) {
+        switch (node.getType()) {
+            case SINGLE_CHAR:
+                return isChar(node, character);
+            case CHAR_CLASS:
+                return charClassMatches(node, character);
+            case GROUP:
+                return groupNodeMatches(node, character);
+            default:
+                return false;
+        }
+    }
+    
+    public static boolean matchesZeroExplicitly(Node node) {
+        return matchesCharExplicitly(node, RegexConstants.ZERO);
     }
     
     /**

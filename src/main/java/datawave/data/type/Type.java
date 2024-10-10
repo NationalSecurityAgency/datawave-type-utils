@@ -12,6 +12,8 @@ public interface Type<T extends Comparable<T>> extends Comparable<Type<T>> {
     
     String normalizeRegex(String in);
     
+    boolean normalizedRegexIsLossy(String in);
+    
     Collection<String> expand(String in);
     
     Collection<String> expand();
