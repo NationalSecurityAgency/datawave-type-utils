@@ -13,8 +13,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
@@ -22,6 +20,8 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.Lists;
@@ -34,29 +34,23 @@ import datawave.query.parser.JavaRegexAnalyzer.JavaRegexParseException;
  */
 public class JavaRegexAnalyzerTest {
     
-    private static final Logger log = Logger.getLogger(JavaRegexAnalyzerTest.class);
+    private static final Logger log = LoggerFactory.getLogger(JavaRegexAnalyzerTest.class);
     
     @BeforeAll
-    public static void setUpClass() {
-        Logger.getRootLogger().setLevel(Level.OFF);
-    }
+    public static void setUpClass() {}
     
     @AfterAll
     public static void tearDownClass() {}
     
     @BeforeEach
     public void setUp() {
-        log.setLevel(Level.OFF);
-        Logger.getLogger(JavaRegexAnalyzer.class).setLevel(Level.OFF);
+        
     }
     
     @AfterEach
     public void tearDown() {}
     
-    public void enableLogging() {
-        log.setLevel(Level.DEBUG);
-        Logger.getLogger(JavaRegexAnalyzer.class).setLevel(Level.TRACE);
-    }
+    public void enableLogging() {}
     
     @Test
     public void testRegexAnalyzer01() throws JavaRegexParseException {

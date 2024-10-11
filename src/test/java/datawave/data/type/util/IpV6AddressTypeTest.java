@@ -7,14 +7,15 @@ package datawave.data.type.util;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import org.apache.log4j.Logger;
 import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * 
  */
 public class IpV6AddressTypeTest {
-    private static Logger log = Logger.getLogger(IpV6AddressTypeTest.class);
+    private static Logger log = LoggerFactory.getLogger(IpV6AddressTypeTest.class);
     
     private final String[] in = { //
             "2001:0db8:0000:0000:0000:ff00:0042:8329", //

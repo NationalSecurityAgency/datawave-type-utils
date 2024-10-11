@@ -9,9 +9,10 @@ import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import org.apache.log4j.Logger;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import datawave.data.type.util.IpV4Address;
 
@@ -19,7 +20,7 @@ import datawave.data.type.util.IpV4Address;
  * 
  */
 public class IpAddressNormalizerTest {
-    private static Logger log = Logger.getLogger(IpAddressNormalizerTest.class);
+    private static Logger log = LoggerFactory.getLogger(IpAddressNormalizerTest.class);
     
     @Test
     public void testIpNormalizer01() {

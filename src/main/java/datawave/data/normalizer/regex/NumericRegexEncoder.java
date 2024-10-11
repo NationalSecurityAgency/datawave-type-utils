@@ -4,7 +4,8 @@ import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.base.CharMatcher;
 
@@ -96,7 +97,7 @@ import datawave.data.type.util.NumericalEncoder;
  */
 public class NumericRegexEncoder {
     
-    private static final Logger log = Logger.getLogger(NumericRegexEncoder.class);
+    private static final Logger log = LoggerFactory.getLogger(NumericRegexEncoder.class);
     
     /**
      * Matches against any unescaped d characters, and any other letters. If \d is present, that indicates a digit and is allowed.

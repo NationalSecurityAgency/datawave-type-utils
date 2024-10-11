@@ -13,9 +13,10 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
-import org.apache.log4j.Logger;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.Sets;
 
@@ -25,7 +26,7 @@ import com.google.common.collect.Sets;
  */
 public class DateNormalizerTest {
     
-    private static final Logger log = Logger.getLogger(DateNormalizerTest.class);
+    private static final Logger log = LoggerFactory.getLogger(DateNormalizerTest.class);
     DateNormalizer normalizer = new DateNormalizer();
     
     String[] inputDateStrings = {"2014-10-20T00:00:00.0000000", "2014-10-20T00:00:00.000Z", "20141020000000", "2014-10-20 00:00:00GMT", "2014-10-20 00:00:00Z",

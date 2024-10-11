@@ -191,7 +191,7 @@ public class NumberNormalizerTest {
     
     /**
      * Return a random number that when used in {@link #testRandomRegexPatterns()}, will not make the test take more than a minute to complete.
-     * 
+     *
      * @return a random number
      */
     private String getFastRandomNumber() {
@@ -204,7 +204,7 @@ public class NumberNormalizerTest {
     
     /**
      * Return a random number. Note: when used in {@link #testRandomRegexPatterns()}, the test can take more than 20 minutes to complete.
-     * 
+     *
      * @return a random number
      */
     private String getRandomNumber() {
@@ -213,7 +213,7 @@ public class NumberNormalizerTest {
     
     /**
      * Return a random number that is larger than zero, randomly negative, and randomly whole.
-     * 
+     *
      * @return a random number
      */
     private String getRandomNumberGreaterThanZero() {
@@ -233,7 +233,7 @@ public class NumberNormalizerTest {
     
     /**
      * Return a random number that is less than zero, and randomly negative.
-     * 
+     *
      * @return a random number
      */
     private String getRandomNumberLessThanZero() {
@@ -251,7 +251,7 @@ public class NumberNormalizerTest {
     
     /**
      * Return a random big decimal that is randomly negative.
-     * 
+     *
      * @return a new big decimal
      */
     private BigDecimal getRandomBigDecimal() {
