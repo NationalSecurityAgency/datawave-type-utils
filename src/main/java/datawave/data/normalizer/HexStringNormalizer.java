@@ -43,8 +43,12 @@ public class HexStringNormalizer extends AbstractNormalizer<String> {
         return matcher;
     }
     
-    @Override
     public String normalize(String fieldValue) {
+        return normalize(null, fieldValue);
+    }
+    
+    @Override
+    public String normalize(String fieldName, String fieldValue) {
         Matcher matcher = validate(fieldValue);
         
         return getNormalizedHex(matcher.group(2));

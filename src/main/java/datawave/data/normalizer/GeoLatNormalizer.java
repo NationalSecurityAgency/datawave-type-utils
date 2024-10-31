@@ -12,6 +12,10 @@ public class GeoLatNormalizer extends AbstractNormalizer<String> {
     private static final Logger log = LoggerFactory.getLogger(GeoLatNormalizer.class);
     
     public String normalize(String fieldValue) {
+        return normalize(null, fieldValue);
+    }
+    
+    public String normalize(String fieldName, String fieldValue) {
         double val;
         try {
             val = GeoNormalizer.parseLatOrLon(fieldValue);
@@ -19,7 +23,15 @@ public class GeoLatNormalizer extends AbstractNormalizer<String> {
             throw new IllegalArgumentException(e);
         }
         if (val < -90.0 || val > 90.0) {
-            throw new IllegalArgumentException("Latitude is outside of valid range [-90, 90]: " + val);
+            String msg = "Latitude is outside of valid range [-90, 90]";
+            if (null == fieldName) {
+                msg += ": " + val;
+                msg += " Note: fieldName was null. Consider updating call to normalize(fieldName,fieldPod)";
+            } else {
+                msg += " for field " + fieldName + ": " + val;
+            }
+            
+            throw new IllegalArgumentException(msg);
         }
         try {
             return NumericalEncoder.encode(Double.toString(val));
