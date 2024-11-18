@@ -2,12 +2,15 @@ package datawave.data.normalizer;
 
 import java.math.BigDecimal;
 
+import org.apache.log4j.Logger;
+
 import datawave.data.normalizer.regex.NumericRegexEncoder;
 import datawave.data.type.util.NumericalEncoder;
 
 public class NumberNormalizer extends AbstractNormalizer<BigDecimal> {
     
     private static final long serialVersionUID = -2781476072987375820L;
+    private Logger log = Logger.getLogger(NumberNormalizer.class);
     
     public String normalize(String fv) {
         if (NumericalEncoder.isPossiblyEncoded(fv)) {
@@ -26,14 +29,21 @@ public class NumberNormalizer extends AbstractNormalizer<BigDecimal> {
     }
     
     /**
-     * We cannot support regex against numbers
+     * We can support regex against numbers.
      */
     public String normalizeRegex(String fieldRegex) {
         try {
             return NumericRegexEncoder.encode(fieldRegex);
         } catch (IllegalArgumentException e) {
-            throw new IllegalArgumentException("Failed to normalize numeric field pattern '" + fieldRegex + "'", e);
+            log.debug("Failed to normalize numeric field pattern '" + fieldRegex + "', returning regex as is", e);
+            return fieldRegex;
         }
+    }
+    
+    public boolean normalizedRegexIsLossy(String untrimmedRegex) {
+        ZeroRegexStatus status = NumericRegexEncoder.getZeroRegexStatus(untrimmedRegex);
+        
+        return (status.equals(ZeroRegexStatus.LEADING) || status.equals(ZeroRegexStatus.TRAILING));
     }
     
     @Override

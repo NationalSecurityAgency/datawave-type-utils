@@ -5,8 +5,11 @@ import static datawave.data.normalizer.regex.RegexParser.parse;
 
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.locationtech.jts.util.Assert;
 
+import datawave.data.normalizer.ZeroRegexStatus;
 import datawave.data.normalizer.regex.Node;
+import datawave.data.normalizer.regex.RegexParser;
 
 class ZeroTrimmerTest {
     
@@ -284,6 +287,8 @@ class ZeroTrimmerTest {
         assertTrimmedTo("45.*", "\\+[b-z]E45.*");
         assertTrimmedTo("300454.*", "\\+[f-z]E300454.*");
         assertTrimmedTo("300.*0003", "\\+[c-z]E300.*0003");
+        assertTrimmedTo("300.*000[1-9]", "\\+[c-z]E300.*000[1-9]");
+        
     }
     
     @Test
@@ -300,6 +305,36 @@ class ZeroTrimmerTest {
     }
     
     @Test
+    void testStatus() {
+        ZeroRegexStatus status = ZeroRegexStatus.NONE;
+        assertStatus("300.*0003", status);
+        assertStatus("300.*000[1-9]", status);
+        assertStatus("45.*", status);
+        assertStatus("-45.*", status);
+        
+        status = ZeroRegexStatus.LEADING;
+        assertStatus(".*", status);
+        assertStatus(".*?", status);
+        assertStatus(".*?11", status);
+        assertStatus("[04][05][06]", status);
+        assertStatus("[04]{1,3}[05][06]", status);
+        assertStatus("\\d{3}", status);
+        assertStatus(".\\.000034.*", status);
+        assertStatus("00345.*", status);
+        assertStatus("\\.000034.*", status);
+        assertStatus("-00345.*", status);
+        
+        status = ZeroRegexStatus.TRAILING;
+        assertStatus("3.*0{0,}[01]", status);
+        assertStatus("3.*?0{0,}[01]", status);
+        assertStatus("3400\\.0000.", status);
+        assertStatus("340.*", status);
+        assertStatus("340.*?", status);
+        assertStatus("3400{3}0{2}", status);
+        
+    }
+    
+    @Test
     void testTrailingZerosWithoutQuantifiers() {
         assertTrimmedTo(".*34300", "\\+[e-zA-Z]E.*343");
     }
@@ -312,6 +347,10 @@ class ZeroTrimmerTest {
     @Test
     void testMixedAlternation() {
         assertTrimmedTo("234\\.45|343.*|0\\.00[0]34.*", "\\+cE2\\.3445|\\+[c-z]E343.*|\\+WE34.*");
+    }
+    
+    private void assertStatus(String pattern, ZeroRegexStatus status) {
+        Assert.equals(ZeroTrimmer.getStatus(RegexParser.parse(pattern).getChildren()), status);
     }
     
     private void assertTrimmedTo(String pattern, String expectedPattern) {

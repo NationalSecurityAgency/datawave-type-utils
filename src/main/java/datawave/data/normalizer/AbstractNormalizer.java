@@ -9,4 +9,9 @@ public abstract class AbstractNormalizer<T> implements Normalizer<T> {
     public Collection<String> expand(String in) {
         return Collections.singletonList(normalize(in));
     }
+    
+    @Override
+    public boolean normalizedRegexIsLossy(String in) {
+        return false;
+    }
 }
