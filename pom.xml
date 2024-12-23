@@ -35,7 +35,7 @@
         <version.jackson>2.10.1</version.jackson>
         <version.jakarta-bind-api>2.3.3</version.jakarta-bind-api>
         <version.jaxb>2.3.3</version.jaxb>
-        <version.jts>1.19.0</version.jts>
+        <version.jts-core>1.19.0</version.jts-core>
         <version.protostuff>1.6.2</version.protostuff>
         <version.slf4j>1.7.29</version.slf4j>
     </properties>
@@ -109,7 +109,7 @@
             <dependency>
                 <groupId>org.locationtech.jts</groupId>
                 <artifactId>jts-core</artifactId>
-                <version>${version.jts}</version>
+                <version>${version.jts-core}</version>
             </dependency>
             <dependency>
                 <groupId>org.slf4j</groupId>
