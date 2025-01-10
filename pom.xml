@@ -8,7 +8,7 @@
         <relativePath>../../../microservices/microservice-parent/pom.xml</relativePath>
     </parent>
     <artifactId>type-utils</artifactId>
-    <version>3.1.2</version>
+    <version>3.1.3-SNAPSHOT</version>
     <url>https://code.nsa.gov/datawave-type-utils</url>
     <licenses>
         <license>
