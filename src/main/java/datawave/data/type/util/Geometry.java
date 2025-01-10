@@ -12,6 +12,14 @@ public class Geometry extends AbstractGeometry<org.locationtech.jts.geom.Geometr
     
     @Override
     public int compareTo(Geometry o) {
-        return jtsGeom.compareTo(o.jtsGeom);
+        if (jtsGeom == o.jtsGeom) {
+            return 0;
+        } else if (jtsGeom == null) {
+            return -1;
+        } else if (o.jtsGeom == null) {
+            return 1;
+        } else {
+            return jtsGeom.compareTo(o.jtsGeom);
+        }
     }
 }
