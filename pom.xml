@@ -4,11 +4,11 @@
     <parent>
         <groupId>gov.nsa.datawave.microservice</groupId>
         <artifactId>datawave-microservice-parent</artifactId>
-        <version>4.0.0</version>
+        <version>4.0.1-depfix</version>
         <relativePath>../../../microservices/microservice-parent/pom.xml</relativePath>
     </parent>
     <artifactId>type-utils</artifactId>
-    <version>3.1.3-SNAPSHOT</version>
+    <version>3.1.3-depfix</version>
     <url>https://code.nsa.gov/datawave-type-utils</url>
     <licenses>
         <license>
@@ -26,7 +26,7 @@
         <datawave.webservice.namespace>http://webservice.datawave.nsa/v1</datawave.webservice.namespace>
         <spotbugs.excludes.file>${project.basedir}/src/main/spotbugs/excludes.xml</spotbugs.excludes.file>
         <version.assertj>3.20.2</version.assertj>
-        <version.common-utils>3.0.0</version.common-utils>
+        <version.common-utils>3.0.1-depfix</version.common-utils>
         <version.commons-codec>1.7</version.commons-codec>
         <version.commons-lang3>3.12.0</version.commons-lang3>
         <version.commons-net>3.6</version.commons-net>
