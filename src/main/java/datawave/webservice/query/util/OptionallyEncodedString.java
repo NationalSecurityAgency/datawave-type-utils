@@ -4,6 +4,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
+import java.util.Base64;
 
 import javax.xml.bind.annotation.XmlAccessOrder;
 import javax.xml.bind.annotation.XmlAccessType;
@@ -11,8 +12,6 @@ import javax.xml.bind.annotation.XmlAccessorOrder;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlValue;
-
-import org.apache.commons.codec.binary.Base64;
 
 /**
  * A JAXB holder class for strings that could possibly contain invalid XML characters. If any invalid XML characters are found, the string will be base64
@@ -74,7 +73,7 @@ public class OptionallyEncodedString {
             
             try {
                 incoming = value.getBytes("UTF-8");
-                byte[] decodedBytes = Base64.decodeBase64(incoming);
+                byte[] decodedBytes = Base64.getDecoder().decode(incoming);
                 decoded = new String(decodedBytes, Charset.forName("UTF-8"));
             } catch (UnsupportedEncodingException e) {
                 // Should never happen with UTF-8!!! (but if it does we will be
@@ -91,7 +90,7 @@ public class OptionallyEncodedString {
         try {
             byte[] incoming = value.getBytes("UTF-8");
             if (this.base64Encoded != null && this.base64Encoded.equals(Boolean.TRUE)) {
-                return Base64.decodeBase64(incoming);
+                return Base64.getDecoder().decode(incoming);
             } else {
                 return incoming;
             }
@@ -112,7 +111,7 @@ public class OptionallyEncodedString {
         if (XMLUtil.isValidXML(value)) {
             this.value = value;
         } else {
-            this.value = new String(Base64.encodeBase64(value.getBytes(UTF_8)), UTF_8);
+            this.value = new String(Base64.getEncoder().encode(value.getBytes(UTF_8)), UTF_8);
             this.base64Encoded = true;
         }
     }
