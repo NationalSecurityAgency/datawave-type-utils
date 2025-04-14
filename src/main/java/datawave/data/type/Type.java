@@ -10,6 +10,8 @@ public interface Type<T extends Comparable<T>> extends Comparable<Type<T>> {
     
     String normalize(String in);
     
+    String normalize(String fieldName, String fieldValue);
+    
     String normalizeRegex(String in);
     
     boolean normalizedRegexIsLossy(String in);

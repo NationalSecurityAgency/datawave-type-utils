@@ -11,11 +11,22 @@ public class IpAddressNormalizer extends AbstractNormalizer<IpAddress> {
     private static final long serialVersionUID = 8604032745289485764L;
     
     public String normalize(String fieldValue) {
+        return normalize(null, fieldValue);
+    }
+    
+    public String normalize(String fieldName, String fieldValue) {
         try {
             fieldValue = fieldValue.replaceAll(" ", "");
             return IpAddress.parse(fieldValue).toZeroPaddedString();
         } catch (IllegalArgumentException iae) {
-            throw new IpAddressNormalizer.Exception("Failed to normalize " + fieldValue + " as an IP");
+            String msg = "Failed to normalize  " + fieldValue + " as an IP";
+            if (null == fieldName) {
+                msg += ". Note: fieldName was null. Consider updating call to normalize(fieldName,fieldPod)";
+            } else {
+                msg += " for field " + fieldName + ": " + fieldValue;
+            }
+            
+            throw new IpAddressNormalizer.Exception(msg);
         }
     }
     

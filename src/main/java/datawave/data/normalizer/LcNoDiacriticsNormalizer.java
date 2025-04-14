@@ -23,6 +23,10 @@ public class LcNoDiacriticsNormalizer extends AbstractNormalizer<String> {
     private static final Pattern diacriticals = Pattern.compile("\\p{InCombiningDiacriticalMarks}");
     
     public String normalize(String fieldValue) {
+        return normalize(null, fieldValue);
+    }
+    
+    public String normalize(String fieldName, String fieldValue) {
         if (null == fieldValue) {
             return null;
         }
