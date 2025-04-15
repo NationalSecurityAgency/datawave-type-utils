@@ -5,13 +5,11 @@ import java.util.Collections;
 import java.util.List;
 
 import org.apache.commons.lang3.tuple.Pair;
-import org.w3c.dom.NodeList;
 
 import datawave.data.normalizer.ZeroRegexStatus;
 import datawave.data.normalizer.regex.AnyCharNode;
 import datawave.data.normalizer.regex.EncodedPatternNode;
 import datawave.data.normalizer.regex.EscapedSingleCharNode;
-import datawave.data.normalizer.regex.ExpressionNode;
 import datawave.data.normalizer.regex.GroupNode;
 import datawave.data.normalizer.regex.IntegerNode;
 import datawave.data.normalizer.regex.IntegerRangeNode;
