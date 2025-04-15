@@ -311,20 +311,21 @@ class ZeroTrimmerTest {
         assertStatus("300.*000[1-9]", status);
         assertStatus("45.*", status);
         assertStatus("-45.*", status);
+        assertStatus(".*?11", status);
+        assertStatus(".*?abc", status);
         
         status = ZeroRegexStatus.LEADING;
-        assertStatus(".*", status);
-        assertStatus(".*?", status);
-        assertStatus(".*?11", status);
         assertStatus("[04][05][06]", status);
         assertStatus("[04]{1,3}[05][06]", status);
-        assertStatus("\\d{3}", status);
-        assertStatus(".\\.000034.*", status);
         assertStatus("00345.*", status);
-        assertStatus("\\.000034.*", status);
         assertStatus("-00345.*", status);
+        assertStatus(".\\.000034.*", status);
+        assertStatus("\\.000034.*", status);
         
         status = ZeroRegexStatus.TRAILING;
+        assertStatus("\\d{3}", status);
+        assertStatus(".*", status);
+        assertStatus(".*?", status);
         assertStatus("3.*0{0,}[01]", status);
         assertStatus("3.*?0{0,}[01]", status);
         assertStatus("3400\\.0000.", status);
@@ -350,7 +351,7 @@ class ZeroTrimmerTest {
     }
     
     private void assertStatus(String pattern, ZeroRegexStatus status) {
-        Assert.equals(ZeroTrimmer.getStatus(RegexParser.parse(pattern).getChildren()), status);
+        Assert.equals(status, ZeroTrimmer.getStatus(RegexParser.parse(pattern).getChildren()));
     }
     
     private void assertTrimmedTo(String pattern, String expectedPattern) {

@@ -10,7 +10,6 @@ import datawave.data.normalizer.ZeroRegexStatus;
 import datawave.data.normalizer.regex.AnyCharNode;
 import datawave.data.normalizer.regex.EncodedPatternNode;
 import datawave.data.normalizer.regex.EscapedSingleCharNode;
-import datawave.data.normalizer.regex.ExpressionNode;
 import datawave.data.normalizer.regex.GroupNode;
 import datawave.data.normalizer.regex.IntegerNode;
 import datawave.data.normalizer.regex.IntegerRangeNode;
@@ -32,7 +31,7 @@ public class ZeroTrimmer extends CopyVisitor {
     
     /**
      * Return a copy of the node tree with all leading zeros for partially encoded regex patterns either trimmed and/or consolidated.
-     * 
+     *
      * @param node
      *            the node
      * @return the trimmed tree
@@ -46,7 +45,7 @@ public class ZeroTrimmer extends CopyVisitor {
     }
     
     public static ZeroRegexStatus getStatus(List<Node> encodedRegexNodes) {
-        if (hasPossiblyLeadingZeroes(encodedRegexNodes)) {
+        if (hasLeadingZeroes(encodedRegexNodes)) {
             return ZeroRegexStatus.LEADING;
         } else if (hasTrailingZeroes(encodedRegexNodes)) {
             return ZeroRegexStatus.TRAILING;
@@ -59,45 +58,41 @@ public class ZeroTrimmer extends CopyVisitor {
         Collections.reverse(encodedRegexNodes);
         
         NodeListIterator iter = new NodeListIterator(encodedRegexNodes);
+        return checkZeroes(iter);
+    }
+    
+    private static boolean hasLeadingZeroes(List<Node> encodedRegexNodes) {
+        NodeListIterator iter = new NodeListIterator(encodedRegexNodes);
+        return checkZeroes(iter);
+    }
+    
+    private static boolean checkZeroes(NodeListIterator iter) {
+        Node next;
         
         while (iter.hasNext()) {
             iter.seekPastQuestionMarks();
             iter.seekPastQuantifiers();
             iter.seekPastQuestionMarks();
-            
-            Node next = iter.peekNext();
+            if (iter.hasNext()) {
+                next = iter.peekNext();
+            } else {
+                return false;
+            }
             
             if (RegexUtils.matchesZero(next)) {
                 if (RegexUtils.matchesZeroExplicitly(next)) {
                     return true;
                 }
                 iter.next();
-            } else {
-                return false;
-            }
-            
-        }
-        return true;
-        
-    }
-    
-    private static boolean hasPossiblyLeadingZeroes(List<Node> encodedRegexNodes) {
-        NodeListIterator iter = new NodeListIterator(encodedRegexNodes);
-        
-        while (iter.hasNext()) {
-            Node next = iter.peekNext();
-            
-            if (RegexUtils.matchesZero(next)) {
-                return true;
             } else if (RegexUtils.isChar(next, RegexConstants.HYPHEN) || next.equals(new EscapedSingleCharNode(RegexConstants.PERIOD))) {
                 iter.next();
+                
             } else {
                 return false;
             }
+            
         }
-        
         return true;
-        
     }
     
     @Override
@@ -142,7 +137,7 @@ public class ZeroTrimmer extends CopyVisitor {
     
     /**
      * Trim/consolidate leading zeros.
-     * 
+     *
      * @param nodes
      *            the nodes to trim
      * @return the trimmed nodes
@@ -154,7 +149,7 @@ public class ZeroTrimmer extends CopyVisitor {
     
     /**
      * Trim/consolidate trailing zeros.
-     * 
+     *
      * @param nodes
      *            the nodes to trim
      * @return the trimmed nodes
@@ -171,7 +166,7 @@ public class ZeroTrimmer extends CopyVisitor {
     
     /**
      * Return true if the given list consists only of one regex element that may or may not be followed by a quantifier or question mark.
-     * 
+     *
      * @param nodes
      *            the nodes
      * @return true if the list consists of a single element pattern, or false otherwise
@@ -186,7 +181,7 @@ public class ZeroTrimmer extends CopyVisitor {
     
     /**
      * Trim all leading nodes that only match zero. Trimming will stop once the first element that can match something other than zero is seen.
-     * 
+     *
      * @param nodes
      *            the nodes
      * @return a list of trimmed nodes
@@ -211,7 +206,7 @@ public class ZeroTrimmer extends CopyVisitor {
     
     /**
      * Return a list with all possible leading zeros consolidated, and any elements made optional as needed.
-     * 
+     *
      * @param nodes
      *            the nodes to consolidate
      * @return a list of consolidated nodes
@@ -250,7 +245,7 @@ public class ZeroTrimmer extends CopyVisitor {
     
     /**
      * Consolidate any leading zeros that can possibly match zero.
-     * 
+     *
      * @param iter
      *            the iterator
      * @return the consolidated nodes.
@@ -337,7 +332,7 @@ public class ZeroTrimmer extends CopyVisitor {
     
     /**
      * Consolidate the next consecutive elements that can only match zero.
-     * 
+     *
      * @param iter
      *            the iterator
      * @return a list of the consolidated nodes
@@ -430,7 +425,7 @@ public class ZeroTrimmer extends CopyVisitor {
     
     /**
      * Trim all trailing nodes that explicitly only match zero. Trimming will stop once the first element that can match something other than zero is seen.
-     * 
+     *
      * @param nodes
      *            the nodes
      * @return a list of trimmed nodes
@@ -461,7 +456,7 @@ public class ZeroTrimmer extends CopyVisitor {
     
     /**
      * Return a list with all possible trailing zeros consolidated, and any elements made optional as needed.
-     * 
+     *
      * @param nodes
      *            the nodes to consolidate
      * @return a list of consolidated nodes
@@ -525,7 +520,7 @@ public class ZeroTrimmer extends CopyVisitor {
     
     /**
      * Consolidate any trailing zeros that can possibly match zero.
-     * 
+     *
      * @param iter
      *            the iterator
      * @return the consolidated nodes.
@@ -623,7 +618,7 @@ public class ZeroTrimmer extends CopyVisitor {
     
     /**
      * Consolidate the next consecutive elements that can only match zero.
-     * 
+     *
      * @param iter
      *            the iterator
      * @return a list of the consolidated nodes
