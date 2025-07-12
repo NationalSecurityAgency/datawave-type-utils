@@ -27,7 +27,7 @@
         <spotbugs.excludes.file>${project.basedir}/src/main/spotbugs/excludes.xml</spotbugs.excludes.file>
         <version.assertj>3.20.2</version.assertj>
         <version.common-utils>3.0.0</version.common-utils>
-        <version.commons-lang3>3.12.0</version.commons-lang3>
+        <version.commons-lang3>3.18.0</version.commons-lang3>
         <version.commons-net>3.6</version.commons-net>
         <version.geowave>1.2.0</version.geowave>
         <version.jaxb>2.3.3</version.jaxb>
